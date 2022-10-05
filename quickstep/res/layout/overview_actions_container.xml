@@ -29,6 +29,7 @@
         <Space
             android:layout_width="0dp"
             android:layout_height="1dp"
+            android:visibility="gone"
             android:layout_weight="1" />
 
         <Button
@@ -38,6 +39,7 @@
             android:layout_height="wrap_content"
             android:drawableStart="@drawable/ic_screenshot"
             android:text="@string/action_screenshot"
+            android:visibility="gone"
             android:theme="@style/ThemeControlHighlightWorkspaceColor" />
 
         <Space
