@@ -20,6 +20,7 @@ import static android.provider.Settings.Global.DEVELOPMENT_SETTINGS_ENABLED;
 
 import static androidx.preference.PreferenceFragmentCompat.ARG_PREFERENCE_ROOT;
 
+import static com.android.launcher3.SessionCommitReceiver.ADD_ICON_PREFERENCE_KEY;
 import static com.android.launcher3.BuildConfig.IS_DEBUG_DEVICE;
 import static com.android.launcher3.BuildConfig.IS_STUDIO_BUILD;
 import static com.android.launcher3.states.RotationHelper.ALLOW_ROTATION_PREFERENCE_KEY;
@@ -303,6 +304,9 @@ public class SettingsActivity extends FragmentActivity
                     preference.setDefaultValue(isSingleLayer);
                     ((SwitchPreference) preference).setChecked(isSingleLayer);
                     return true;
+
+                case ADD_ICON_PREFERENCE_KEY:
+                    return !MultiModeController.isSingleLayerMode();
             }
 
             return true;
