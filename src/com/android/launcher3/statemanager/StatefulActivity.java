@@ -40,6 +40,8 @@ import com.android.launcher3.views.BaseDragLayer;
 
 import java.util.List;
 
+import foundation.e.bliss.LauncherAppMonitor;
+
 /**
  * Abstract activity with state management
  * @param <STATE_TYPE> Type of state object
@@ -56,12 +58,15 @@ public abstract class StatefulActivity<STATE_TYPE extends BaseState<STATE_TYPE>>
     protected Configuration mOldConfig;
     private int mOldRotation;
 
+    private LauncherAppMonitor mAppMonitor;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         mOldConfig = new Configuration(getResources().getConfiguration());
         mOldRotation = WindowManagerProxy.INSTANCE.get(this).getRotation(this);
+        mAppMonitor = LauncherAppMonitor.INSTANCE.get(this);
     }
 
     /**
@@ -208,6 +213,7 @@ public abstract class StatefulActivity<STATE_TYPE extends BaseState<STATE_TYPE>>
      */
     public void handleConfigurationChanged(Configuration newConfig) {
         int diff = newConfig.diff(mOldConfig);
+        mAppMonitor.onLauncherConfigurationChanged(diff);
         int rotation = WindowManagerProxy.INSTANCE.get(this).getRotation(this);
         if ((diff & (CONFIG_ORIENTATION | CONFIG_SCREEN_SIZE)) != 0
                 || rotation != mOldRotation) {
@@ -216,6 +222,12 @@ public abstract class StatefulActivity<STATE_TYPE extends BaseState<STATE_TYPE>>
 
         mOldConfig.setTo(newConfig);
         mOldRotation = rotation;
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        mAppMonitor.onLauncherFocusChanged(hasFocus);
     }
 
     /**

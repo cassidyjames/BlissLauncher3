@@ -41,6 +41,7 @@ allprojects {
 
     tasks.withType(KotlinCompile).configureEach {
         kotlinOptions {
+            freeCompilerArgs = ['-Xjvm-default=all']
             jvmTarget = JavaVersion.VERSION_17
         }
     }

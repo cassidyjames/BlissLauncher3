@@ -43,6 +43,8 @@ import com.android.launcher3.util.TraceHelper;
 import com.android.launcher3.util.WallpaperColorHints;
 import com.android.launcher3.util.WindowBounds;
 
+import foundation.e.bliss.LauncherAppMonitor;
+
 /**
  * Extension of BaseActivity allowing support for drag-n-drop
  */
@@ -91,6 +93,7 @@ public abstract class BaseDraggingActivity extends BaseActivity
     private void updateTheme() {
         if (mThemeRes != Themes.getActivityThemeRes(this)) {
             recreate();
+            LauncherAppMonitor.getInstance(this).onThemeChanged();
         }
     }
 
