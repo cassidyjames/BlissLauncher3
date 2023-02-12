@@ -41,6 +41,12 @@ allprojects {
         }
     }
 
+    tasks.withType(KotlinCompile).configureEach {
+        kotlinOptions {
+            freeCompilerArgs = ['-Xjvm-default=all']
+        }
+    }
+
     ext {
         FRAMEWORK_PREBUILTS_DIR = "$rootDir/prebuilts/"
         daggerVersion = '2.51.1'

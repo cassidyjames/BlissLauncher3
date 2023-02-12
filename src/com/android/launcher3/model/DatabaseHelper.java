@@ -59,6 +59,8 @@ import java.util.Locale;
 import java.util.function.ToLongFunction;
 import java.util.stream.Collectors;
 
+import foundation.e.bliss.LauncherAppMonitor;
+
 /**
  * SqLite database for launcher home-screen model
  * The class is subclassed in tests to create an in-memory db.
@@ -160,6 +162,7 @@ public class DatabaseHelper extends NoLocaleSQLiteHelper implements
         if (LOGD) {
             Log.d(TAG, "onUpgrade triggered: " + oldVersion);
         }
+        LauncherAppMonitor.getInstance(mContext).onLauncherDbUpgrade(db, oldVersion, newVersion);
         switch (oldVersion) {
             // The version cannot be lower that 12, as Launcher3 never supported a lower
             // version of the DB.

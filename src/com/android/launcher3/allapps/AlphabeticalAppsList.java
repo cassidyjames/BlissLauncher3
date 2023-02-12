@@ -42,6 +42,8 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import foundation.e.bliss.LauncherAppMonitor;
+
 /**
  * The alphabetically sorted list of applications.
  *
@@ -240,6 +242,7 @@ public class AlphabeticalAppsList<T extends Context & ActivityContext> implement
         }
 
         appSteam.forEachOrdered(mApps::add);
+        LauncherAppMonitor.getInstance(mActivityContext).onAllAppsListUpdated(mApps);
         privateAppStream.forEachOrdered(mPrivateApps::add);
         // Recompose the set of adapter items from the current set of apps
         if (mSearchResults.isEmpty()) {
