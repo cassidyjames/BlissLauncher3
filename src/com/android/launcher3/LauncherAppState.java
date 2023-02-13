@@ -185,7 +185,7 @@ public class LauncherAppState implements SafeCloseable {
     public LauncherAppState(Context context, @Nullable String iconCacheFileName) {
         mContext = context;
 
-        mAppMonitor = LauncherAppMonitor.getInstance(mContext);
+        mAppMonitor = LauncherAppMonitor.INSTANCE.get(mContext);
         mInvariantDeviceProfile = InvariantDeviceProfile.INSTANCE.get(context);
         mIconProvider = new LauncherIconProvider(context);
         mIconCache = new IconCache(mContext, mInvariantDeviceProfile,

@@ -18,7 +18,7 @@ package com.android.launcher3.graphics;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 
-import static com.android.launcher3.LauncherSettings.Favorites.TABLE_NAME;
+import static com.android.launcher3.LauncherSettings.Favorites.getFavoritesTableName;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.Executors.MODEL_EXECUTOR;
 
@@ -157,7 +157,7 @@ public class PreviewSurfaceRenderer {
 
         ModelDbController mainController =
                 LauncherAppState.getInstance(mContext).getModel().getModelDbController();
-        try (Cursor c = mainController.query(TABLE_NAME,
+        try (Cursor c = mainController.query(getFavoritesTableName(),
                 new String[] {
                         LauncherSettings.Favorites.APPWIDGET_ID,
                         LauncherSettings.Favorites.SPANX,
@@ -227,10 +227,10 @@ public class PreviewSurfaceRenderer {
             // Copy existing data to preview DB
             LauncherDbUtils.copyTable(LauncherAppState.getInstance(mContext)
                             .getModel().getModelDbController().getDb(),
-                    TABLE_NAME,
+                    getFavoritesTableName(),
                     LauncherAppState.getInstance(previewContext)
                             .getModel().getModelDbController().getDb(),
-                    TABLE_NAME,
+                    getFavoritesTableName(),
                     mContext);
             LauncherAppState.getInstance(previewContext)
                     .getModel().getModelDbController().clearEmptyDbFlag();

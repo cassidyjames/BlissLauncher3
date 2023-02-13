@@ -6,4 +6,6 @@
         <item>@string/quickstep_component</item>
         <item>@string/launcher_component</item>
     </string-array>
+
+    <bool name="default_single_mode">true</bool>
 </resources>

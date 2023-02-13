@@ -15,7 +15,7 @@
  */
 package com.android.launcher3.hybridhotseat;
 
-import static com.android.launcher3.LauncherSettings.Favorites.HYBRID_HOTSEAT_BACKUP_TABLE;
+import static com.android.launcher3.LauncherSettings.Favorites.getHotseatBackupTableName;
 import static com.android.launcher3.provider.LauncherDbUtils.tableExists;
 import static com.android.launcher3.util.Executors.MODEL_EXECUTOR;
 
@@ -41,7 +41,7 @@ public class HotseatRestoreHelper {
                     .getModel().getModelDbController();
             try (SQLiteTransaction transaction = dbController.newTransaction()) {
                 GridBackupTable backupTable = new GridBackupTable(context, transaction.getDb());
-                backupTable.createCustomBackupTable(HYBRID_HOTSEAT_BACKUP_TABLE);
+                backupTable.createCustomBackupTable(getHotseatBackupTableName());
                 transaction.commit();
                 dbController.refreshHotseatRestoreTable();
             }
@@ -55,11 +55,11 @@ public class HotseatRestoreHelper {
         MODEL_EXECUTOR.execute(() -> {
             LauncherModel model = LauncherAppState.getInstance(context).getModel();
             try (SQLiteTransaction transaction = model.getModelDbController().newTransaction()) {
-                if (!tableExists(transaction.getDb(), HYBRID_HOTSEAT_BACKUP_TABLE)) {
+                if (!tableExists(transaction.getDb(), getHotseatBackupTableName())) {
                     return;
                 }
                 GridBackupTable backupTable = new GridBackupTable(context, transaction.getDb());
-                backupTable.restoreFromCustomBackupTable(HYBRID_HOTSEAT_BACKUP_TABLE, true);
+                backupTable.restoreFromCustomBackupTable(getHotseatBackupTableName(), true);
                 transaction.commit();
                 model.forceReload();
             }

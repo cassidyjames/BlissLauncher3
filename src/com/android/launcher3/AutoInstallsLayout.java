@@ -17,7 +17,7 @@
 package com.android.launcher3;
 
 import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPLICATION;
-import static com.android.launcher3.LauncherSettings.Favorites.TABLE_NAME;
+import static com.android.launcher3.LauncherSettings.Favorites.getFavoritesTableName;
 import static com.android.launcher3.provider.LauncherDbUtils.itemIdMatch;
 
 import android.content.ComponentName;
@@ -619,7 +619,7 @@ public class AutoInstallsLayout {
             // failed to add, and less than 2 were actually added
             if (folderItems.size() < 2) {
                 // Delete the folder
-                mDb.delete(TABLE_NAME, itemIdMatch(folderId), null);
+                mDb.delete(Favorites.getFavoritesTableName(), itemIdMatch(folderId), null);
                 addedId = -1;
 
                 // If we have a single item, promote it to where the folder
@@ -632,7 +632,7 @@ public class AutoInstallsLayout {
                     copyInteger(myValues, childValues, Favorites.CELLY);
 
                     addedId = folderItems.get(0);
-                    mDb.update(TABLE_NAME, childValues,
+                    mDb.update(Favorites.getFavoritesTableName(), childValues,
                             Favorites._ID + "=" + addedId, null);
                 }
             }

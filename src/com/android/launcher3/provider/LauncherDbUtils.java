@@ -105,7 +105,7 @@ public class LauncherDbUtils {
      */
     public static void migrateLegacyShortcuts(Context context, SQLiteDatabase db) {
         Cursor c = db.query(
-                Favorites.TABLE_NAME, null, "itemType = 1", null, null, null, null);
+                Favorites.getFavoritesTableName(), null, "itemType = 1", null, null, null, null);
         UserManagerState ums = new UserManagerState();
         ums.init(UserCache.INSTANCE.get(context),
                 context.getSystemService(UserManager.class));
@@ -160,19 +160,19 @@ public class LauncherDbUtils {
             update.put(Favorites.ITEM_TYPE, Favorites.ITEM_TYPE_DEEP_SHORTCUT);
             update.put(Favorites.INTENT,
                     ShortcutKey.makeIntent(info.getId(), context.getPackageName()).toUri(0));
-            db.update(Favorites.TABLE_NAME, update, "_id = ?",
+            db.update(Favorites.getFavoritesTableName(), update, "_id = ?",
                     new String[] {Integer.toString(lc.id)});
         }
         lc.close();
         if (!deletedShortcuts.isEmpty()) {
-            db.delete(Favorites.TABLE_NAME,
+            db.delete(Favorites.getFavoritesTableName(),
                     Utilities.createDbSelectionQuery(Favorites._ID, deletedShortcuts.getArray()),
                     null);
         }
 
         // Drop the unused columns
-        db.execSQL("ALTER TABLE " + Favorites.TABLE_NAME + " DROP COLUMN iconPackage;");
-        db.execSQL("ALTER TABLE " + Favorites.TABLE_NAME + " DROP COLUMN iconResource;");
+        db.execSQL("ALTER TABLE " + Favorites.getFavoritesTableName() + " DROP COLUMN iconPackage;");
+        db.execSQL("ALTER TABLE " + Favorites.getFavoritesTableName() + " DROP COLUMN iconResource;");
     }
 
     /**
