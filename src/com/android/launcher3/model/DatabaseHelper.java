@@ -171,7 +171,8 @@ public class DatabaseHelper extends NoLocaleSQLiteHelper implements
             case 13: {
                 try (SQLiteTransaction t = new SQLiteTransaction(db)) {
                     // Insert new column for holding widget provider name
-                    db.execSQL("ALTER TABLE favorites ADD COLUMN appWidgetProvider TEXT;");
+                    db.execSQL("ALTER TABLE " + Favorites.getFavoritesTableName() +
+                            " ADD COLUMN appWidgetProvider TEXT;");
                     t.commit();
                 } catch (SQLException ex) {
                     Log.e(TAG, ex.getMessage(), ex);
@@ -241,7 +242,7 @@ public class DatabaseHelper extends NoLocaleSQLiteHelper implements
                 if (!TextUtils.isEmpty(updatemap)) {
                     String query = String.format(Locale.ENGLISH,
                             "UPDATE %1$s SET %2$s=CASE %3$s ELSE %2$s END WHERE %4$s = %5$d",
-                            Favorites.TABLE_NAME, Favorites.SCREEN, updatemap,
+                            Favorites.getFavoritesTableName(), Favorites.SCREEN, updatemap,
                             Favorites.CONTAINER, Favorites.CONTAINER_DESKTOP);
                     db.execSQL(query);
                 }
@@ -257,7 +258,7 @@ public class DatabaseHelper extends NoLocaleSQLiteHelper implements
             }
             case 29: {
                 // Remove widget panel related leftover workspace items
-                db.delete(Favorites.TABLE_NAME, Utilities.createDbSelectionQuery(
+                db.delete(Favorites.getFavoritesTableName(), Utilities.createDbSelectionQuery(
                         Favorites.SCREEN, IntArray.wrap(-777, -778)), null);
             }
             case 30: {
@@ -265,7 +266,7 @@ public class DatabaseHelper extends NoLocaleSQLiteHelper implements
                         && !shouldShowFirstPageWidget()) {
                     // Clean up first row in screen 0 as it might contain junk data.
                     Log.d(TAG, "Cleaning up first row");
-                    db.delete(Favorites.TABLE_NAME,
+                    db.delete(Favorites.getFavoritesTableName(),
                             String.format(Locale.ENGLISH,
                                     "%1$s = %2$d AND %3$s = %4$d AND %5$s = %6$d",
                                     Favorites.SCREEN, 0,
@@ -305,7 +306,7 @@ public class DatabaseHelper extends NoLocaleSQLiteHelper implements
      */
     public void createEmptyDB(SQLiteDatabase db) {
         try (SQLiteTransaction t = new SQLiteTransaction(db)) {
-            dropTable(db, Favorites.TABLE_NAME);
+            dropTable(db, Favorites.getFavoritesTableName());
             dropTable(db, "workspaceScreens");
             onCreate(db);
             t.commit();
@@ -330,7 +331,7 @@ public class DatabaseHelper extends NoLocaleSQLiteHelper implements
                 return;
             }
             final IntSet validWidgets = IntSet.wrap(LauncherDbUtils.queryIntArray(false, db,
-                    Favorites.TABLE_NAME, Favorites.APPWIDGET_ID,
+                    Favorites.getFavoritesTableName(), Favorites.APPWIDGET_ID,
                     "itemType=" + Favorites.ITEM_TYPE_APPWIDGET, null, null));
             boolean isAnyWidgetRemoved = false;
             for (int widgetId : allWidgets) {
@@ -368,12 +369,12 @@ public class DatabaseHelper extends NoLocaleSQLiteHelper implements
     void convertShortcutsToLauncherActivities(SQLiteDatabase db) {
         try (SQLiteTransaction t = new SQLiteTransaction(db);
              // Only consider the primary user as other users can't have a shortcut.
-             Cursor c = db.query(Favorites.TABLE_NAME,
+             Cursor c = db.query(Favorites.getFavoritesTableName(),
                      new String[]{Favorites._ID, Favorites.INTENT},
                      "itemType=" + Favorites.ITEM_TYPE_SHORTCUT
                              + " AND profileId=" + getDefaultUserSerial(),
                      null, null, null, null);
-             SQLiteStatement updateStmt = db.compileStatement("UPDATE favorites SET itemType="
+             SQLiteStatement updateStmt = db.compileStatement("UPDATE " + Favorites.getFavoritesTableName() + " SET itemType="
                      + Favorites.ITEM_TYPE_APPLICATION + " WHERE _id=?")
         ) {
             final int idIndex = c.getColumnIndexOrThrow(Favorites._ID);
@@ -408,17 +409,17 @@ public class DatabaseHelper extends NoLocaleSQLiteHelper implements
         try (SQLiteTransaction t = new SQLiteTransaction(db)) {
             if (addRankColumn) {
                 // Insert new column for holding rank
-                db.execSQL("ALTER TABLE favorites ADD COLUMN rank INTEGER NOT NULL DEFAULT 0;");
+                db.execSQL("ALTER TABLE " + Favorites.getFavoritesTableName() + " ADD COLUMN rank INTEGER NOT NULL DEFAULT 0;");
             }
 
             // Get a map for folder ID to folder width
-            Cursor c = db.rawQuery("SELECT container, MAX(cellX) FROM favorites"
-                            + " WHERE container IN (SELECT _id FROM favorites WHERE itemType = ?)"
+            Cursor c = db.rawQuery("SELECT container, MAX(cellX) FROM " + Favorites.getFavoritesTableName()
+                            + " WHERE container IN (SELECT _id FROM " + Favorites.getFavoritesTableName() + " WHERE itemType = ?)"
                             + " GROUP BY container;",
                     new String[]{Integer.toString(Favorites.ITEM_TYPE_FOLDER)});
 
             while (c.moveToNext()) {
-                db.execSQL("UPDATE favorites SET rank=cellX+(cellY*?) WHERE "
+                db.execSQL("UPDATE " + Favorites.getFavoritesTableName() + " SET rank=cellX+(cellY*?) WHERE "
                                 + "container=? AND cellX IS NOT NULL AND cellY IS NOT NULL;",
                         new Object[]{c.getLong(1) + 1, c.getLong(0)});
             }
@@ -435,7 +436,7 @@ public class DatabaseHelper extends NoLocaleSQLiteHelper implements
 
     private boolean addIntegerColumn(SQLiteDatabase db, String columnName, long defaultValue) {
         try (SQLiteTransaction t = new SQLiteTransaction(db)) {
-            db.execSQL("ALTER TABLE favorites ADD COLUMN "
+            db.execSQL("ALTER TABLE " + Favorites.getFavoritesTableName() + " ADD COLUMN "
                     + columnName + " INTEGER NOT NULL DEFAULT " + defaultValue + ";");
             t.commit();
         } catch (SQLException ex) {
@@ -469,7 +470,7 @@ public class DatabaseHelper extends NoLocaleSQLiteHelper implements
 
     @Override
     public int insertAndCheck(SQLiteDatabase db, ContentValues values) {
-        return dbInsertAndCheck(db, Favorites.TABLE_NAME, values);
+        return dbInsertAndCheck(db, Favorites.getFavoritesTableName(), values);
     }
 
     public int dbInsertAndCheck(SQLiteDatabase db, String table, ContentValues values) {
@@ -490,7 +491,7 @@ public class DatabaseHelper extends NoLocaleSQLiteHelper implements
 
     private int initializeMaxItemId(SQLiteDatabase db) {
         return getMaxId(db, "SELECT MAX(%1$s) FROM %2$s", Favorites._ID,
-                Favorites.TABLE_NAME);
+                Favorites.getFavoritesTableName());
     }
 
     /**
@@ -500,7 +501,7 @@ public class DatabaseHelper extends NoLocaleSQLiteHelper implements
     public int getNewScreenId() {
         return getMaxId(getWritableDatabase(),
                 "SELECT MAX(%1$s) FROM %2$s WHERE %3$s = %4$d AND %1$s >= 0",
-                Favorites.SCREEN, Favorites.TABLE_NAME, Favorites.CONTAINER,
+                Favorites.SCREEN, Favorites.getFavoritesTableName(), Favorites.CONTAINER,
                 Favorites.CONTAINER_DESKTOP) + 1;
     }
 

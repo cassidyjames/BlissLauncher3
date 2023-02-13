@@ -16,8 +16,8 @@
 
 package com.android.launcher3.model;
 
-import static com.android.launcher3.LauncherSettings.Favorites.TABLE_NAME;
-import static com.android.launcher3.LauncherSettings.Favorites.TMP_TABLE;
+import static com.android.launcher3.LauncherSettings.Favorites.getFavoritesTableName;
+import static com.android.launcher3.LauncherSettings.Favorites.getTempTableName;
 import static com.android.launcher3.config.FeatureFlags.ENABLE_SMARTSPACE_REMOVAL;
 import static com.android.launcher3.config.FeatureFlags.shouldShowFirstPageWidget;
 import static com.android.launcher3.model.LoaderTask.SMARTSPACE_ON_HOME_SCREEN;
@@ -114,18 +114,18 @@ public class GridSizeMigrationUtil {
         if (!needsToMigrate(srcDeviceState, destDeviceState)) {
             return true;
         }
-        copyTable(source, TABLE_NAME, target.getWritableDatabase(), TMP_TABLE, context);
+        copyTable(source, getFavoritesTableName(), target.getWritableDatabase(), getTempTableName(), context);
 
         HashSet<String> validPackages = getValidPackages(context);
         long migrationStartTime = System.currentTimeMillis();
         try (SQLiteTransaction t = new SQLiteTransaction(target.getWritableDatabase())) {
-            DbReader srcReader = new DbReader(t.getDb(), TMP_TABLE, context, validPackages);
-            DbReader destReader = new DbReader(t.getDb(), TABLE_NAME, context, validPackages);
+            DbReader srcReader = new DbReader(t.getDb(), getTempTableName(), context, validPackages);
+            DbReader destReader = new DbReader(t.getDb(), getFavoritesTableName(), context, validPackages);
 
             Point targetSize = new Point(destDeviceState.getColumns(), destDeviceState.getRows());
             migrate(target, srcReader, destReader, destDeviceState.getNumHotseat(),
                     targetSize, srcDeviceState, destDeviceState);
-            dropTable(t.getDb(), TMP_TABLE);
+            dropTable(t.getDb(), getTempTableName());
             t.commit();
             return true;
         } catch (Exception e) {
@@ -330,13 +330,17 @@ public class GridSizeMigrationUtil {
             final int screenId, final int trgX, final int trgY,
             @NonNull final List<DbEntry> sortedItemsToPlace, final boolean matchingScreenIdOnly) {
         final GridOccupancy occupied = new GridOccupancy(trgX, trgY);
+        final int adjScreenId = screenId == 0 && FeatureFlags.QSB_ON_FIRST_SCREEN
+                ? 1 /* smartspace */ : screenId; // Skip QSB screen
         final Point trg = new Point(trgX, trgY);
-        final Point next = new Point(0, screenId == 0
+        final Point next = new Point(0, 0);
+        /** final Point next = new Point(0, screenId == 0
                 && (FeatureFlags.QSB_ON_FIRST_SCREEN
                 && (!ENABLE_SMARTSPACE_REMOVAL.get() || LauncherPrefs.getPrefs(destReader.mContext)
                 .getBoolean(SMARTSPACE_ON_HOME_SCREEN, true))
                 && !shouldShowFirstPageWidget())
-                ? 1 /* smartspace */ : 0);
+                ? 1 : 0);
+        **/
         List<DbEntry> existedEntries = destReader.mWorkspaceEntriesByScreenId.get(screenId);
         if (existedEntries != null) {
             for (DbEntry entry : existedEntries) {
@@ -346,13 +350,13 @@ public class GridSizeMigrationUtil {
         Iterator<DbEntry> iterator = sortedItemsToPlace.iterator();
         while (iterator.hasNext()) {
             final DbEntry entry = iterator.next();
-            if (matchingScreenIdOnly && entry.screenId < screenId) continue;
-            if (matchingScreenIdOnly && entry.screenId > screenId) break;
+            if (matchingScreenIdOnly && entry.screenId < adjScreenId) continue;
+            if (matchingScreenIdOnly && entry.screenId > adjScreenId) break;
             if (entry.minSpanX > trgX || entry.minSpanY > trgY) {
                 iterator.remove();
                 continue;
             }
-            if (findPlacementForEntry(entry, next, trg, occupied, screenId)) {
+            if (findPlacementForEntry(entry, next, trg, occupied, adjScreenId)) {
                 insertEntryInDb(helper, entry, srcReader.mTableName, destReader.mTableName);
                 iterator.remove();
             }

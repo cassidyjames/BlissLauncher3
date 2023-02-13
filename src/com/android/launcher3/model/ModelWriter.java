@@ -253,7 +253,8 @@ public class ModelWriter {
             item.onAddToDatabase(writer);
             writer.put(Favorites._ID, item.id);
 
-            mModel.getModelDbController().insert(Favorites.TABLE_NAME, writer.getValues(mContext));
+            mModel.getModelDbController().insert(Favorites.getFavoritesTableName(), writer.getValues(mContext));
+
             synchronized (mBgDataModel) {
                 checkItemInfoLocked(item.id, item, stackTrace);
                 mBgDataModel.addItem(mContext, item, true);
@@ -307,7 +308,7 @@ public class ModelWriter {
         notifyDelete(Collections.singleton(info));
 
         enqueueDeleteRunnable(newModelTask(() -> {
-            mModel.getModelDbController().delete(Favorites.TABLE_NAME,
+            mModel.getModelDbController().delete(Favorites.getFavoritesTableName(),
                     Favorites.CONTAINER + "=" + info.id, null);
             mBgDataModel.removeItem(mContext, info.contents);
             info.contents.clear();

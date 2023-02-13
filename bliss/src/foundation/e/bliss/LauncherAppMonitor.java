@@ -27,13 +27,14 @@ import com.android.launcher3.LauncherPrefs;
 import com.android.launcher3.model.data.AppInfo;
 import com.android.launcher3.InvariantDeviceProfile;
 import com.android.launcher3.Launcher;
-import com.android.launcher3.Utilities;
 import com.android.launcher3.util.MainThreadInitializedObject;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+
+import foundation.e.bliss.multimode.MultiModeController;
 
 public class LauncherAppMonitor extends LauncherApps.Callback
         implements
@@ -49,7 +50,7 @@ public class LauncherAppMonitor extends LauncherApps.Callback
 
     private Launcher mLauncher;
 
-    // private MultiModeController mMultiModeController = null;
+    private MultiModeController mMultiModeController = null;
 
     public static LauncherAppMonitor getInstance(final Context context) {
         return INSTANCE.get(context.getApplicationContext());
@@ -82,7 +83,7 @@ public class LauncherAppMonitor extends LauncherApps.Callback
 
     /**
      * Register to receive notifications about general Launcher app information
-     * 
+     *
      * @param callback
      *            The callback to register
      */
@@ -94,9 +95,10 @@ public class LauncherAppMonitor extends LauncherApps.Callback
         }
     }
 
-    private LauncherAppMonitor(Context context) {
-        LauncherPrefs.get(context).addListener(this);
-        // mMultiModeController = new MultiModeController(context, this);
+    public LauncherAppMonitor(Context context) {
+        context.getSystemService(LauncherApps.class).registerCallback(this);
+        LauncherPrefs.getPrefs(context).registerOnSharedPreferenceChangeListener(this);
+        mMultiModeController = new MultiModeController(context, this);
     }
 
     @Override
@@ -469,5 +471,9 @@ public class LauncherAppMonitor extends LauncherApps.Callback
 
     @Override
     public void onAppSharedPreferenceChanged(@Nullable String key) {
+    }
+
+    public MultiModeController getMultiModeController() {
+        return mMultiModeController;
     }
 }
