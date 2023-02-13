@@ -34,6 +34,8 @@ import com.android.launcher3.util.Executors;
 
 import java.util.Locale;
 
+import foundation.e.bliss.multimode.MultiModeController;
+
 /**
  * BroadcastReceiver to handle session commit intent.
  */
@@ -68,7 +70,7 @@ public class SessionCommitReceiver extends BroadcastReceiver {
         boolean alreadyAddedPromiseIcon =
                 packageInstallerCompat.promiseIconAddedForId(info.getSessionId());
         if (TextUtils.isEmpty(info.getAppPackageName())
-                || info.getInstallReason() != PackageManager.INSTALL_REASON_USER
+                || (info.getInstallReason() != PackageManager.INSTALL_REASON_USER && !isSingleLayer())
                 || alreadyAddedPromiseIcon) {
             FileLog.d(LOG,
                     String.format(Locale.ENGLISH,
@@ -93,6 +95,11 @@ public class SessionCommitReceiver extends BroadcastReceiver {
     }
 
     public static boolean isEnabled(Context context) {
-        return LauncherPrefs.getPrefs(context).getBoolean(ADD_ICON_PREFERENCE_KEY, true);
+        return LauncherPrefs.getPrefs(context).getBoolean(ADD_ICON_PREFERENCE_KEY, true)
+                || isSingleLayer();
+    }
+
+    public static boolean isSingleLayer() {
+        return MultiModeController.isSingleLayerMode();
     }
 }

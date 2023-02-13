@@ -78,6 +78,8 @@ import org.xmlpull.v1.XmlPullParser;
 import java.io.InputStream;
 import java.io.StringReader;
 
+import foundation.e.bliss.multimode.MultiModeController;
+
 /**
  * Utility class which maintains an instance of Launcher database and provides utility methods
  * around it.
@@ -86,6 +88,13 @@ public class ModelDbController {
     private static final String TAG = "LauncherProvider";
 
     private static final String EMPTY_DATABASE_CREATED = "EMPTY_DATABASE_CREATED";
+
+    static final String EMPTY_DATABASE_CREATED_ALL = "EMPTY_DATABASE_CREATED_ALL";
+
+    private static String getEmptyDatabaseCreated() {
+        return MultiModeController.isSingleLayerMode() ? EMPTY_DATABASE_CREATED_ALL : EMPTY_DATABASE_CREATED;
+    }
+
     public static final String EXTRA_DB_NAME = "db_name";
 
     protected DatabaseHelper mOpenHelper;
@@ -116,7 +125,7 @@ public class ModelDbController {
         // Table creation sometimes fails silently, which leads to a crash loop.
         // This way, we will try to create a table every time after crash, so the device
         // would eventually be able to recover.
-        if (!tableExists(databaseHelper.getReadableDatabase(), Favorites.TABLE_NAME)) {
+        if (!tableExists(databaseHelper.getReadableDatabase(), Favorites.getFavoritesTableName())) {
             Log.e(TAG, "Tables are missing after onCreate has been called. Trying to recreate");
             // This operation is a no-op if the table already exists.
             addTableToDb(databaseHelper.getWritableDatabase(),
@@ -124,7 +133,7 @@ public class ModelDbController {
                     true /* optional */);
         }
         databaseHelper.mHotseatRestoreTableExists = tableExists(
-                databaseHelper.getReadableDatabase(), Favorites.HYBRID_HOTSEAT_BACKUP_TABLE);
+                databaseHelper.getReadableDatabase(), Favorites.getHotseatBackupTableName());
 
         databaseHelper.initIds();
         return databaseHelper;
@@ -254,7 +263,7 @@ public class ModelDbController {
     public void refreshHotseatRestoreTable() {
         createDbIfNotExists();
         mOpenHelper.mHotseatRestoreTableExists = tableExists(
-                mOpenHelper.getReadableDatabase(), Favorites.HYBRID_HOTSEAT_BACKUP_TABLE);
+                mOpenHelper.getReadableDatabase(), Favorites.getHotseatBackupTableName());
     }
 
 
@@ -339,12 +348,12 @@ public class ModelDbController {
                     + LauncherSettings.Favorites.ITEM_TYPE_FOLDER + " AND "
                     + LauncherSettings.Favorites._ID +  " NOT IN (SELECT "
                     + LauncherSettings.Favorites.CONTAINER + " FROM "
-                    + Favorites.TABLE_NAME + ")";
+                    + Favorites.getFavoritesTableName() + ")";
 
-            IntArray folderIds = LauncherDbUtils.queryIntArray(false, db, Favorites.TABLE_NAME,
+            IntArray folderIds = LauncherDbUtils.queryIntArray(false, db, Favorites.getFavoritesTableName(),
                     Favorites._ID, selection, null, null);
             if (!folderIds.isEmpty()) {
-                db.delete(Favorites.TABLE_NAME, Utilities.createDbSelectionQuery(
+                db.delete(Favorites.getFavoritesTableName(), Utilities.createDbSelectionQuery(
                         LauncherSettings.Favorites._ID, folderIds), null);
             }
             t.commit();
@@ -505,11 +514,11 @@ public class ModelDbController {
      */
     private ConstantItem<Boolean> getEmptyDbCreatedKey(String dbName) {
         if (mContext instanceof SandboxContext) {
-            return LauncherPrefs.nonRestorableItem(EMPTY_DATABASE_CREATED,
+            return LauncherPrefs.nonRestorableItem(getEmptyDatabaseCreated(),
                     false /* default value */, EncryptionType.ENCRYPTED);
         }
         String key = TextUtils.equals(dbName, LauncherFiles.LAUNCHER_DB)
-                ? EMPTY_DATABASE_CREATED : EMPTY_DATABASE_CREATED + "@" + dbName;
+                ? getEmptyDatabaseCreated() : getEmptyDatabaseCreated() + "@" + dbName;
         return LauncherPrefs.backedUpItem(key, false /* default value */, EncryptionType.ENCRYPTED);
     }
 
