@@ -332,6 +332,11 @@ public class DatabaseHelper extends NoLocaleSQLiteHelper implements
             final IntSet validWidgets = IntSet.wrap(LauncherDbUtils.queryIntArray(false, db,
                     Favorites.TABLE_NAME, Favorites.APPWIDGET_ID,
                     "itemType=" + Favorites.ITEM_TYPE_APPWIDGET, null, null));
+
+            validWidgets.addAll(IntSet.wrap(LauncherDbUtils.queryIntArray(false, db,
+                    Favorites.TABLE_NAME_ALL, Favorites.APPWIDGET_ID,
+                    "itemType=" + Favorites.ITEM_TYPE_APPWIDGET, null, null)));
+
             boolean isAnyWidgetRemoved = false;
             for (int widgetId : allWidgets) {
                 if (!validWidgets.contains(widgetId)) {
