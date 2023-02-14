@@ -46,6 +46,8 @@ import com.android.launcher3.states.StateAnimationConfig;
 import com.android.launcher3.util.FlingBlockCheck;
 import com.android.launcher3.util.TouchController;
 
+import foundation.e.bliss.multimode.MultiModeController;
+
 /**
  * TouchController for handling state changes
  */
@@ -127,13 +129,18 @@ public abstract class AbstractStateChangeTouchController
     private int getSwipeDirection() {
         LauncherState fromState = mLauncher.getStateManager().getState();
         int swipeDirection = 0;
-        if (getTargetState(fromState, true /* isDragTowardPositive */) != fromState) {
+        if (getTargetStateExt(fromState, true /* isDragTowardPositive */) != fromState) {
             swipeDirection |= SingleAxisSwipeDetector.DIRECTION_POSITIVE;
         }
-        if (getTargetState(fromState, false /* isDragTowardPositive */) != fromState) {
+        if (getTargetStateExt(fromState, false /* isDragTowardPositive */) != fromState) {
             swipeDirection |= SingleAxisSwipeDetector.DIRECTION_NEGATIVE;
         }
         return swipeDirection;
+    }
+
+    private LauncherState getTargetStateExt(LauncherState fromState, boolean isDragTowardPositive) {
+        LauncherState targetState = getTargetState(fromState, isDragTowardPositive);
+        return MultiModeController.isSingleLayerMode() && targetState == ALL_APPS ? fromState : targetState;
     }
 
     @Override
@@ -157,7 +164,7 @@ public abstract class AbstractStateChangeTouchController
     private boolean reinitCurrentAnimation(boolean reachedToState, boolean isDragTowardPositive) {
         LauncherState newFromState = mFromState == null ? mLauncher.getStateManager().getState()
                 : reachedToState ? mToState : mFromState;
-        LauncherState newToState = getTargetState(newFromState, isDragTowardPositive);
+        LauncherState newToState = getTargetStateExt(newFromState, isDragTowardPositive);
 
         onReinitToState(newToState);
 
