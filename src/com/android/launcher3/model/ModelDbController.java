@@ -23,6 +23,7 @@ import static com.android.launcher3.LauncherSettings.Favorites.addTableToDb;
 import static com.android.launcher3.LauncherSettings.Settings.LAYOUT_DIGEST_KEY;
 import static com.android.launcher3.LauncherSettings.Settings.LAYOUT_DIGEST_LABEL;
 import static com.android.launcher3.LauncherSettings.Settings.LAYOUT_DIGEST_TAG;
+import static com.android.launcher3.provider.LauncherDbUtils.copyTable;
 import static com.android.launcher3.provider.LauncherDbUtils.tableExists;
 
 import android.app.blob.BlobHandle;
@@ -418,6 +419,9 @@ public class ModelDbController {
                     mOpenHelper.createEmptyDB(mOpenHelper.getWritableDatabase());
                     mOpenHelper.loadFavorites(mOpenHelper.getWritableDatabase(),
                             getDefaultLayoutParser(widgetHolder));
+                    copyTable(mOpenHelper.getReadableDatabase(), Favorites.TABLE_NAME_ALL,
+                            mOpenHelper.getWritableDatabase(),Favorites.TABLE_NAME, mContext);
+
                 }
                 clearFlagEmptyDbCreated();
             } finally {
