@@ -538,6 +538,11 @@ public abstract class PagedView<T extends View & PageIndicator> extends ViewGrou
         }
     }
 
+    @Override
+    public void setOnScrollChangeListener(OnScrollChangeListener l) {
+        super.setOnScrollChangeListener(l);
+    }
+
     protected void announcePageForAccessibility() {
         if (isAccessibilityEnabled(getContext())) {
             // Notify the user when the page changes

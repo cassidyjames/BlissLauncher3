@@ -2237,7 +2237,7 @@ public class Launcher extends StatefulActivity<LauncherState>
                     Object tag = v.getTag();
                     String desc = "Collision while binding workspace item: " + item
                             + ". Collides with " + tag;
-                    if (FeatureFlags.IS_STUDIO_BUILD) {
+                    if (FeatureFlags.IS_STUDIO_BUILD && tag != null) {
                         throw (new RuntimeException(desc));
                     } else {
                         getModelWriter().deleteItemFromDatabase(item, desc);
@@ -2570,6 +2570,10 @@ public class Launcher extends StatefulActivity<LauncherState>
                         && info.getTargetComponent() != null
                         && TextUtils.equals(info.getTargetComponent().getPackageName(),
                         packageName);
+
+        if (mWorkspace.getDestinationPage() == 0) {
+            return null;
+        }
 
         if (supportsAllAppsState && isInState(LauncherState.ALL_APPS)) {
             AllAppsRecyclerView activeRecyclerView = mAppsView.getActiveRecyclerView();

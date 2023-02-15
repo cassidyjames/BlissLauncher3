@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.gnu.org/licenses/gpl.html
  */
-package foundation.e.bliss.db
+package foundation.e.bliss.utils
 
 import android.content.Context
 import android.content.Intent

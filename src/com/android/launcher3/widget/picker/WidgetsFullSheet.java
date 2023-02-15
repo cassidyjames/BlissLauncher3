@@ -57,6 +57,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.launcher3.BaseActivity;
 import com.android.launcher3.DeviceProfile;
+import com.android.launcher3.Launcher;
 import com.android.launcher3.LauncherAppState;
 import com.android.launcher3.LauncherPrefs;
 import com.android.launcher3.R;
@@ -83,6 +84,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
+
+import foundation.e.bliss.widgets.WidgetContainer.WidgetFragment;
 
 /**
  * Popup for showing the full list of available widgets
@@ -173,6 +176,8 @@ public class WidgetsFullSheet extends BaseWidgetSheet
     protected WidgetsSearchBar mSearchBar;
     protected TextView mHeaderTitle;
     protected RecyclerViewFastScroller mFastScroller;
+
+    private static boolean isEditMode = false;
 
     public WidgetsFullSheet(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
@@ -677,10 +682,16 @@ public class WidgetsFullSheet extends BaseWidgetSheet
                 getWidgetSheetId(activity),
                 activity.getDragLayer(),
                 false);
+        isEditMode = false;
         sheet.attachToContainer();
         sheet.mIsOpen = true;
         sheet.open(animate);
         return sheet;
+    }
+
+    public static WidgetsFullSheet show(Launcher launcher, boolean animate, boolean inEditMode) {
+        isEditMode = inEditMode;
+        return show(launcher, animate);
     }
 
     private static int getWidgetSheetId(BaseActivity activity) {
@@ -916,8 +927,13 @@ public class WidgetsFullSheet extends BaseWidgetSheet
                     context,
                     LayoutInflater.from(context),
                     this::getEmptySpaceHeight,
-                    /* iconClickListener= */ WidgetsFullSheet.this,
-                    /* iconLongClickListener= */ WidgetsFullSheet.this,
+                    /* iconClickListener= */ !isEditMode ? WidgetsFullSheet.this :
+                    v -> WidgetFragment.onWidgetClick(context, v, close -> {
+                        close(close);
+                        return null;
+                    }),
+                    /* iconLongClickListener= */ !isEditMode ? WidgetsFullSheet.this : null,
+
                     isTwoPane());
             mWidgetsListAdapter.setHasStableIds(true);
             switch (mAdapterType) {
