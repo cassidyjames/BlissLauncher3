@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<foundation.e.bliss.suggestions.BlissInput xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingHorizontal="3dp"
+    android:paddingBottom="6dp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/search_widget"
+        android:focusableInTouchMode="true">
+
+        <EditText
+            android:id="@+id/search_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:clickable="true"
+            android:drawableStart="@drawable/ic_allapps_search"
+            android:drawablePadding="8dp"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:hint="@string/search"
+            android:imeOptions="actionSearch"
+            android:importantForAutofill="no"
+            android:inputType="text"
+            android:maxLines="1"
+            android:padding="8dp"
+            android:textColor="@color/text_color_primary_dark"
+            android:textColorHint="@color/text_color_primary_dark" />
+
+        <ImageView
+            android:id="@+id/clearSuggestions"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:importantForAccessibility="no"
+            android:padding="8dp"
+            android:src="@drawable/ic_cancel_24"
+            android:visibility="gone" />
+    </RelativeLayout>
+</foundation.e.bliss.suggestions.BlissInput>

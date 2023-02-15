@@ -26,6 +26,7 @@ import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCH
 import static com.android.launcher3.testing.shared.TestProtocol.NORMAL_STATE_ORDINAL;
 
 import android.animation.Animator;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Rect;
@@ -35,6 +36,7 @@ import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
@@ -48,6 +50,7 @@ import android.view.animation.Interpolator;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.window.BackEvent;
 
 import androidx.annotation.NonNull;
@@ -60,6 +63,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.launcher3.BaseActivity;
 import com.android.launcher3.DeviceProfile;
+import com.android.launcher3.Launcher;
 import com.android.launcher3.LauncherAppState;
 import com.android.launcher3.LauncherPrefs;
 import com.android.launcher3.R;
@@ -84,6 +88,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
+
+import foundation.e.bliss.widgets.WidgetContainer.WidgetFragment;
 
 /**
  * Popup for showing the full list of available widgets
@@ -698,16 +704,24 @@ public class WidgetsFullSheet extends BaseWidgetSheet
         return intercept;
     }
 
+    private static boolean isEditMode = false;
+
     /** Shows the {@link WidgetsFullSheet} on the launcher. */
     public static WidgetsFullSheet show(BaseActivity activity, boolean animate) {
         WidgetsFullSheet sheet = (WidgetsFullSheet) activity.getLayoutInflater().inflate(
                 getWidgetSheetId(activity),
                 activity.getDragLayer(),
                 false);
+        isEditMode = false;
         sheet.attachToContainer();
         sheet.mIsOpen = true;
         sheet.open(animate);
         return sheet;
+    }
+
+    public static WidgetsFullSheet show(Launcher launcher, boolean animate, boolean inEditMode) {
+        isEditMode = inEditMode;
+        return show(launcher, animate);
     }
 
     private static int getWidgetSheetId(BaseActivity activity) {
@@ -973,8 +987,12 @@ public class WidgetsFullSheet extends BaseWidgetSheet
                     context,
                     LayoutInflater.from(context),
                     this::getEmptySpaceHeight,
-                    /* iconClickListener= */ WidgetsFullSheet.this,
-                    /* iconLongClickListener= */ WidgetsFullSheet.this,
+                    /* iconClickListener= */ !isEditMode ? WidgetsFullSheet.this :
+                    v -> WidgetFragment.onWidgetClick(context, v, close -> {
+                        close(close);
+                        return null;
+                    }),
+                    /* iconLongClickListener= */ !isEditMode ? WidgetsFullSheet.this : null,
                     isTwoPane());
             mWidgetsListAdapter.setHasStableIds(true);
             switch (mAdapterType) {

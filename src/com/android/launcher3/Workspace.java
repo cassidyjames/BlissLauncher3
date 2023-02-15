@@ -165,7 +165,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
 
     private static final int ADJACENT_SCREEN_DROP_DURATION = 300;
 
-    public static final int DEFAULT_PAGE = 0;
+    public static final int DEFAULT_PAGE = 1;
 
     private final int mAllAppsIconSize;
 
@@ -248,7 +248,6 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
     private float mXDown;
     private float mYDown;
     private View mFirstPagePinnedItem;
-    private boolean mIsEventOverFirstPagePinnedItem;
 
     final static float START_DAMPING_TOUCH_SLOP_ANGLE = (float) Math.PI / 6;
     final static float MAX_SWIPE_ANGLE = (float) Math.PI / 3;
@@ -607,11 +606,13 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
             // As workspace does not touch the edges, we do not need a full
             // width first page pinned item.
             mFirstPagePinnedItem = LayoutInflater.from(getContext())
-                    .inflate(R.layout.search_container_workspace, firstPage, false);
+                    .inflate(R.layout.search_container_workspace_v2, firstPage, false);
         }
 
-        int cellHSpan = mLauncher.getDeviceProfile().inv.numSearchContainerColumns;
-        CellLayoutLayoutParams lp = new CellLayoutLayoutParams(0, 0, cellHSpan, 1);
+        int cellHSpan = mLauncher.getDeviceProfile().inv.numColumns;
+        int cellVSpan = mLauncher.getDeviceProfile().inv.numRows;
+        CellLayoutLayoutParams lp = new CellLayoutLayoutParams(0, 0, cellHSpan, cellVSpan);
+
         lp.canReorder = false;
         if (!firstPage.addViewToCellLayout(
                 mFirstPagePinnedItem, 0, R.id.search_container_workspace, lp, true)) {
@@ -1166,18 +1167,12 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
             tempFXY[0] = mXDown;
             tempFXY[1] = mYDown;
             Utilities.mapCoordInSelfToDescendant(mFirstPagePinnedItem, this, tempFXY);
-            mIsEventOverFirstPagePinnedItem = mFirstPagePinnedItem.getLeft() <= tempFXY[0]
-                    && mFirstPagePinnedItem.getRight() >= tempFXY[0]
-                    && mFirstPagePinnedItem.getTop() <= tempFXY[1]
-                    && mFirstPagePinnedItem.getBottom() >= tempFXY[1];
-        } else {
-            mIsEventOverFirstPagePinnedItem = false;
         }
     }
 
     @Override
     protected void determineScrollingStart(MotionEvent ev) {
-        if (!isFinishedSwitchingState() || mIsEventOverFirstPagePinnedItem) return;
+        if (!isFinishedSwitchingState()) return;
 
         float deltaX = ev.getX() - mXDown;
         float absDeltaX = Math.abs(deltaX);
@@ -1285,6 +1280,30 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         updatePageAlphaValues();
         updatePageScrollValues();
         enableHwLayersOnVisiblePages();
+        firstPageItemHideHotseat(l);
+    }
+
+    private void firstPageItemHideHotseat(int scrollX) {
+        DeviceProfile grid = mLauncher.getDeviceProfile();
+        int bottomPadding = grid.workspacePadding.bottom;
+
+        final DeviceProfile dp = mLauncher.getDeviceProfile();
+        float progress = (float) scrollX / dp.availableWidthPx;
+
+        if (progress >= 0.999)
+            progress = 1;
+        if (progress <= 0.001)
+            progress = 0;
+
+        int dockHeight = getHotseat().getHeight() + getPageIndicator().getHeight();
+        float dockTranslationY = (1 - progress) * dockHeight;
+
+        float qsbPadding = progress * bottomPadding;
+
+        getHotseat().setTranslationY(dockTranslationY);
+        getPageIndicator().setTranslationY(dockTranslationY);
+        setPadding(getPaddingLeft(), getPaddingTop(), getPaddingRight(),
+                progress != 0 ? (int) qsbPadding : getPaddingBottom());
     }
 
     public void showPageIndicatorAtCurrentScroll() {
