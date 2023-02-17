@@ -102,4 +102,9 @@
         android:persistent="true"
         android:title="Enable single layer mode" />
 
+    <SwitchPreference
+        android:defaultValue="true"
+        android:key="pref_notif_count"
+        android:persistent="true"
+        android:title="Show notification count" />
 </androidx.preference.PreferenceScreen>

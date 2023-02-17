@@ -307,6 +307,12 @@ public class SettingsActivity extends FragmentActivity
 
                 case ADD_ICON_PREFERENCE_KEY:
                     return !MultiModeController.isSingleLayerMode();
+
+                case BlissPrefs.PREF_NOTIF_COUNT:
+                    boolean showCount = MultiModeController.isNotifCountEnabled();
+                    preference.setDefaultValue(showCount);
+                    ((SwitchPreference) preference).setChecked(showCount);
+                    return true;
             }
 
             return true;
