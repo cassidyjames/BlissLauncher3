@@ -141,7 +141,7 @@ public class BubbleView extends ConstraintLayout {
         mDrawParams.leftAlign = mOnLeft;
         mDrawParams.scale = mDotScale;
 
-        mDotRenderer.draw(canvas, mDrawParams);
+        mDotRenderer.draw(canvas, mDrawParams, -1);
     }
 
     /** Sets the bubble being rendered in this view. */
@@ -150,7 +150,7 @@ public class BubbleView extends ConstraintLayout {
         mBubbleIcon.setImageBitmap(bubble.getIcon());
         mAppIcon.setImageBitmap(bubble.getBadge());
         mDotColor = bubble.getDotColor();
-        mDotRenderer = new DotRenderer(mBubbleSize, bubble.getDotPath(), DEFAULT_PATH_SIZE);
+        mDotRenderer = new DotRenderer(mBubbleSize, bubble.getDotPath(), DEFAULT_PATH_SIZE, false, null);
     }
 
     /**
