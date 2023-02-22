@@ -1309,11 +1309,24 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         ((PageIndicatorDots) getPageIndicator()).setForcedTranslationY(dockTranslationY);
         setPadding(getPaddingLeft(), getPaddingTop(), getPaddingRight(),
                 progress != 0 ? (int) qsbPadding : getPaddingBottom());
+
+        if (getCurrentPage() != 0) {
+            mLauncher.mBlurLayer.setAlpha(0f);
+        }
+
+        if (scrollX >= 0 && scrollX < dp.availableWidthPx) {
+            float fraction = (float) (dp.availableWidthPx - scrollX)
+                    / dp.availableWidthPx;
+            mLauncher.mBlurLayer.setAlpha(fraction);
+        }
     }
 
     public void showPageIndicatorAtCurrentScroll() {
         if (mPageIndicator != null) {
             mPageIndicator.setScroll(getScrollX(), computeMaxScroll());
+        }
+        if (mCurrentPage != 0) {
+            mLauncher.mBlurLayer.setAlpha(0f);
         }
     }
 

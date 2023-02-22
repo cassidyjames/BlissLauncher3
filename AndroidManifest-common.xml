@@ -79,6 +79,7 @@
         android:fullBackupContent="@xml/backupscheme"
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
+        tools:replace="android:label"
         android:label="@string/derived_app_name"
         android:usesCleartextTraffic="true"
         android:allowClearUserData="true"
