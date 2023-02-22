@@ -19,6 +19,7 @@ import com.android.launcher3.util.Executors.MODEL_EXECUTOR
 import foundation.e.bliss.BaseController
 import foundation.e.bliss.LauncherAppMonitor
 import foundation.e.bliss.LauncherAppMonitorCallback
+import foundation.e.bliss.blur.BlurWallpaperProvider
 import foundation.e.bliss.preferences.BlissPrefs
 import java.io.FileDescriptor
 import java.io.PrintWriter
@@ -48,6 +49,10 @@ class MultiModeController(val context: Context, val monitor: LauncherAppMonitor)
                     }
                     else -> Unit
                 }
+            }
+
+            override fun onLauncherOrientationChanged() {
+                BlurWallpaperProvider.getInstanceNoCreate().orientationChanged()
             }
 
             override fun dump(

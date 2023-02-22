@@ -29,6 +29,8 @@ import com.android.launcher3.util.MultiPropertyFactory;
 import com.android.launcher3.util.MultiPropertyFactory.MultiProperty;
 import com.android.systemui.shared.system.BlurUtils;
 
+import foundation.e.bliss.multimode.MultiModeController;
+
 /**
  * Utility class for applying depth effect
  */
@@ -130,7 +132,11 @@ public class BaseDepthController {
             // The API's full zoom-out is three times larger than the zoom-out we apply to the
             // icons. To keep the two consistent throughout the animation while keeping Launcher's
             // concept of full depth unchanged, we divide the depth by 3 here.
-            mWallpaperManager.setWallpaperZoomOut(windowToken, depth / 3);
+            if (MultiModeController.isSingleLayerMode()) {
+                mWallpaperManager.setWallpaperZoomOut(windowToken, 1);
+            } else {
+                mWallpaperManager.setWallpaperZoomOut(windowToken, depth / 3);
+            }
         }
 
         if (!BlurUtils.supportsBlursOnWindows()) {

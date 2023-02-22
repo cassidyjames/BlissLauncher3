@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <foundation.e.bliss.widgets.WidgetContainer xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@id/search_container_workspace"
     android:layout_width="match_parent"
@@ -36,21 +37,27 @@
                 android:tag="qsb_view"
                 tools:ignore="FragmentTagUsage" />
 
-            <Button
-                android:id="@+id/manage_widgets"
+            <foundation.e.bliss.blur.BlurLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginVertical="6dp"
-                android:background="@drawable/btn_rounded_corner"
-                android:fontFamily="sans-serif-medium"
-                android:minWidth="0dp"
-                android:minHeight="0dp"
-                android:paddingHorizontal="24dp"
-                android:paddingVertical="6dp"
-                android:stateListAnimator="@null"
-                android:text="@string/edit"
-                android:textAllCaps="false"
-                android:textColor="#FFF" />
+                app:blurCornerRadius="20dp">
+
+                <Button
+                    android:id="@+id/manage_widgets"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/btn_rounded_corner"
+                    android:fontFamily="sans-serif-medium"
+                    android:minWidth="0dp"
+                    android:minHeight="0dp"
+                    android:paddingHorizontal="24dp"
+                    android:paddingVertical="6dp"
+                    android:stateListAnimator="@null"
+                    android:text="@string/edit"
+                    android:textAllCaps="false"
+                    android:textColor="#FFF" />
+            </foundation.e.bliss.blur.BlurLayout>
         </LinearLayout>
     </ScrollView>
 </foundation.e.bliss.widgets.WidgetContainer>

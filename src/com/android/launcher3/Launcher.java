@@ -36,6 +36,7 @@ import static com.android.launcher3.LauncherConstants.ActivityCodes.REQUEST_CREA
 import static com.android.launcher3.LauncherConstants.ActivityCodes.REQUEST_CREATE_SHORTCUT;
 import static com.android.launcher3.LauncherConstants.ActivityCodes.REQUEST_PICK_APPWIDGET;
 import static com.android.launcher3.LauncherConstants.ActivityCodes.REQUEST_RECONFIGURE_APPWIDGET;
+import static com.android.launcher3.LauncherConstants.ActivityCodes.STORAGE_PERMISSION_REQUEST_CODE;
 import static com.android.launcher3.LauncherConstants.SavedInstanceKeys.RUNTIME_STATE;
 import static com.android.launcher3.LauncherConstants.SavedInstanceKeys.RUNTIME_STATE_CURRENT_SCREEN_IDS;
 import static com.android.launcher3.LauncherConstants.SavedInstanceKeys.RUNTIME_STATE_PENDING_ACTIVITY_RESULT;
@@ -152,6 +153,7 @@ import androidx.annotation.RequiresApi;
 import androidx.annotation.StringRes;
 import androidx.annotation.UiThread;
 import androidx.annotation.VisibleForTesting;
+import androidx.core.app.ActivityCompat;
 
 import com.android.launcher3.DropTarget.DragObject;
 import com.android.launcher3.accessibility.LauncherAccessibilityDelegate;
@@ -273,6 +275,8 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import foundation.e.bliss.LauncherAppMonitor;
+import foundation.e.bliss.blur.BlurBackgroundView;
+import foundation.e.bliss.blur.BlurWallpaperProvider;
 import foundation.e.bliss.multimode.MultiModeController;
 
 /**
@@ -402,6 +406,8 @@ public class Launcher extends StatefulActivity<LauncherState>
 
     private LauncherAppMonitor mAppMonitor;
 
+    public BlurBackgroundView mBlurLayer;
+
     private final CannedAnimationCoordinator mAnimationCoordinator =
             new CannedAnimationCoordinator(this);
 
@@ -506,6 +512,7 @@ public class Launcher extends StatefulActivity<LauncherState>
         LauncherAppState app = LauncherAppState.getInstance(this);
         mModel = app.getModel();
 
+        BlurWallpaperProvider.Companion.getInstance(this);
         mRotationHelper = new RotationHelper(this);
         InvariantDeviceProfile idp = app.getInvariantDeviceProfile();
         initDeviceProfile(idp);
@@ -574,12 +581,18 @@ public class Launcher extends StatefulActivity<LauncherState>
         getSystemUiController().updateUiState(SystemUiController.UI_STATE_BASE_WINDOW,
                 Themes.getAttrBoolean(this, R.attr.isWorkspaceDarkText));
 
+        requestPermissions(new String[]{Manifest.permission.MANAGE_EXTERNAL_STORAGE},
+                STORAGE_PERMISSION_REQUEST_CODE);
+
         mOverlayManager = getDefaultOverlay();
         PluginManagerWrapper.INSTANCE.get(this).addPluginListener(this,
                 LauncherOverlayPlugin.class, false /* allowedMultiple */);
 
         mRotationHelper.initialize();
         mAppMonitor.onLauncherCreated();
+        mBlurLayer = findViewById(R.id.blur_layer);
+        mBlurLayer.setAlpha(0f);
+
         TraceHelper.INSTANCE.endSection();
 
         if (Utilities.ATLEAST_R) {
