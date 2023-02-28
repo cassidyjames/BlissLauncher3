@@ -18,6 +18,7 @@ import android.util.Pair;
 import androidx.annotation.WorkerThread;
 
 import com.android.launcher3.LauncherAppState;
+import com.android.launcher3.R;
 import com.android.launcher3.model.BgDataModel;
 import com.android.launcher3.model.ItemInstallQueue;
 import com.android.launcher3.model.data.AppInfo;
@@ -26,16 +27,20 @@ import com.android.launcher3.util.ComponentKey;
 import com.android.launcher3.util.ItemInfoMatcher;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Predicate;
 
 @WorkerThread
 public class VerifyIdleAppTask implements Runnable {
     private static final String TAG = "VerifyIdleAppTask";
+
+    private final List<String> mBlacklistedApps;
 
     private final Context mContext;
     private final Collection<AppInfo> mApps;
@@ -54,6 +59,7 @@ public class VerifyIdleAppTask implements Runnable {
         mUser = user;
         mIsAddPackage = isAdd;
         mBgdataModel = bgDataModel;
+        mBlacklistedApps = Arrays.asList(context.getResources().getStringArray(R.array.blacklisted_apps));
     }
 
     private static void verifyShortcutHighRes(Context context, AppInfo appInfo) {
@@ -75,7 +81,10 @@ public class VerifyIdleAppTask implements Runnable {
             // All apps loading, we ignore loaded.
             mIgnoreLoaded = true;
             for (AppInfo app : mApps) {
-                map.put(new ComponentKey(app.componentName, app.user), app);
+                if (mBlacklistedApps.stream().noneMatch(
+                        pkg -> pkg.equals(Objects.requireNonNull(app.getTargetPackage()).trim().toLowerCase()))) {
+                    map.put(new ComponentKey(app.componentName, app.user), app);
+                }
             }
         } else if (mPackageNames != null && mUser != null) {
             // App add or update, should not ignore loaded.

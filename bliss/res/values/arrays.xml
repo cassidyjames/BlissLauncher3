@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="blacklisted_apps">
+        <item>org.sufficientlysecure.keychain</item>
+        <item>com.google.android.gms</item>
+        <item>foundation.e.pdfviewer</item>
+        <item>com.android.stk</item>
+        <item>foundation.e.blissweather</item>
+    </array>
+</resources>
