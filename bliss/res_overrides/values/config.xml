@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="derived_app_name" translatable="false">BlissLauncher</string>
+    <string name="launcher_activity_logic_class" translatable="false">foundation.e.bliss.LauncherActivityCachingLogic</string>
 
     <string-array name="filtered_components">
         <item>@string/quickstep_component</item>

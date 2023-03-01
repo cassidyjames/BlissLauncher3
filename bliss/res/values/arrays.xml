@@ -7,4 +7,9 @@
         <item>com.android.stk</item>
         <item>foundation.e.blissweather</item>
     </array>
+
+    <!-- Key | Value string array to force alias -->
+    <string-array name="aliased_apps">
+        <item>com.generalmagic.magicearth</item> <item>@string/maps</item>
+    </string-array>
 </resources>

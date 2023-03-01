@@ -10,6 +10,7 @@ package foundation.e.bliss.utils
 import android.content.Context
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import kotlin.Exception
 
 fun Context.toggleKeyboard(view: View, hasFocus: Boolean) {
     val inputMethodManager = getSystemService(InputMethodManager::class.java)
@@ -18,4 +19,18 @@ fun Context.toggleKeyboard(view: View, hasFocus: Boolean) {
     } else {
         inputMethodManager?.hideSoftInputFromWindow(view.windowToken, 0)
     }
+}
+
+fun <T> resourcesToMap(array: List<T>): Map<T, T> {
+    val map = mutableMapOf<T, T>()
+
+    if (array.size.mod(2) == 0) {
+        for (i in array.indices step 2) {
+            map[array[i]] = array[i + 1]
+        }
+    } else {
+        throw Exception("Failed to parse array resource")
+    }
+
+    return map
 }
