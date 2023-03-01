@@ -25,6 +25,7 @@ import androidx.core.graphics.ColorUtils
 import com.android.launcher3.Launcher
 import com.android.launcher3.LauncherSettings
 import com.android.launcher3.model.data.ItemInfo
+import kotlin.Exception
 
 private val mainHandler by lazy { Handler(Looper.getMainLooper()) }
 
@@ -105,3 +106,5 @@ fun disableComponent(context: Context, componentName: ComponentName) {
         PackageManager.DONT_KILL_APP
     )
 }
+
+
