@@ -3,4 +3,8 @@
     <string name="edit">Edit</string>
     <string name="search">Search</string>
     <string name="suggestions">SUGGESTIONS</string>
+    <string name="maps">Maps</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="uninstall_app">Do you want to uninstall this app?</string>
 </resources>

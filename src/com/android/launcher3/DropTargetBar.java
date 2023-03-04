@@ -35,6 +35,8 @@ import com.android.launcher3.dragndrop.DragController;
 import com.android.launcher3.dragndrop.DragController.DragListener;
 import com.android.launcher3.dragndrop.DragOptions;
 
+import foundation.e.bliss.multimode.MultiModeController;
+
 /*
  * The top bar containing various drop targets: Delete/App Info/Uninstall.
  */
@@ -129,6 +131,7 @@ public class DropTargetBar extends FrameLayout
     }
 
     public void setup(DragController dragController) {
+        if (MultiModeController.isSingleLayerMode()) return;
         dragController.addDragListener(this);
         for (int i = 0; i < mDropTargets.length; i++) {
             dragController.addDragListener(mDropTargets[i]);

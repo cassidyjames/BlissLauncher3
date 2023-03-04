@@ -667,7 +667,12 @@ public class Launcher extends StatefulActivity<LauncherState>
             return topView;
         }
 
-        // #4 Custom back handlers
+        // #4 Cancel Wobble
+        if (getWorkspace().isWobbling()) {
+            return (OnBackAnimationCallback) getWorkspace();
+        }
+
+        // #5 state handler
         for (BackPressHandler handler : mBackPressedHandlers) {
             if (handler.canHandleBack()) {
                 return handler;
