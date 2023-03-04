@@ -157,6 +157,9 @@ public class WorkspaceTouchListener extends GestureDetector.SimpleOnGestureListe
                         (CellLayout) mWorkspace.getChildAt(mWorkspace.getCurrentPage());
                 if (currentPage != null) {
                     mWorkspace.onWallpaperTap(ev);
+                    if (mWorkspace.isWobbling()) {
+                        mWorkspace.wobbleLayouts(false /* wobble */);
+                    }
                 }
             }
         }
