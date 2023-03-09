@@ -7,10 +7,14 @@
  */
 package foundation.e.bliss.utils
 
+import android.animation.ArgbEvaluator
+import android.animation.ValueAnimator
 import android.content.Context
 import android.view.View
+import android.view.Window
+import android.view.animation.LinearInterpolator
 import android.view.inputmethod.InputMethodManager
-import kotlin.Exception
+import androidx.core.graphics.ColorUtils
 
 fun Context.toggleKeyboard(view: View, hasFocus: Boolean) {
     val inputMethodManager = getSystemService(InputMethodManager::class.java)
@@ -33,4 +37,22 @@ fun <T> resourcesToMap(array: List<T>): Map<T, T> {
     }
 
     return map
+}
+
+fun createNavbarColorAnimator(window: Window): ValueAnimator {
+    val navColor: Int = window.navigationBarColor
+    val colorAnimation =
+        ValueAnimator.ofObject(
+            ArgbEvaluator(),
+            navColor,
+            ColorUtils.setAlphaComponent(navColor, 160)
+        )
+
+    colorAnimation.apply {
+        duration = 400
+        interpolator = LinearInterpolator()
+        addUpdateListener { window.navigationBarColor = it.animatedValue as Int }
+    }
+
+    return colorAnimation
 }
