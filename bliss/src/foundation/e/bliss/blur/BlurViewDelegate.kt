@@ -18,6 +18,7 @@ import android.view.View
 import android.view.ViewOutlineProvider
 import android.view.ViewTreeObserver
 import android.widget.ScrollView
+import androidx.core.graphics.toRectF
 import com.android.launcher3.PagedView
 import com.android.launcher3.R
 
@@ -135,15 +136,7 @@ class BlurViewDelegate(
             this.draw(canvas)
         }
         if (overlayColor != 0) {
-            canvas.drawRoundRect(
-                view.left.toFloat(),
-                view.top.toFloat(),
-                view.right.toFloat(),
-                view.bottom.toFloat(),
-                view.x,
-                view.y,
-                overlayPaint
-            )
+            canvas.drawRoundRect(canvas.clipBounds.toRectF(), view.x, view.y, overlayPaint)
         }
     }
 

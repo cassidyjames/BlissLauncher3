@@ -18,7 +18,6 @@ package com.android.launcher3.folder;
 
 import static com.android.launcher3.Flags.enableCursorHoverStates;
 import static com.android.launcher3.folder.ClippedFolderIconLayoutRule.ICON_OVERLAP_FACTOR;
-import static com.android.launcher3.folder.ClippedFolderIconLayoutRule.MAX_NUM_ITEMS_IN_PREVIEW;
 import static com.android.launcher3.folder.PreviewItemManager.INITIAL_ITEM_ANIMATION_DURATION;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_FOLDER_AUTO_LABELED;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_FOLDER_AUTO_LABELING_SKIPPED_EMPTY_PRIMARY;
@@ -86,6 +85,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
+import foundation.e.bliss.LauncherAppMonitor;
+import foundation.e.bliss.folder.GridFolder;
+import foundation.e.bliss.multimode.MultiModeController;
+
 /**
  * An icon that can appear on in the workspace representing an {@link Folder}.
  */
@@ -113,7 +116,7 @@ public class FolderIcon extends FrameLayout implements FolderListener, IconLabel
     private boolean mBackgroundIsVisible = true;
 
     FolderGridOrganizer mPreviewVerifier;
-    ClippedFolderIconLayoutRule mPreviewLayoutRule;
+    private ClippedFolderIconLayoutRule mPreviewLayoutRule;
     private PreviewItemManager mPreviewItemManager;
     private PreviewItemDrawingParams mTmpParams = new PreviewItemDrawingParams(0, 0, 0);
     private List<WorkspaceItemInfo> mCurrentPreviewItems = new ArrayList<>();
@@ -161,14 +164,21 @@ public class FolderIcon extends FrameLayout implements FolderListener, IconLabel
 
     private void init() {
         mLongPressHelper = new CheckLongPressHelper(this);
-        mPreviewLayoutRule = new ClippedFolderIconLayoutRule();
+        if (MultiModeController.isSingleLayerMode()) {
+            mPreviewLayoutRule = LauncherAppMonitor.getInstanceNoCreate()
+                    .getGridFolderController().getGridFolderIconLayoutRule();
+        } else{
+            mPreviewLayoutRule = new ClippedFolderIconLayoutRule();
+        }
+
         mPreviewItemManager = new PreviewItemManager(this);
         mDotParams = new DotRenderer.DrawParams();
     }
 
     public static <T extends Context & ActivityContext> FolderIcon inflateFolderAndIcon(int resId,
             T activityContext, ViewGroup group, FolderInfo folderInfo) {
-        Folder folder = Folder.fromXml(activityContext);
+        Folder folder = MultiModeController.isSingleLayerMode() ?
+                GridFolder.fromXml(activityContext) : Folder.fromXml(activityContext);
 
         FolderIcon icon = inflateIcon(resId, activityContext, group, folderInfo);
         folder.setFolderIcon(icon);
@@ -203,7 +213,13 @@ public class FolderIcon extends FrameLayout implements FolderListener, IconLabel
         }
         icon.mFolderName.setCompoundDrawablePadding(0);
         FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) icon.mFolderName.getLayoutParams();
-        lp.topMargin = grid.iconSizePx + grid.iconDrawablePaddingPx;
+
+        if (MultiModeController.isSingleLayerMode()) {
+            lp.topMargin = grid.iconSizePx;
+            icon.mFolderName.setIncludeFontPadding(false);
+        } else {
+            lp.topMargin = grid.iconSizePx + grid.iconDrawablePaddingPx;
+        }
 
         icon.setTag(folderInfo);
         icon.setOnClickListener(activity.getItemOnClickListener());
@@ -358,9 +374,9 @@ public class FolderIcon extends FrameLayout implements FolderListener, IconLabel
                 workspace.resetTransitionTransform();
             }
 
-            int numItemsInPreview = Math.min(MAX_NUM_ITEMS_IN_PREVIEW, index + 1);
+            int numItemsInPreview = Math.min(mPreviewLayoutRule.getMaxNumItemsInPreview(), index + 1);
             boolean itemAdded = false;
-            if (itemReturnedOnFailedDrop || index >= MAX_NUM_ITEMS_IN_PREVIEW) {
+            if (itemReturnedOnFailedDrop || index >= mPreviewLayoutRule.getMaxNumItemsInPreview()) {
                 List<WorkspaceItemInfo> oldPreviewItems = new ArrayList<>(mCurrentPreviewItems);
                 mInfo.add(item, index, false);
                 mCurrentPreviewItems.clear();
@@ -394,7 +410,7 @@ public class FolderIcon extends FrameLayout implements FolderListener, IconLabel
             to.offset(center[0] - animateView.getMeasuredWidth() / 2,
                     center[1] - animateView.getMeasuredHeight() / 2);
 
-            float finalAlpha = index < MAX_NUM_ITEMS_IN_PREVIEW ? 1f : 0f;
+            float finalAlpha = index < mPreviewLayoutRule.getMaxNumItemsInPreview() ? 1f : 0f;
 
             float finalScale = scale * scaleRelativeToDragLayer;
 
@@ -555,7 +571,7 @@ public class FolderIcon extends FrameLayout implements FolderListener, IconLabel
 
     private float getLocalCenterForIndex(int index, int curNumItems, int[] center) {
         mTmpParams = mPreviewItemManager.computePreviewItemDrawingParams(
-                Math.min(MAX_NUM_ITEMS_IN_PREVIEW, index), curNumItems, mTmpParams);
+                Math.min(mPreviewLayoutRule.getMaxNumItemsInPreview(), index), curNumItems, mTmpParams);
 
         mTmpParams.transX += mBackground.basePreviewOffsetX;
         mTmpParams.transY += mBackground.basePreviewOffsetY;
@@ -796,11 +812,11 @@ public class FolderIcon extends FrameLayout implements FolderListener, IconLabel
      */
     public String getAccessiblityTitle(CharSequence title) {
         int size = mInfo.contents.size();
-        if (size < MAX_NUM_ITEMS_IN_PREVIEW) {
+        if (size < mPreviewLayoutRule.getMaxNumItemsInPreview()) {
             return getContext().getString(R.string.folder_name_format_exact, title, size);
         } else {
             return getContext().getString(R.string.folder_name_format_overflow, title,
-                    MAX_NUM_ITEMS_IN_PREVIEW);
+                    mPreviewLayoutRule.getMaxNumItemsInPreview());
         }
     }
 

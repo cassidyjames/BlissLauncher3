@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="grid_folder_content_padding">12dp</dimen>
+    <dimen name="grid_folder_footer_height">32dp</dimen>
+</resources>

@@ -3,4 +3,7 @@
     <color name="search_widget_background_color">@color/e_launcher_search_background</color>
     <color name="widgetPrimaryTextColor">#FFFFFF</color>
     <color name="colorAccent">@color/e_accent_light</color>
+
+    <color name="gridFolderPreview">@color/e_launcher_search_background</color>
+    <color name="gridFolderBackground">@android:color/transparent</color>
 </resources>
