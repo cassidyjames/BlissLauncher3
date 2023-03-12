@@ -10,7 +10,6 @@ package foundation.e.bliss.multimode
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.res.Resources
-import android.util.Log
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.R
@@ -72,7 +71,6 @@ class MultiModeController(val context: Context, val monitor: LauncherAppMonitor)
         sharedPreferences = LauncherPrefs.getPrefs(context)
         resources = context.resources
         monitor.registerCallback(mAppMonitorCallback)
-        Log.d(TAG, this.toString())
     }
 
     override fun dumpState(
@@ -103,15 +101,10 @@ class MultiModeController(val context: Context, val monitor: LauncherAppMonitor)
         val isSingleLayerMode: Boolean
             get() {
                 throwIfControllerNotInit()
-                return sharedPreferences!!
-                    .getBoolean(
-                        BlissPrefs.PREF_SINGLE_LAYER_MODE,
-                        resources!!.getBoolean(R.bool.default_single_mode)
-                    )
-                    .apply {
-                        Log.d(TAG, "Single Layer Mode (getter): $this")
-                        return@apply
-                    }
+                return sharedPreferences!!.getBoolean(
+                    BlissPrefs.PREF_SINGLE_LAYER_MODE,
+                    resources!!.getBoolean(R.bool.default_single_mode)
+                )
             }
     }
 }

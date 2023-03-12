@@ -73,7 +73,7 @@ public class LauncherDelegate {
     }
 
     @Nullable
-    Launcher getLauncher() {
+    public Launcher getLauncher() {
         return mLauncher;
     }
 
@@ -187,7 +187,7 @@ public class LauncherDelegate {
         void forEachVisibleWorkspacePage(Consumer<View> callback) { }
 
         @Override
-        Launcher getLauncher() {
+        public Launcher getLauncher() {
             return null;
         }
 

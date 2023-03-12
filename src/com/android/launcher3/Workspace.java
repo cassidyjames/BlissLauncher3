@@ -1285,7 +1285,10 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         updatePageAlphaValues();
         updatePageScrollValues();
         enableHwLayersOnVisiblePages();
-        firstPageItemHideHotseat(l);
+
+        if (mIsPageInTransition) {
+            firstPageItemHideHotseat(l);
+        }
     }
 
     private void firstPageItemHideHotseat(int scrollX) {

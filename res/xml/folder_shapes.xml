@@ -19,7 +19,7 @@
     <Circle launcher:folderIconRadius="1" />
 
     <!-- Default icon for AOSP -->
-    <RoundedSquare launcher:folderIconRadius="0.16" />
+    <RoundedSquare launcher:folderIconRadius="0.45" />
 
     <!-- Rounded icon from RRO -->
     <RoundedSquare launcher:folderIconRadius="0.6" />

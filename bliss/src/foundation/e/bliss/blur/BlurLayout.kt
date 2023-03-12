@@ -12,13 +12,14 @@ import android.graphics.Canvas
 import android.util.AttributeSet
 import android.widget.FrameLayout
 
-class BlurLayout @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
+open class BlurLayout @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     FrameLayout(context, attrs) {
 
-    private val delegate = BlurViewDelegate(this, BlurWallpaperProvider.blurConfigWidget, attrs)
+    private val delegate =
+        BlurViewDelegate(this.rootView, BlurWallpaperProvider.blurConfigWidget, attrs)
 
     init {
-        setWillNotDraw(false)
+        this.setWillNotDraw(false)
         clipToOutline = true
 
         outlineProvider = delegate.outlineProvider
