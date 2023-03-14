@@ -8,5 +8,8 @@
         <item name="android:fontFamily">sans-serif</item>
     </style>
 
-    <color name="widgetPrimaryTextColor">#FFFFFF</color>
+    <style name="SearchBar">
+        <item name="android:colorAccent">@color/colorAccent</item>
+        <item name="android:colorControlActivated">@color/colorAccent</item>
+    </style>
 </resources>
