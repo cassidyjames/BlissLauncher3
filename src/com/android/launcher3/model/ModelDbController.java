@@ -80,6 +80,7 @@ import java.io.InputStream;
 import java.io.StringReader;
 
 import foundation.e.bliss.multimode.MultiModeController;
+import foundation.e.bliss.utils.BlissDbUtils;
 
 /**
  * Utility class which maintains an instance of Launcher database and provides utility methods
@@ -198,6 +199,11 @@ public class ModelDbController {
 
         addModifiedTime(values);
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        int count = 0;
+        if (tableExists(mOpenHelper.getWritableDatabase(), table)) {
+            count = db.update(table, values, selection, selectionArgs);
+        }
+
         int count = db.update(table, values, selection, selectionArgs);
         return count;
     }
@@ -383,6 +389,13 @@ public class ModelDbController {
     @WorkerThread
     public synchronized void loadDefaultFavoritesIfNecessary() {
         createDbIfNotExists();
+
+        if (BlissDbUtils.migrateDataFromDb(mContext)) {
+            copyTable(mOpenHelper.getReadableDatabase(), Favorites.TABLE_NAME_ALL,
+                    mOpenHelper.getWritableDatabase(),Favorites.TABLE_NAME, mContext);
+            clearFlagEmptyDbCreated();
+            return;
+        }
 
         if (LauncherPrefs.get(mContext).get(getEmptyDbCreatedKey())) {
             Log.d(TAG, "loading default workspace");

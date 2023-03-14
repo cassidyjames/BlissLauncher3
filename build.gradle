@@ -144,6 +144,7 @@ android {
         buildConfigField "boolean", "QSB_ON_FIRST_SCREEN", "true"
         buildConfigField "boolean", "WIDGET_ON_FIRST_SCREEN", "false"
         buildConfigField "boolean", "IS_DEBUG_DEVICE", "false"
+
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -173,7 +174,7 @@ android {
             minifyEnabled true
             shrinkResources true
             proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
-            signingConfig = signingConfigs.debugConfig
+            signingConfig = signingConfigs.platformConfig
         }
 
     }
