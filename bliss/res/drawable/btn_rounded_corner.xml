@@ -3,8 +3,8 @@
     android:color="#66000000">
     <item android:id="@android:id/background">
         <shape android:shape="rectangle">
-            <corners android:radius="20dp"/>
-            <solid android:color="#40202020" />
+            <corners android:radius="20dp" />
+            <solid android:color="@color/e_launcher_search_background" />
         </shape>
     </item>
 </ripple>
