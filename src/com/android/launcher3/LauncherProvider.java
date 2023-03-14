@@ -16,6 +16,7 @@
 
 package com.android.launcher3;
 
+import static com.android.launcher3.provider.LauncherDbUtils.tableExists;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.Executors.MODEL_EXECUTOR;
 
@@ -139,7 +140,12 @@ public class LauncherProvider extends ContentProvider {
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         SqlArguments args = new SqlArguments(uri, selection, selectionArgs);
-        return executeControllerTask(c -> c.update(args.table, values, args.where, args.args));
+        return executeControllerTask(c -> {
+            if (tableExists(c.getDb(), args.table)) {
+                return c.update(args.table, values, args.where, args.args);
+            }
+            return 0;
+        });
     }
 
     private int executeControllerTask(ToIntFunction<ModelDbController> task) {
