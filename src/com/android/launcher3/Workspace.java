@@ -68,6 +68,7 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.android.app.animation.Interpolators;
 import com.android.launcher3.accessibility.AccessibleDragListenerAdapter;
@@ -1392,6 +1393,17 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
                                     LauncherAtom.WorkspaceContainer.newBuilder()
                                             .setPageIndex(prevPage)).build())
                     .log(event);
+
+            if (mCurrentPage != 0) {
+                mLauncher.mBlurLayer.setAlpha(0f);
+                getWindowInsetsController().show(WindowInsetsCompat.Type.statusBars());
+            }
+
+            if (mCurrentPage == 0 && prevPage == 1) {
+                getWindowInsetsController().hide(WindowInsetsCompat.Type.statusBars());
+            } else if (prevPage == 0 && mCurrentPage == 1) {
+                getWindowInsetsController().show(WindowInsetsCompat.Type.statusBars());
+            }
         }
     }
 
