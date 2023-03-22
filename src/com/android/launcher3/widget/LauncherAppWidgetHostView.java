@@ -270,6 +270,10 @@ public class LauncherAppWidgetHostView extends BaseLauncherAppWidgetHostView
         return info;
     }
 
+    public AppWidgetProviderInfo getProviderInfo() {
+        return super.getAppWidgetInfo();
+    }
+
     @Override
     public void onTouchComplete() {
         if (!mLongPressHelper.hasPerformedLongPress()) {

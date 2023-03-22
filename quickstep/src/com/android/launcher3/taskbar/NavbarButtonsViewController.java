@@ -206,7 +206,13 @@ public class NavbarButtonsViewController implements TaskbarControllers.LoggableT
     private boolean mAreNavButtonsInSeparateWindow = false;
     private BaseDragLayer<TaskbarActivityContext> mSeparateWindowParent; // Initialized in init.
     private final ViewTreeObserver.OnComputeInternalInsetsListener mSeparateWindowInsetsComputer =
-            this::onComputeInsetsForSeparateWindow;
+            new ViewTreeObserver.OnComputeInternalInsetsListener() {
+                @Override
+                public void onComputeInternalInsets(
+                        ViewTreeObserver.InternalInsetsInfo insetInfo) {
+                    onComputeInsetsForSeparateWindow(insetInfo);
+                }
+        };
     private final RecentsHitboxExtender mHitboxExtender = new RecentsHitboxExtender();
     private ImageView mRecentsButton;
     private Space mSpace;

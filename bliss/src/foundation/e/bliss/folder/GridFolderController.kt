@@ -8,7 +8,6 @@
 package foundation.e.bliss.folder
 
 import android.content.Context
-import com.android.launcher3.folder.ClippedFolderIconLayoutRule
 import com.android.launcher3.folder.Folder
 import foundation.e.bliss.BaseController
 import foundation.e.bliss.LauncherAppMonitor
@@ -28,11 +27,10 @@ class GridFolderController(context: Context, val monitor: LauncherAppMonitor) : 
             }
         }
 
-    val gridFolderIconLayoutRule: ClippedFolderIconLayoutRule
+    val gridFolderIconLayoutRule = GridFolderIconLayoutRule(context)
 
     init {
         monitor.registerCallback(mAppMonitorCallback)
-        gridFolderIconLayoutRule = GridFolderIconLayoutRule(context)
     }
 
     override fun dumpState(

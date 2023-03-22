@@ -50,6 +50,7 @@ import android.util.StatsEvent;
 
 import androidx.annotation.AnyThread;
 import androidx.annotation.CallSuper;
+import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
@@ -393,7 +394,13 @@ public class QuickstepModelDelegate extends ModelDelegate {
         state.setTargets(Collections.emptyList());
         state.predictor = predictor;
         state.predictor.registerPredictionUpdates(
-                MODEL_EXECUTOR, t -> handleUpdate(state, t));
+                MODEL_EXECUTOR, new AppPredictor.Callback() {
+                    @Keep
+                    @Override
+                    public void onTargetsAvailable(@NonNull List<AppTarget> targets) {
+                        handleUpdate(state, targets);
+                    }
+                });
         state.predictor.requestPredictionUpdate();
     }
 
@@ -408,13 +415,17 @@ public class QuickstepModelDelegate extends ModelDelegate {
     private void registerWidgetsPredictor(AppPredictor predictor) {
         mWidgetsRecommendationState.predictor = predictor;
         mWidgetsRecommendationState.predictor.registerPredictionUpdates(
-                MODEL_EXECUTOR, targets -> {
-                    if (mWidgetsRecommendationState.setTargets(targets)) {
-                        // No diff, skip
-                        return;
+                MODEL_EXECUTOR, new AppPredictor.Callback() {
+                    @Keep
+                    @Override
+                    public void onTargetsAvailable(@NonNull List<AppTarget> targets) {
+                        if (mWidgetsRecommendationState.setTargets(targets)) {
+                            // No diff, skip
+                            return;
+                        }
+                        mApp.getModel().enqueueModelUpdateTask(
+                                new WidgetsPredictionUpdateTask(mWidgetsRecommendationState, targets));
                     }
-                    mApp.getModel().enqueueModelUpdateTask(
-                            new WidgetsPredictionUpdateTask(mWidgetsRecommendationState, targets));
                 });
         mWidgetsRecommendationState.predictor.requestPredictionUpdate();
     }

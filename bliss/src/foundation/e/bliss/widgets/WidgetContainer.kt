@@ -219,8 +219,12 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
         }
 
         private fun showDialog(widgetId: Int, onRemove: () -> Unit) {
-            val info = mWidgetManager.getAppWidgetInfo(widgetId)
             val alertDialogBuilder = AlertDialog.Builder(context)
+            val info =
+                LauncherAppWidgetProviderInfo.fromProviderInfo(
+                    context,
+                    mWidgetManager.getAppWidgetInfo(widgetId)
+                )
 
             alertDialogBuilder.apply {
                 setTitle("Remove ${info.label.lowercase()} widget?")
