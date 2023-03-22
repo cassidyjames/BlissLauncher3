@@ -976,9 +976,12 @@ public class TaskView extends FrameLayout implements Reusable {
             int exitResId, final Runnable callback, final Handler callbackHandler) {
         return ActivityOptions.makeCustomTaskAnimation(context, enterResId, exitResId,
                 callbackHandler,
-                elapsedRealTime -> {
-                    if (callback != null) {
-                        callbackHandler.post(callback);
+                new ActivityOptions.OnAnimationStartedListener() {
+                    @Override
+                    public void onAnimationStarted(long elapsedRealTime) {
+                        if (callback != null) {
+                            callbackHandler.post(callback);
+                        }
                     }
                 }, null /* finishedListener */);
     }

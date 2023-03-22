@@ -16,6 +16,7 @@
 package com.android.quickstep.util;
 
 import android.annotation.TargetApi;
+import android.graphics.HardwareRenderer;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
@@ -108,7 +109,9 @@ public class SurfaceTransactionApplier extends ReleaseCheck {
         mLastSequenceNumber++;
         final int toApplySeqNo = mLastSequenceNumber;
         setCanRelease(false);
-        mTargetViewRootImpl.registerRtFrameCallback(frame -> {
+        mTargetViewRootImpl.registerRtFrameCallback(new HardwareRenderer.FrameDrawingCallback() {
+            @Override
+            public void onFrameDraw(long frame) {
             if (mBarrierSurfaceControl == null || !mBarrierSurfaceControl.isValid()) {
                 Message.obtain(mApplyHandler, MSG_UPDATE_SEQUENCE_NUMBER, toApplySeqNo, 0)
                         .sendToTarget();
@@ -117,7 +120,7 @@ public class SurfaceTransactionApplier extends ReleaseCheck {
             mTargetViewRootImpl.mergeWithNextTransaction(t, frame);
             Message.obtain(mApplyHandler, MSG_UPDATE_SEQUENCE_NUMBER, toApplySeqNo, 0)
                     .sendToTarget();
-        });
+        }});
 
         // Make sure a frame gets scheduled.
         view.invalidate();

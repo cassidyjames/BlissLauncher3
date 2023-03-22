@@ -20,6 +20,7 @@ import androidx.annotation.Nullable;
 import com.android.launcher3.CheckLongPressHelper;
 import com.android.launcher3.R;
 import com.android.launcher3.widget.LauncherAppWidgetHostView;
+import com.android.launcher3.widget.LauncherAppWidgetProviderInfo;
 
 import foundation.e.bliss.blur.BlurViewDelegate;
 import foundation.e.bliss.blur.BlurWallpaperProvider;
@@ -144,5 +145,10 @@ public class RoundedWidgetView extends LauncherAppWidgetHostView {
         // The host view's background changes when selected, to indicate the focus is
         // inside.
         setSelected(childIsFocused);
+    }
+
+    @Override
+    public AppWidgetProviderInfo getAppWidgetInfo() {
+        return LauncherAppWidgetProviderInfo.fromProviderInfo(mContext, getProviderInfo());
     }
 }

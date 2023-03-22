@@ -13,10 +13,18 @@ cache:
   paths:
     - .gradle/
 
-blissWithQuickstep:
+blissWithQuickstepDebug:
   stage: build
   script:
     - ./gradlew assembleblissWithQuickstepDebug
+  artifacts:
+    paths:
+      - build/outputs/apk
+
+blissWithQuickstepRelease:
+  stage: build
+  script:
+    - ./gradlew assembleblissWithQuickstepRelease
   artifacts:
     paths:
       - build/outputs/apk

@@ -68,7 +68,13 @@ public class TaskbarDragLayer extends BaseDragLayer<TaskbarActivityContext> {
 
     private final TaskbarBackgroundRenderer mBackgroundRenderer;
     private final ViewTreeObserver.OnComputeInternalInsetsListener mTaskbarInsetsComputer =
-            this::onComputeTaskbarInsets;
+            new ViewTreeObserver.OnComputeInternalInsetsListener() {
+                @Override
+                public void onComputeInternalInsets(
+                        ViewTreeObserver.InternalInsetsInfo insetInfo) {
+                    onComputeTaskbarInsets(insetInfo);
+                }
+            };
 
     // Initialized in init.
     private TaskbarDragLayerController.TaskbarDragLayerCallbacks mControllerCallbacks;
