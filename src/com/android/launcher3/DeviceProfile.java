@@ -435,7 +435,10 @@ public class DeviceProfile {
                 // When depth is 0, wallpaper zoom is set to maxWallpaperScale.
                 // When depth is 1, wallpaper zoom is set to 1.
                 // For depth to achieve zoom set to maxWallpaperScale * workspaceContentScale:
-                float maxWallpaperScale = res.getFloat(R.dimen.config_wallpaperMaxScale);
+                float maxWallpaperScale = Resources.getSystem().getFloat(Resources.getSystem().getIdentifier(
+                        /* name= */ "config_wallpaperMaxScale",
+                        /* defType= */ "dimen",
+                        /* defPackage= */ "android"));
                 bottomSheetDepth = Utilities.mapToRange(maxWallpaperScale * workspaceContentScale,
                         maxWallpaperScale, 1f, 0f, 1f, LINEAR);
             }

@@ -245,9 +245,6 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
         super(context, attrs, defStyle);
         mActivity = ActivityContext.lookupContext(context);
         FastBitmapDrawable.setFlagHoverEnabled(enableCursorHoverStates());
-        mLauncher = LauncherAppMonitor.getInstanceNoCreate().getLauncher();
-
-        mLauncher.getDragController().addDragListener(this);
 
         TypedArray a = context.obtainStyledAttributes(attrs,
                 R.styleable.BubbleTextView, defStyle, 0);
@@ -1358,7 +1355,8 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
      */
     public PreDragCondition startLongPressAction() {
         if (MultiModeController.isSingleLayerMode()) {
-            Launcher launcher = LauncherAppMonitor.getInstanceNoCreate().getLauncher();
+            mLauncher = LauncherAppMonitor.getInstanceNoCreate().getLauncher();
+            mLauncher.getDragController().addDragListener(this);
             return createWobblePreDragCondition();
         } else {
             PopupContainerWithArrow popup = PopupContainerWithArrow.showForIcon(this);
