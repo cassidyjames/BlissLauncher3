@@ -63,6 +63,28 @@
             android:layout_gravity="bottom|center_horizontal"
             android:theme="@style/HomeScreenElementTheme" />
 
+        <foundation.e.bliss.widgets.SwipeSearchContainer
+            android:id="@+id/swipe_search_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="10dp"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:orientation="vertical">
+
+                <include layout="@layout/search_bar" />
+
+                <include
+                    android:id="@+id/used_apps_layout"
+                    layout="@layout/layout_used_apps" />
+            </LinearLayout>
+        </foundation.e.bliss.widgets.SwipeSearchContainer>
+
         <include
             android:id="@+id/drop_target_bar"
             layout="@layout/drop_target_bar" />

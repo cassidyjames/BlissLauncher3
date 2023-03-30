@@ -102,7 +102,9 @@ import static com.android.launcher3.util.ItemInfoMatcher.forFolderMatch;
 import static com.android.launcher3.util.SettingsCache.TOUCHPAD_NATURAL_SCROLLING;
 
 import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.annotation.TargetApi;
 import android.app.Notification;
@@ -150,7 +152,9 @@ import android.view.WindowInsets;
 import android.view.WindowInsetsAnimation;
 import android.view.WindowManager.LayoutParams;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.animation.LinearInterpolator;
 import android.view.animation.OvershootInterpolator;
+import android.widget.FrameLayout;
 import android.window.BackEvent;
 import android.window.OnBackAnimationCallback;
 
@@ -408,6 +412,8 @@ public class Launcher extends StatefulActivity<LauncherState>
 
     private LauncherAppMonitor mAppMonitor;
     public BlurBackgroundView mBlurLayer;
+    public FrameLayout swipeSearchContainer;
+    private AnimatorSet currentAnimator;
 
     private final CannedAnimationCoordinator mAnimationCoordinator =
             new CannedAnimationCoordinator(this);
@@ -593,7 +599,8 @@ public class Launcher extends StatefulActivity<LauncherState>
         mAppMonitor.onLauncherCreated();
         mBlurLayer = findViewById(R.id.blur_layer);
         mBlurLayer.setAlpha(0f);
-
+        swipeSearchContainer = findViewById(R.id.swipe_search_container);
+        swipeSearchContainer.setTranslationY(-1000);
         TraceHelper.INSTANCE.endSection();
 
         getWindow().setSoftInputMode(LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
@@ -1653,6 +1660,9 @@ public class Launcher extends StatefulActivity<LauncherState>
                 handleSplitAnimationGoingToHome(LAUNCHER_SPLIT_SELECTION_EXIT_HOME);
             }
             mOverlayManager.hideOverlay(isStarted() && !isForceInvisible());
+            if (swipeSearchContainer.getVisibility() == View.VISIBLE) {
+                hideSwipeSearchContainer();
+            }
             handleGestureContract(intent);
         } else if (Intent.ACTION_ALL_APPS.equals(intent.getAction())) {
             showAllAppsFromIntent(alreadyOnHome);
@@ -2888,6 +2898,102 @@ public class Launcher extends StatefulActivity<LauncherState>
     public boolean areFreeformTasksVisible() {
         return false; // Base launcher does not track freeform tasks
     }
+
+    public void toggleSwipeSearchState() {
+        if (swipeSearchContainer.getVisibility() == View.VISIBLE) {
+            hideSwipeSearchContainer();
+        } else if (!getWorkspace().isWobbling() && Folder.getOpen(this) == null) {
+            showSwipeSearchContainer();
+        }
+    }
+
+    private void showSwipeSearchContainer() {
+        if (currentAnimator != null) {
+            currentAnimator.cancel();
+        }
+        AnimatorSet set = new AnimatorSet();
+        set.play(ObjectAnimator.ofFloat(swipeSearchContainer, View.TRANSLATION_Y, 0))
+                .with(ObjectAnimator.ofFloat(mBlurLayer, View.ALPHA, 1f))
+                .with(ObjectAnimator.ofFloat(mWorkspace, View.ALPHA, 0f))
+                .with(ObjectAnimator.ofFloat(mWorkspace.mPageIndicator, View.ALPHA, 0f))
+                .with(ObjectAnimator.ofFloat(mHotseat, View.ALPHA, 0f));
+        set.setDuration(300);
+        set.setInterpolator(new LinearInterpolator());
+        set.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                swipeSearchContainer.setVisibility(View.VISIBLE);
+                super.onAnimationStart(animation);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                currentAnimator = null;
+                swipeSearchContainer.setVisibility(View.GONE);
+                mWorkspace.setVisibility(View.VISIBLE);
+                mHotseat.setVisibility(View.VISIBLE);
+                mWorkspace.mPageIndicator.setVisibility(View.VISIBLE);
+                mBlurLayer.setAlpha(0f);
+                super.onAnimationCancel(animation);
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                currentAnimator = null;
+                mWorkspace.setVisibility(View.GONE);
+                mHotseat.setVisibility(View.GONE);
+                mWorkspace.mPageIndicator.setVisibility(View.GONE);
+                super.onAnimationEnd(animation);
+            }
+        });
+        set.start();
+        currentAnimator = set;
+    }
+
+    public void hideSwipeSearchContainer() {
+        if (currentAnimator != null) {
+            currentAnimator.cancel();
+        }
+        AnimatorSet set = new AnimatorSet();
+        set.play(ObjectAnimator.ofFloat(swipeSearchContainer, View.TRANSLATION_Y, -swipeSearchContainer.getHeight()))
+                .with(ObjectAnimator.ofFloat(mWorkspace, View.ALPHA, 1f))
+                .with(ObjectAnimator.ofFloat(mWorkspace.mPageIndicator, View.ALPHA, 1f))
+                .with(ObjectAnimator.ofFloat(mHotseat, View.ALPHA, 1f))
+                .with(ObjectAnimator.ofFloat(mBlurLayer, View.ALPHA, 0f));
+        set.setDuration(300);
+        set.setInterpolator(new LinearInterpolator());
+        set.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                mWorkspace.setVisibility(View.VISIBLE);
+                mHotseat.setVisibility(View.VISIBLE);
+                mWorkspace.mPageIndicator.setVisibility(View.VISIBLE);
+                super.onAnimationStart(animation);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                currentAnimator = null;
+                swipeSearchContainer.setVisibility(View.VISIBLE);
+                mBlurLayer.setAlpha(1f);
+                mWorkspace.setVisibility(View.GONE);
+                mHotseat.setVisibility(View.GONE);
+                mWorkspace.mPageIndicator.setVisibility(View.GONE);
+                super.onAnimationCancel(animation);
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                currentAnimator = null;
+                swipeSearchContainer.setVisibility(View.GONE);
+                mBlurLayer.setAlpha(0f);
+                super.onAnimationEnd(animation);
+            }
+        });
+        set.start();
+        currentAnimator = set;
+    }
+
 
     // Getters and Setters
 
