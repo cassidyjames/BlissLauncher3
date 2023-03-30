@@ -10,7 +10,6 @@ package foundation.e.bliss.utils
 import android.animation.ArgbEvaluator
 import android.animation.ValueAnimator
 import android.content.ComponentName
-import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.LauncherActivityInfo
@@ -22,24 +21,13 @@ import android.graphics.drawable.Drawable
 import android.os.Handler
 import android.os.Looper
 import android.os.UserHandle
-import android.view.View
 import android.view.Window
 import android.view.animation.LinearInterpolator
-import android.view.inputmethod.InputMethodManager
 import androidx.core.graphics.ColorUtils
 import com.android.launcher3.Launcher
 import com.android.launcher3.LauncherSettings
 import com.android.launcher3.model.data.ItemInfo
-
-fun Context.toggleKeyboard(view: View, hasFocus: Boolean) {
-    val inputMethodManager = getSystemService(InputMethodManager::class.java)
-    if (hasFocus) {
-        inputMethodManager?.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT)
-    } else {
-        inputMethodManager?.hideSoftInputFromWindow(view.windowToken, 0)
-    }
-}
-
+   
 private val mainHandler by lazy { Handler(Looper.getMainLooper()) }
 
 fun <T> resourcesToMap(array: List<T>): Map<T, T> {
