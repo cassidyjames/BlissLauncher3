@@ -11,7 +11,6 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.content.res.Resources
 import com.android.launcher3.InvariantDeviceProfile
-import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.R
 import com.android.launcher3.model.data.AppInfo
 import com.android.launcher3.util.Executors.MODEL_EXECUTOR
@@ -68,8 +67,6 @@ class MultiModeController(val context: Context, val monitor: LauncherAppMonitor)
         }
 
     init {
-        sharedPreferences = LauncherPrefs.getPrefs(context)
-        resources = context.resources
         monitor.registerCallback(mAppMonitorCallback)
     }
 
@@ -91,9 +88,8 @@ class MultiModeController(val context: Context, val monitor: LauncherAppMonitor)
         @JvmField var resources: Resources? = null
 
         private fun throwIfControllerNotInit() {
-            val launcherAppMonitor = LauncherAppMonitor.getInstanceNoCreate()
-            if (launcherAppMonitor == null || launcherAppMonitor.multiModeController == null) {
-                throw RuntimeException("MultiModeController is not init.")
+            if (sharedPreferences == null || resources == null) {
+                throw RuntimeException("sharedPreferences is not init.")
             }
         }
 

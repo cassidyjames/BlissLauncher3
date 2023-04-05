@@ -2718,13 +2718,24 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         IntSet pageIndexesToVerify = IntSet.wrap(nextPage - 1,
                 nextPage + (isTwoPanelEnabled() ? 2 : 1));
 
+        int iconOffset = mLauncher.getDeviceProfile().iconSizePx / 2;
         for (int pageIndex : pageIndexesToVerify) {
             // When deciding whether to perform a page switch, we need to consider the most
             // extreme X coordinate between the finger location and the center of the object
             // being dragged. This is either the max or the min of the two depending on whether
             // dragging to the left / right, respectively.
-            touchX = (((pageIndex < nextPage) && !mIsRtl) || (pageIndex > nextPage && mIsRtl))
-                    ? Math.min(d.x, centerX) : Math.max(d.x, centerX);
+            if (((pageIndex < nextPage) && !mIsRtl) || (pageIndex > nextPage && mIsRtl)) {
+                touchX = Math.min(d.x, centerX);
+                if (MultiModeController.isSingleLayerMode()) {
+                    touchX -= iconOffset;
+                }
+            } else {
+                touchX = Math.max(d.x, centerX);
+                if (MultiModeController.isSingleLayerMode()) {
+                    touchX += iconOffset;
+                }
+            }
+
             CellLayout layout = verifyInsidePage(pageIndex, touchX, touchY);
             if (layout != null) {
                 return layout;
