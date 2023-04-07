@@ -82,6 +82,15 @@ public class Hotseat extends CellLayout implements Insettable {
         return mHasVerticalHotseat ? (getCountY() - (rank + 1)) : 0;
     }
 
+    public void setForcedTranslationY(float translationY){
+        super.setTranslationY(translationY);
+    }
+
+    @Override
+    public void setTranslationY(float translationY) {
+       // Thread.dumpStack();
+    }
+
     public void resetLayout(boolean hasVerticalHotseat) {
         ActivityContext activityContext = ActivityContext.lookupContext(getContext());
         boolean bubbleBarEnabled = activityContext.isBubbleBarEnabled();
