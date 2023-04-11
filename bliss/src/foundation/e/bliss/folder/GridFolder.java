@@ -7,18 +7,22 @@
  */
 package foundation.e.bliss.folder;
 
-import static com.android.launcher3.LauncherState.HOTSEAT_ICONS;
 import static com.android.launcher3.LauncherState.NORMAL;
 import static com.android.launcher3.LauncherState.OVERVIEW;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowInsets;
-import android.widget.LinearLayout;
+import android.widget.FrameLayout;
 
 import com.android.launcher3.Alarm;
 import com.android.launcher3.BubbleTextView;
@@ -29,13 +33,13 @@ import com.android.launcher3.LauncherState;
 import com.android.launcher3.OnAlarmListener;
 import com.android.launcher3.R;
 import com.android.launcher3.Workspace;
-import com.android.launcher3.anim.AlphaUpdateListener;
 import com.android.launcher3.dragndrop.DragLayer;
 import com.android.launcher3.dragndrop.DragOptions;
 import com.android.launcher3.folder.Folder;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.model.data.WorkspaceItemInfo;
 import com.android.launcher3.views.ActivityContext;
+import com.android.launcher3.views.ClipPathView;
 import com.android.launcher3.views.ScrimView;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -48,7 +52,7 @@ public class GridFolder extends Folder implements OnAlarmListener {
     private final Alarm wobbleExpireAlarm = new Alarm();
     public View mFolderTab;
     public int mFolderTabHeight;
-    public GridFolderPage mGridFolderPage;
+    public FrameLayout mGridFolderPage;
     private LauncherState mLastStateBeforeOpen = NORMAL;
     private boolean mNeedResetState = false;
 
@@ -92,19 +96,25 @@ public class GridFolder extends Folder implements OnAlarmListener {
         int contentHeight = getContentAreaHeight();
 
         int contentAreaWidthSpec = MeasureSpec.makeMeasureSpec(contentWidth, MeasureSpec.EXACTLY);
+        int contentAreaHeightSpec = MeasureSpec.makeMeasureSpec(contentHeight, MeasureSpec.EXACTLY);
+
+        mContent.setFixedSize(contentWidth, contentHeight);
+        mContent.measure(contentAreaWidthSpec, contentAreaHeightSpec);
 
         mFolderTab.measure(contentAreaWidthSpec, MeasureSpec.makeMeasureSpec(mFolderTabHeight, MeasureSpec.EXACTLY));
 
-        mGridFolderPage.measure(contentAreaWidthSpec, MeasureSpec.makeMeasureSpec(contentHeight, MeasureSpec.EXACTLY));
-
-        mContent.setFixedSize(contentWidth, contentHeight);
-        mContent.measure(contentAreaWidthSpec, MeasureSpec.makeMeasureSpec(contentHeight, MeasureSpec.EXACTLY));
+        mGridFolderPage.measure(contentAreaWidthSpec, contentAreaHeightSpec);
 
         mFooter.measure(contentAreaWidthSpec, MeasureSpec.makeMeasureSpec(mFooterHeight, MeasureSpec.EXACTLY));
 
         int folderWidth = getPaddingLeft() + getPaddingRight() + contentWidth;
         int folderHeight = getFolderHeight();
         setMeasuredDimension(folderWidth, folderHeight);
+    }
+
+    @Override
+    public Drawable getBackground() {
+        return mGridFolderPage.getBackground();
     }
 
     private int getContentAreaWidth() {
@@ -115,7 +125,7 @@ public class GridFolder extends Folder implements OnAlarmListener {
         DeviceProfile grid = mActivityContext.getDeviceProfile();
         int maxContentAreaHeight = grid.availableHeightPx - grid.getTotalWorkspacePadding().y
                 + (grid.isVerticalBarLayout() ? 0 : grid.hotseatBarSizePx);
-        int height = Math.min(maxContentAreaHeight, mContent.getDesiredHeight() + mFooterHeight);
+        int height = Math.min(maxContentAreaHeight, getFolderHeight());
         return Math.max(height, MIN_CONTENT_DIMEN);
     }
 
@@ -124,7 +134,7 @@ public class GridFolder extends Folder implements OnAlarmListener {
     }
 
     private int getFolderHeight() {
-        return getPaddingTop() + getPaddingBottom() + mContent.getDesiredHeight() + mFolderTabHeight + mFooterHeight;
+        return mContent.getDesiredHeight() + mFooterHeight;
     }
 
     @Override
@@ -175,6 +185,10 @@ public class GridFolder extends Folder implements OnAlarmListener {
 
     public boolean isFolderWobbling() {
         return isFolderWobbling;
+    }
+
+    public boolean isAnimating() {
+        return isAnimating;
     }
 
     @Override
@@ -232,20 +246,13 @@ public class GridFolder extends Folder implements OnAlarmListener {
     }
 
     private void showOrHideDesktop(Launcher launcher, boolean hide) {
-        float hotseatIconsAlpha = hide ? 0 : 1;
-        float pageIndicatorAlpha = hide ? 0 : 1;
-        LauncherState state = launcher.getStateManager().getState();
-        if (state == OVERVIEW) {
-            hotseatIconsAlpha = (state.getVisibleElements(launcher) & HOTSEAT_ICONS) != 0 ? 1 : 0;
-            pageIndicatorAlpha = 0;
-        }
+        AnimatorSet set = new AnimatorSet();
 
         Workspace<?> workspace = launcher.getWorkspace();
         if (workspace != null) {
-            workspace.setVisibility(hide ? View.INVISIBLE : View.VISIBLE);
+            play(set, getAnimator(workspace, 1f, 0f, hide));
             if (workspace.getPageIndicator() != null) {
-                workspace.getPageIndicator().setAlpha(pageIndicatorAlpha);
-                AlphaUpdateListener.updateVisibility(workspace.getPageIndicator());
+                play(set, getAnimator(workspace.getPageIndicator(), 1f, 0f, hide));
                 if (!hide && launcher.isInState(LauncherState.SPRING_LOADED)) {
                     workspace.showPageIndicatorAtCurrentScroll();
                 }
@@ -254,31 +261,40 @@ public class GridFolder extends Folder implements OnAlarmListener {
 
         Hotseat hotseat = launcher.getHotseat();
         if (hotseat != null) {
-            hotseat.setAlpha(hotseatIconsAlpha);
-            AlphaUpdateListener.updateVisibility(hotseat);
+            play(set, getAnimator(hotseat, 1f, 0f, hide));
+            View qsb = hotseat.getQsb();
+            if (qsb != null) {
+                play(set, getAnimator(qsb, 1f, 0f, hide));
+            }
+
         }
 
         ScrimView scrimView = launcher.findViewById(R.id.scrim_view);
         if (scrimView != null) {
-            scrimView.setVisibility(hide ? View.INVISIBLE : View.VISIBLE);
+            play(set, getAnimator(scrimView, 1f, 0f, hide));
         }
 
         BlurBackgroundView blur = launcher.mBlurLayer;
         if (blur != null) {
-            blur.setAlpha(hide ? 1 : 0);
-            AlphaUpdateListener.updateVisibility(blur);
+            play(set, getAnimator(blur, 0f, 1f, hide));
         }
-
-        showOrHideQsb(launcher, hide);
-    }
-
-    public void showOrHideQsb(Launcher launcher, boolean hide) {
-        if (launcher.getAppsView() != null) {
-            View qsb = launcher.getWorkspace().getHotseat();
-            if (qsb != null) {
-                qsb.setVisibility(hide ? INVISIBLE : VISIBLE);
+        set.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                isAnimating = false;
             }
-        }
+
+            @Override
+            public void onAnimationStart(Animator animation) {
+                super.onAnimationStart(animation);
+                isAnimating = true;
+                if (!hide && hotseat != null) {
+                    hotseat.setVisibility(VISIBLE);
+                }
+            }
+        });
+        set.start();
     }
 
     @Override
@@ -288,8 +304,9 @@ public class GridFolder extends Folder implements OnAlarmListener {
 
     @Override
     public int getUnusedOffsetYOnAnimate(boolean isOpening) {
-        LinearLayout.LayoutParams tabLp = (LinearLayout.LayoutParams) mFolderTab.getLayoutParams();
-        return mFolderTabHeight + tabLp.bottomMargin;
+        return mFolderTabHeight + mFolderTab.getPaddingBottom() + mFooterHeight + mFooter.getPaddingBottom()
+                + mContent.getPaddingBottom() + mContent.getPaddingTop() + mContent.getPaddingBottom()
+                + mGridFolderPage.getPaddingBottom() + mGridFolderPage.getPaddingTop();
 
     }
 
@@ -343,5 +360,22 @@ public class GridFolder extends Folder implements OnAlarmListener {
         if (alarm == wobbleExpireAlarm) {
             wobbleFolder(false);
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T extends View & ClipPathView> T getAnimateObject() {
+        return (T) mGridFolderPage;
+    }
+
+    private Animator getAnimator(View view, float v1, float v2, boolean hide) {
+        return hide
+                ? ObjectAnimator.ofFloat(view, View.ALPHA, v1, v2)
+                : ObjectAnimator.ofFloat(view, View.ALPHA, v2, v1);
+    }
+
+    private void play(AnimatorSet as, Animator a) {
+        a.setStartDelay(a.getStartDelay());
+        a.setDuration(0);
+        as.play(a);
     }
 }
