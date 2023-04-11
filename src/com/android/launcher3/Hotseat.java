@@ -26,6 +26,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -34,6 +35,7 @@ import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import com.android.launcher3.folder.Folder;
+import com.android.launcher3.pageindicators.PageIndicatorDots;
 
 import com.android.launcher3.util.HorizontalInsettableView;
 import com.android.launcher3.util.MultiTranslateDelegate;
@@ -44,6 +46,7 @@ import androidx.annotation.NonNull;
 import foundation.e.bliss.blur.BlurViewDelegate;
 import foundation.e.bliss.blur.BlurWallpaperProvider;
 import foundation.e.bliss.blur.OffsetParent;
+import foundation.e.bliss.folder.GridFolder;
 
 /**
  * View class that represents the bottom row of the home screen.
@@ -361,7 +364,13 @@ public class Hotseat extends CellLayout implements Insettable, OffsetParent {
 
     @Override
     public void setAlpha(float alpha) {
-        if (Folder.getOpen(mActivity) == null) {
+        Folder folder = Folder.getOpen(mActivity);
+        if (folder instanceof GridFolder) {
+            GridFolder gridFolder = (GridFolder) folder;
+            if (gridFolder.isAnimating()) {
+                super.setAlpha(alpha);
+            }
+        } else {
             super.setAlpha(alpha);
         }
     }

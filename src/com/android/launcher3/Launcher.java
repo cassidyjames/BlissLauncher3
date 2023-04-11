@@ -1916,6 +1916,9 @@ public class Launcher extends StatefulActivity<LauncherState>
     public FolderIcon addFolder(CellLayout layout, int container, final int screenId, int cellX,
             int cellY) {
         final FolderInfo folderInfo = new FolderInfo();
+        if (MultiModeController.isSingleLayerMode()) {
+            folderInfo.setTitle(this.getString(R.string.untitled_folder), getModelWriter());
+        }
 
         // Update the model
         getModelWriter().addItemToDatabase(folderInfo, container, screenId, cellX, cellY);

@@ -8,18 +8,33 @@
 package foundation.e.bliss.folder
 
 import android.content.Context
+import android.graphics.Canvas
 import android.graphics.Path
 import android.util.AttributeSet
+import android.widget.FrameLayout
 import com.android.launcher3.views.ClipPathView
-import foundation.e.bliss.blur.BlurLayout
 
 class GridFolderPage(context: Context, attrs: AttributeSet?) :
-    BlurLayout(context, attrs), ClipPathView {
+    FrameLayout(context, attrs), ClipPathView {
 
     private var mClipPath: Path? = null
 
     override fun setClipPath(clipPath: Path?) {
         mClipPath = clipPath
         invalidate()
+    }
+
+    override fun draw(canvas: Canvas) {
+        val clipPath = mClipPath
+        if (clipPath != null) {
+            val count: Int = canvas.save()
+            canvas.clipPath(clipPath)
+            background.draw(canvas)
+            super.draw(canvas)
+            canvas.restoreToCount(count)
+        } else {
+            background.draw(canvas)
+            super.draw(canvas)
+        }
     }
 }

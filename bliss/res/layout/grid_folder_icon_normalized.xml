@@ -51,8 +51,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:elevation="5dp"
-        launcher:blurCornerRadius="12dp"
-        launcher:blurOverlayColor="@color/e_launcher_widget_background">
+        android:background="@drawable/round_rect_grid_folder">
 
         <com.android.launcher3.folder.FolderPagedView
             android:id="@+id/folder_content"
