@@ -96,7 +96,7 @@ public class PreviewItemManager {
     private float mCurrentPageItemsTransX = 0;
     private boolean mShouldSlideInFirstPage;
 
-    static final int INITIAL_ITEM_ANIMATION_DURATION = 350;
+    public static final int INITIAL_ITEM_ANIMATION_DURATION = 350;
     private static final int FINAL_ITEM_ANIMATION_DURATION = 200;
 
     private static final int SLIDE_IN_FIRST_PAGE_ANIMATION_DURATION_DELAY = 100;

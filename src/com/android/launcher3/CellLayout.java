@@ -65,6 +65,7 @@ import com.android.launcher3.celllayout.ItemConfiguration;
 import com.android.launcher3.celllayout.ReorderAlgorithm;
 import com.android.launcher3.celllayout.ReorderParameters;
 import com.android.launcher3.celllayout.ReorderPreviewAnimation;
+import com.android.launcher3.celllayout.ViewCluster;
 import com.android.launcher3.config.FeatureFlags;
 import com.android.launcher3.dragndrop.DraggableView;
 import com.android.launcher3.folder.PreviewBackground;
@@ -83,6 +84,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Stack;
 
 public class CellLayout extends ViewGroup {
@@ -92,7 +94,7 @@ public class CellLayout extends ViewGroup {
     /** The color of the "leave-behind" shape when a folder is opened from Hotseat. */
     private static final int FOLDER_LEAVE_BEHIND_COLOR = Color.argb(160, 245, 245, 245);
 
-    protected final ActivityContext mActivity;
+    public final ActivityContext mActivity;
     @ViewDebug.ExportedProperty(category = "launcher")
     @Thunk int mCellWidth;
     @ViewDebug.ExportedProperty(category = "launcher")
@@ -214,6 +216,8 @@ public class CellLayout extends ViewGroup {
     DragAndDropAccessibilityDelegate mTouchHelper;
 
     CellLayoutContainer mCellLayoutContainer;
+
+    ArrayList<CellAndSpan> mWidgetCellAndSpanList = new ArrayList<>();
 
     public static final FloatProperty<CellLayout> SPRING_LOADED_PROGRESS =
             new FloatProperty<CellLayout>("spring_loaded_progress") {
@@ -1370,6 +1374,8 @@ public class CellLayout extends ViewGroup {
             bestXY[0] = -1;
             bestXY[1] = -1;
         }
+        //mTmpOccupied.findVacantCell(bestXY, spanX, spanY);
+        //findCellForSpan(bestXY, spanX, spanY);
         return bestXY;
     }
 
@@ -1591,13 +1597,176 @@ public class CellLayout extends ViewGroup {
     }
 
     public void copyCurrentStateToSolution(ItemConfiguration solution) {
+        mWidgetCellAndSpanList.clear();
         int childCount = mShortcutsAndWidgets.getChildCount();
         for (int i = 0; i < childCount; i++) {
             View child = mShortcutsAndWidgets.getChildAt(i);
             CellLayoutLayoutParams lp = (CellLayoutLayoutParams) child.getLayoutParams();
-            solution.add(child,
-                    new CellAndSpan(lp.getCellX(), lp.getCellY(), lp.cellHSpan, lp.cellVSpan));
+            CellAndSpan c = new CellAndSpan(lp.getCellX(), lp.getCellY(), lp.cellHSpan, lp.cellVSpan);
+            if (child instanceof LauncherAppWidgetHostView) {
+                mWidgetCellAndSpanList.add(c);
+            }
+            solution.add(child, c);
         }
+    }
+
+    public void reArrangeIcons(int x, int y) {
+        ItemConfiguration solution = new ItemConfiguration();
+        copyCurrentStateToSolution(solution);
+        View dragView = null;
+        int[] intersecting = new int[2];
+
+        if (x == 0) {
+            intersecting[0] = getCountX() - 1;
+            intersecting[1] = y - 1;
+        } else {
+            intersecting[0] = x - 1;
+            intersecting[1] = y;
+        }
+
+        ArrayList<View> views = new ArrayList<>();
+        for (Map.Entry <View, CellAndSpan> keyValue : solution.map.entrySet()) {
+            CellAndSpan c = keyValue.getValue();
+
+            if (c.cellX == x && c.cellY == y) {
+                mTmpOccupied.markCells(c, false);
+                dragView = keyValue.getKey();
+                views.add(dragView);
+                pushIconByRow(c, getCountX(), getCountY(), ViewCluster.LEFT);
+
+                int screenId = getCellLayoutContainer().getCellLayoutId(this);
+                int container = LauncherSettings.Favorites.CONTAINER_DESKTOP;
+
+                CellLayoutLayoutParams lp = (CellLayoutLayoutParams) dragView.getLayoutParams();
+                ItemInfo info = (ItemInfo) dragView.getTag();
+                info.cellX = intersecting[0];
+                lp.setCellX(info.cellX);
+                info.cellY = intersecting[1];
+                lp.setCellY(info.cellY);
+                info.spanX = lp.cellHSpan = 1;
+                info.spanY = lp.cellVSpan = 1;
+                lp.isLockedToGrid = true;
+
+                Launcher.cast(mActivity).getModelWriter().modifyItemInDatabase(info, container,
+                        screenId, info.cellX, info.cellY, info.spanX, info.spanY);
+            }
+        }
+        ViewCluster cluster = new ViewCluster(this, views, solution);
+        cluster.sortConfigurationForEdgePush(ViewCluster.LEFT);
+        solution.sortedViews.sort((lhs, rhs) -> {
+            CellLayoutLayoutParams lplhs = (CellLayoutLayoutParams) lhs.getLayoutParams();
+            CellLayoutLayoutParams lprhs = (CellLayoutLayoutParams) rhs.getLayoutParams();
+            if (lprhs.getCellY() + lprhs.cellVSpan == lplhs.getCellY() + lplhs.cellVSpan) {
+                return lprhs.getCellX() - lplhs.getCellX();
+            }
+            return (lprhs.getCellY() + lprhs.cellVSpan) - (lplhs.getCellY() + lplhs.cellVSpan);
+        });
+
+        for (View v: solution.sortedViews) {
+            CellAndSpan c = solution.map.get(v);
+            CellLayoutLayoutParams lp = (CellLayoutLayoutParams) v.getLayoutParams();
+            if (!lp.canReorder) {
+                // The push solution includes the all apps button, this is not viable.
+                break;
+            }
+            if (cluster.isViewTouchingEdge(v, ViewCluster.LEFT)) {
+                if (!cluster.views.contains(v)) {
+                    cluster.addView(v);
+                }
+                mTmpOccupied.markCells(c, false);
+                pushIconByRow(c, getCountX(), getCountY(),ViewCluster.LEFT);
+            }
+        }
+        cluster.shift(ViewCluster.LEFT, 1);
+
+        solution.cellX = intersecting[0];
+        solution.cellY = intersecting[1];
+        solution.spanX = 1;
+        solution.spanY = 1;
+        solution.isSolution = true;
+
+        if (dragView != null) {
+            performReorder(solution, dragView, MODE_ON_DROP);
+        }
+    }
+
+    public void pushIconByRow(CellAndSpan c, int countX, int countY, int whichEdge) {
+        if (whichEdge == ViewCluster.LEFT) {
+            if (c.cellX == 0 && c.cellY - c.spanY >= 0) {
+                c.cellY = c.cellY - c.spanY;
+                c.cellX = countX;
+            }
+            int result = isCellInLauncherAppWidget(c.cellX - 1, c.cellY, ViewCluster.LEFT);
+            if (result != -1) {
+                c.cellX = result;
+                while (c.cellX == 0 && c.cellY - c.spanY >= 0) {
+                    c.cellY = c.cellY - c.spanY;
+                    c.cellX = countX;
+                    int cellX = isCellInLauncherAppWidget(c.cellX - 1, c.cellY, ViewCluster.LEFT);
+                    if (cellX != -1) {
+                        c.cellX = cellX;
+                    }
+                }
+            }
+        } else if (whichEdge == ViewCluster.RIGHT) {
+            if (c.cellX == countX - 1 && c.cellY + c.spanY <= countY - 1) {
+                c.cellY = c.cellY + c.spanY;
+                c.cellX = -1;
+            }
+            int result = isCellInLauncherAppWidget(c.cellX + 1, c.cellY, ViewCluster.RIGHT);
+            if (result != -1) {
+                c.cellX = result;
+                while (c.cellX == countX - 1 && c.cellY + c.spanY <= countY - 1) {
+                    c.cellY = c.cellY + c.spanY;
+                    c.cellX = -1;
+                    int cellX = isCellInLauncherAppWidget(c.cellX + 1, c.cellY, ViewCluster.RIGHT);
+                    if (cellX != -1) {
+                        c.cellX = cellX;
+                    }
+                }
+            }
+        }
+    }
+
+    private int isCellInLauncherAppWidget(int x, int y, int whichEdge) {
+        for (CellAndSpan c : mWidgetCellAndSpanList) {
+            if (x >= c.cellX && x < c.cellX + c.spanX && y >= c.cellY && y < c.cellY + c.spanY) {
+                if (whichEdge == ViewCluster.LEFT) {
+                    return c.cellX;
+                } else if (whichEdge == ViewCluster.RIGHT) {
+                    return c.cellX + c.spanX - 1;
+                }
+            }
+        }
+        return -1;
+    }
+
+    public int[] getLastOccupiedCells() {
+        int[] loc = new int[]{-1, -1};
+        out:
+        for (int y = mCountY - 1; y >= 0; y--) {
+            for (int x = mCountX - 1; x >= 0; x--) {
+                if (isOccupied(x, y)) {
+                    loc[0] = x;
+                    loc[1] = y;
+                    break out;
+                }
+            }
+        }
+        /*
+        if (loc[0] >= 0 && loc[1] >= 0) {
+            if (loc[0] == mCountX - 1) {
+                loc[0] = 0;
+                loc[1]++;
+                if (loc[1] > mCountY - 1) {
+                    return null;
+                }
+            } else {
+                loc[0] = loc[0] + 1;
+            }
+        }
+         */
+        return loc;
     }
 
     /**
