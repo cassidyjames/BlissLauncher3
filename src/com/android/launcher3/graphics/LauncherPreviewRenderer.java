@@ -225,6 +225,7 @@ public class LauncherPreviewRenderer extends ContextWrapper
 
         mHotseat = mRootView.findViewById(R.id.hotseat);
         mHotseat.resetLayout(false);
+        mHotseat.drawBlur = false;
 
         mLauncherWidgetSpanInfo = launcherWidgetSpanInfo == null ? new SparseArray<>() :
                 launcherWidgetSpanInfo;
