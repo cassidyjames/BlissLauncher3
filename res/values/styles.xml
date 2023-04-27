@@ -355,7 +355,7 @@
     </style>
 
     <!-- Intentionally empty so we can override -->
-    <style name="BaseIcon.Workspace" parent="BaseIcon.Workspace.Shadows">
+    <style name="BaseIcon.Workspace" parent="BaseIcon">
     </style>
 
     <!-- Theme for the popup container -->
