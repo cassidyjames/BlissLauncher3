@@ -2911,6 +2911,8 @@ public class Launcher extends StatefulActivity<LauncherState>
      * Shows the default options popup
      */
     public void showDefaultOptions(float x, float y) {
+        if (MultiModeController.isSingleLayerMode()) return;
+
         OptionsPopupView.show(this, getPopupTarget(x, y), OptionsPopupView.getOptions(this),
                 false);
     }
