@@ -12,12 +12,12 @@ import android.app.WallpaperManager
 import android.content.Context
 import android.graphics.*
 import android.util.DisplayMetrics
-import android.util.Log
 import android.view.WindowManager
 import android.widget.Toast
 import com.android.launcher3.Utilities
 import com.android.launcher3.util.Executors
 import com.android.launcher3.util.MainThreadInitializedObject
+import foundation.e.bliss.utils.Logger
 import foundation.e.bliss.utils.drawableToBitmap
 import foundation.e.bliss.utils.runOnMainThread
 import foundation.e.bliss.utils.safeForEach
@@ -113,7 +113,7 @@ class BlurWallpaperProvider(val context: Context) {
         }
 
         wallpaper = applyVibrancy(wallpaper)
-        Log.d(TAG, "starting blur")
+        Logger.d(TAG, "starting blur")
 
         applyTask =
             wallpaperFilter.apply(wallpaper).setCallback { result, error ->

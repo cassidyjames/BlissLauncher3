@@ -12,9 +12,9 @@ import android.app.usage.UsageStatsManager
 import android.content.Context
 import android.content.Intent
 import android.provider.Settings
-import android.util.Log
 import android.widget.Toast
 import com.android.launcher3.R
+import foundation.e.bliss.utils.Logger
 import java.util.Calendar
 
 class AppUsageStats(private val mContext: Context) {
@@ -49,7 +49,7 @@ class AppUsageStats(private val mContext: Context) {
             }
 
             if (aggregatedStats.isEmpty()) {
-                Log.i(TAG, "The user may not allow the access to apps usage.")
+                Logger.i(TAG, "The user may not allow the access to apps usage.")
                 Toast.makeText(mContext, "Permission not allowed!", Toast.LENGTH_LONG).show()
                 mContext.startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
             } else {

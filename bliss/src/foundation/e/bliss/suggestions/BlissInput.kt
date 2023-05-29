@@ -12,7 +12,6 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.util.AttributeSet
-import android.util.Log
 import android.view.DragEvent
 import android.view.KeyEvent
 import android.view.LayoutInflater
@@ -37,6 +36,7 @@ import com.android.launcher3.model.data.AppInfo
 import com.android.launcher3.search.SearchCallback
 import com.android.launcher3.testing.shared.ResourceUtils
 import foundation.e.bliss.LauncherAppMonitor
+import foundation.e.bliss.utils.Logger
 import foundation.e.bliss.widgets.SwipeSearchContainer
 import java.util.Timer
 import java.util.TimerTask
@@ -192,7 +192,7 @@ class BlissInput(context: Context, attrs: AttributeSet) :
     private fun loadSuggestions() {
         val appsList = mAppsStore.apps.toList()
 
-        Log.i(TAG, "Apps List Size ${appsList.size}")
+        Logger.i(TAG, "Apps List Size ${appsList.size}")
 
         mIconGrid.removeAllViews()
         if (appsList.isNotEmpty()) {
