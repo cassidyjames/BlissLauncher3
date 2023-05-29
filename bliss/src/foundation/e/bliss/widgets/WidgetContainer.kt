@@ -18,7 +18,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.ServiceManager
 import android.util.AttributeSet
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -37,6 +36,7 @@ import com.android.launcher3.widget.LauncherAppWidgetProviderInfo
 import com.android.launcher3.widget.PendingAddShortcutInfo
 import com.android.launcher3.widget.WidgetCell
 import com.android.launcher3.widget.picker.WidgetsFullSheet
+import foundation.e.bliss.utils.Logger
 import foundation.e.bliss.utils.ObservableList
 import foundation.e.bliss.widgets.BlissAppWidgetHost.Companion.REQUEST_CONFIGURE_APPWIDGET
 import io.reactivex.rxjava3.disposables.Disposable
@@ -97,25 +97,25 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
         private fun loadWidgets() {
             if (!initialWidgetsAdded) {
                 mWidgetHost.deleteHost()
-                Log.e(TAG, "default not added ${mWidgetHost.appWidgetIds.size}")
+                Logger.e(TAG, "default not added ${mWidgetHost.appWidgetIds.size}")
 
                 DefaultWidgets.widgets.forEach {
                     try {
                         bindWidget(it)
                     } catch (e: Exception) {
-                        Log.e(TAG, "Could not add widget ${it.flattenToString()}")
+                        Logger.e(TAG, "Could not add widget ${it.flattenToString()}")
                     }
                 }
 
                 initialWidgetsAdded = true
             } else {
                 rebindWidgets()
-                Log.e(TAG, "saved widgets added")
+                Logger.e(TAG, "saved widgets added")
             }
 
             widgetObserver =
                 defaultWidgets.observable.subscribe {
-                    Log.d(TAG, "Component: ${it.flattenToString()}")
+                    Logger.d(TAG, "Component: ${it.flattenToString()}")
                     bindWidget(it)
                 }
         }
@@ -131,7 +131,7 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
 
             if (!isWidgetBound) {
                 mWidgetHost.deleteAppWidgetId(widgetId)
-                Log.e(TAG, "Could not add widget ${provider.flattenToString()}")
+                Logger.e(TAG, "Could not add widget ${provider.flattenToString()}")
             }
 
             configureWidget(widgetId)
@@ -205,7 +205,7 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
         @Deprecated("Deprecated in Java")
         override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
             val widgetId = data?.getIntExtra(EXTRA_APPWIDGET_ID, -1) ?: -1
-            Log.d(TAG, "Request: $requestCode | Result: $resultCode | Widget: $widgetId")
+            Logger.d(TAG, "Request: $requestCode | Result: $resultCode | Widget: $widgetId")
             if (resultCode == RESULT_OK && requestCode == REQUEST_CONFIGURE_APPWIDGET) {
                 addView(widgetId)
             }
