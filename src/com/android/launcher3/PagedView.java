@@ -59,11 +59,15 @@ import com.android.launcher3.touch.PagedOrientationHandler;
 import com.android.launcher3.touch.PagedOrientationHandler.ChildBounds;
 import com.android.launcher3.util.EdgeEffectCompat;
 import com.android.launcher3.util.IntSet;
+import com.android.launcher3.util.NavigationMode;
 import com.android.launcher3.util.Thunk;
+import com.android.launcher3.util.window.WindowManagerProxy;
 import com.android.launcher3.views.ActivityContext;
 
 import java.util.ArrayList;
 import java.util.function.Consumer;
+
+import foundation.e.bliss.utils.Logger;
 
 /**
  * An abstraction of the original Workspace which supports browsing through a
@@ -154,6 +158,7 @@ public abstract class PagedView<T extends View & PageIndicator> extends ViewGrou
 
     protected EdgeEffectCompat mEdgeGlowLeft;
     protected EdgeEffectCompat mEdgeGlowRight;
+    protected NavigationMode navMode;
 
     public PagedView(Context context) {
         this(context, null);
@@ -182,6 +187,7 @@ public abstract class PagedView<T extends View & PageIndicator> extends ViewGrou
         mTouchSlop = configuration.getScaledTouchSlop();
         mPageSlop = configuration.getScaledPagingTouchSlop();
         mMaximumVelocity = configuration.getScaledMaximumFlingVelocity();
+        navMode = WindowManagerProxy.INSTANCE.get(getContext()).getNavigationMode(getContext());
 
         updateVelocityValues();
 
@@ -653,6 +659,47 @@ public abstract class PagedView<T extends View & PageIndicator> extends ViewGrou
         super.forceLayout();
     }
 
+    public static class LayoutParams extends ViewGroup.LayoutParams {
+        public boolean isFullScreenPage = false;
+
+        /**
+         * {@inheritDoc}
+         */
+        public LayoutParams(int width, int height) {
+            super(width, height);
+        }
+
+        public LayoutParams(Context context, AttributeSet attrs) {
+            super(context, attrs);
+        }
+
+        public LayoutParams(ViewGroup.LayoutParams source) {
+            super(source);
+        }
+    }
+
+
+    @Override
+    public LayoutParams generateLayoutParams(AttributeSet attrs) {
+        return new LayoutParams(getContext(), attrs);
+    }
+
+    @Override
+    protected LayoutParams generateDefaultLayoutParams() {
+        return new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+    }
+
+    @Override
+    protected ViewGroup.LayoutParams generateLayoutParams(ViewGroup.LayoutParams p) {
+        return new LayoutParams(p);
+    }
+
+    public void addFullScreenPage(View page, int index) {
+        LayoutParams lp = generateDefaultLayoutParams();
+        lp.isFullScreenPage = true;
+        super.addView(page, index, lp);
+    }
+
     private int getPageWidthSize(int widthSize) {
         // It's necessary to add the padding back because it is remove when measuring children,
         // like when MeasureSpec.getSize in CellLayout.
@@ -674,6 +721,14 @@ public abstract class PagedView<T extends View & PageIndicator> extends ViewGrou
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
         int heightSize = MeasureSpec.getSize(heightMeasureSpec);
 
+        /* Allow the height to be set as WRAP_CONTENT. This allows the particular case
+         * of the All apps view on XLarge displays to not take up more space then it needs. Width
+         * is still not allowed to be set as WRAP_CONTENT since many parts of the code expect
+         * each effect_page to have the same width.
+         */
+        final int verticalPadding = getPaddingTop() + getPaddingBottom();
+        final int horizontalPadding = getPaddingLeft() + getPaddingRight();
+
         if (widthMode == MeasureSpec.UNSPECIFIED || heightMode == MeasureSpec.UNSPECIFIED) {
             super.onMeasure(widthMeasureSpec, heightMeasureSpec);
             return;
@@ -689,14 +744,72 @@ public abstract class PagedView<T extends View & PageIndicator> extends ViewGrou
         // unless they were set to WRAP_CONTENT
         if (DEBUG) Log.d(TAG, "PagedView.onMeasure(): " + widthSize + ", " + heightSize);
 
-        int myWidthSpec = MeasureSpec.makeMeasureSpec(
-                getPageWidthSize(widthSize), MeasureSpec.EXACTLY);
-        int myHeightSpec = MeasureSpec.makeMeasureSpec(
-                heightSize - mInsets.top - mInsets.bottom, MeasureSpec.EXACTLY);
+        if (this instanceof Workspace) {
+            for (int i = 0; i < getChildCount(); i++) {
+                final View child = getPageAt(i);
+                if (child.getVisibility() != GONE) {
+                    final LayoutParams lp = (LayoutParams) child.getLayoutParams();
 
-        // measureChildren takes accounts for content padding, we only need to care about extra
-        // space due to insets.
-        measureChildren(myWidthSpec, myHeightSpec);
+                    int childWidthMode;
+                    int childHeightMode;
+                    int childWidth;
+                    int childHeight;
+                    int topPadding;
+                    int bottomPadding;
+
+                    if (!lp.isFullScreenPage) {
+                        if (lp.width == LayoutParams.WRAP_CONTENT) {
+                            childWidthMode = MeasureSpec.AT_MOST;
+                        } else {
+                            childWidthMode = MeasureSpec.EXACTLY;
+                        }
+
+                        if (lp.height == LayoutParams.WRAP_CONTENT) {
+                            childHeightMode = MeasureSpec.AT_MOST;
+                        } else {
+                            childHeightMode = MeasureSpec.EXACTLY;
+                        }
+
+                        childWidth = getPageWidthSize(widthSize);
+                        childHeight = heightSize - mInsets.top - mInsets.bottom - verticalPadding;
+                    } else {
+                        childWidthMode = MeasureSpec.EXACTLY;
+                        childHeightMode = MeasureSpec.EXACTLY;
+
+                        childWidth = getPageWidthSize(widthSize) - horizontalPadding
+                                - mInsets.left - mInsets.right;
+                        childHeight = heightSize + verticalPadding;
+
+                        topPadding = verticalPadding;
+                        bottomPadding = mInsets.bottom;
+
+                        if (navMode == NavigationMode.NO_BUTTON) {
+                            topPadding += mInsets.top;
+                        } else {
+                            topPadding += mInsets.top + 40;
+                            bottomPadding -= 40;
+                        }
+
+                        child.setPadding(child.getPaddingLeft(), topPadding,
+                                child.getPaddingRight(), bottomPadding);
+                    }
+                    final int childWidthMeasureSpec =
+                            MeasureSpec.makeMeasureSpec(childWidth, childWidthMode);
+                    final int childHeightMeasureSpec =
+                            MeasureSpec.makeMeasureSpec(childHeight, childHeightMode);
+                    child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
+                }
+            }
+        } else {
+            int myWidthSpec = MeasureSpec.makeMeasureSpec(
+                    getPageWidthSize(widthSize), MeasureSpec.EXACTLY);
+            int myHeightSpec = MeasureSpec.makeMeasureSpec(
+                    heightSize - mInsets.top - mInsets.bottom, MeasureSpec.EXACTLY);
+
+            // measureChildren takes accounts for content padding, we only need to care about extra
+            // space due to insets.
+            measureChildren(myWidthSpec, myHeightSpec);
+        }
         setMeasuredDimension(widthSize, heightSize);
     }
 

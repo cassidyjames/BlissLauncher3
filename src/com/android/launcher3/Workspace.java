@@ -734,7 +734,11 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
 
         mWorkspaceScreens.put(screenId, newScreen);
         mScreenOrder.add(insertIndex, screenId);
-        addView(newScreen, insertIndex);
+        if (screenId == FIRST_SCREEN_ID && FeatureFlags.QSB_ON_FIRST_SCREEN) {
+            addFullScreenPage(newScreen, insertIndex);
+        } else {
+            addView(newScreen, insertIndex);
+        }
         mStateTransitionAnimation.applyChildState(
                 mLauncher.getStateManager().getState(), newScreen, insertIndex);
 
@@ -1348,8 +1352,10 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
 
         getHotseat().setForcedTranslationY(dockTranslationY);
         ((PageIndicatorDots) getPageIndicator()).setForcedTranslationY(dockTranslationY);
-        setPadding(getPaddingLeft(), getPaddingTop(), getPaddingRight(),
-                progress != 0 ? (int) qsbPadding : getPaddingBottom());
+        CellLayout firstScreen = mWorkspaceScreens.get(FIRST_SCREEN_ID);
+        firstScreen.setPadding(
+                firstScreen.getPaddingLeft(), firstScreen.getPaddingTop(), firstScreen.getPaddingRight(),
+                progress != 0 ? (int) qsbPadding : firstScreen.getPaddingBottom());
 
         if (getCurrentPage() != 0) {
             mLauncher.mBlurLayer.setAlpha(0f);
