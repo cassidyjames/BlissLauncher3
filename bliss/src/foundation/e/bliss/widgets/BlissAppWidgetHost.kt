@@ -14,6 +14,8 @@ import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 
 class BlissAppWidgetHost(val context: Context) : AppWidgetHost(context, WIDGET_HOST_ID) {
+    private val widgetsDbHelper = WidgetsDbHelper.getInstance(context)
+
     fun createView(widgetId: Int, widgetInfo: AppWidgetProviderInfo): AppWidgetHostView {
         return createView(context, widgetId, widgetInfo).apply { setPaddingRelative(8, 24, 8, 24) }
     }
@@ -26,6 +28,11 @@ class BlissAppWidgetHost(val context: Context) : AppWidgetHost(context, WIDGET_H
     ): AppWidgetHostView {
         val blur = DefaultWidgets.getWidgetsList(context).contains(appWidget?.provider)
         return RoundedWidgetView(context, blur)
+    }
+
+    override fun onAppWidgetRemoved(appWidgetId: Int) {
+        deleteAppWidgetId(appWidgetId)
+        widgetsDbHelper.delete(appWidgetId)
     }
 
     companion object {

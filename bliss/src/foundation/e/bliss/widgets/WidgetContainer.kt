@@ -9,17 +9,19 @@ package foundation.e.bliss.widgets
 
 import android.animation.LayoutTransition
 import android.app.Activity.RESULT_OK
-import android.app.AlertDialog
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetManager.EXTRA_APPWIDGET_ID
+import android.appwidget.AppWidgetProviderInfo
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.ServiceManager
+import android.os.UserHandle
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.OnLayoutChangeListener
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.FrameLayout
@@ -36,14 +38,31 @@ import com.android.launcher3.widget.LauncherAppWidgetProviderInfo
 import com.android.launcher3.widget.PendingAddShortcutInfo
 import com.android.launcher3.widget.WidgetCell
 import com.android.launcher3.widget.picker.WidgetsFullSheet
+import foundation.e.bliss.LauncherAppMonitor
+import foundation.e.bliss.LauncherAppMonitorCallback
 import foundation.e.bliss.utils.Logger
 import foundation.e.bliss.utils.ObservableList
 import foundation.e.bliss.widgets.BlissAppWidgetHost.Companion.REQUEST_CONFIGURE_APPWIDGET
 import io.reactivex.rxjava3.disposables.Disposable
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 @Suppress("Deprecation", "NewApi")
 class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(context, attrs) {
     private val mLauncher by lazy { Launcher.getLauncher(context) }
+
+    private lateinit var mRemoveWidgetLayout: FrameLayout
+    private lateinit var mWrapper: LinearLayout
+    private var mWrapperChildCount = 0
+
+    private val layoutListener = OnLayoutChangeListener { view, _, _, _, _, _, _, _, _ ->
+        val childCount = (view as LinearLayout).childCount
+        if (mWrapperChildCount == childCount) return@OnLayoutChangeListener
+        handleRemoveButtonVisibility(childCount)
+    }
 
     override fun setPadding(left: Int, top: Int, right: Int, bottom: Int) {
         super.setPadding(0, 0, 0, 0)
@@ -54,6 +73,35 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
         findViewById<Button>(R.id.manage_widgets)?.setOnClickListener {
             WidgetsFullSheet.show(mLauncher, true, true)
         }
+
+        findViewById<Button>(R.id.remove_widgets).setOnClickListener {
+            val intent =
+                Intent(context, WidgetsActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            context.startActivity(intent)
+        }
+
+        mRemoveWidgetLayout = findViewById(R.id.remove_widget_parent)
+        mWrapper =
+            findViewWithTag<LinearLayout?>("wrapper_children").apply {
+                addOnLayoutChangeListener(layoutListener)
+                handleRemoveButtonVisibility(childCount)
+            }
+    }
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        mWrapper.removeOnLayoutChangeListener(layoutListener)
+    }
+
+    private fun handleRemoveButtonVisibility(childCount: Int) {
+        mWrapperChildCount = childCount
+        CoroutineScope(Dispatchers.Main).launch {
+            if (childCount == 0) {
+                mRemoveWidgetLayout.visibility = View.GONE
+            } else if (mRemoveWidgetLayout.visibility == View.GONE) {
+                mRemoveWidgetLayout.visibility = View.VISIBLE
+            }
+        }
     }
 
     /** A fragment to display the default widgets. */
@@ -63,6 +111,15 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
 
         private val mWidgetManager by lazy { AppWidgetManager.getInstance(context) }
         private val mWidgetHost by lazy { BlissAppWidgetHost(context) }
+        private val widgetsDbHelper by lazy { WidgetsDbHelper.getInstance(context) }
+        private val launcher by lazy { Launcher.getLauncher(context) }
+
+        private val mAppMonitorCallback: LauncherAppMonitorCallback =
+            object : LauncherAppMonitorCallback {
+                override fun onPackageRemoved(packageName: String?, user: UserHandle?) {
+                    rebindWidgets()
+                }
+            }
 
         private var initialWidgetsAdded: Boolean
             set(value) {
@@ -78,20 +135,31 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
         private val isQsbEnabled: Boolean
             get() = FeatureFlags.QSB_ON_FIRST_SCREEN
 
+        init {
+            LauncherAppMonitor.getInstanceNoCreate().registerCallback(mAppMonitorCallback)
+        }
+
         @Deprecated("Deprecated in Java")
         override fun onCreateView(
             inflater: LayoutInflater,
             container: ViewGroup?,
             savedInstanceState: Bundle?
         ): View {
-            mWrapper = LinearLayout(context, null)
-            mWrapper.orientation = LinearLayout.VERTICAL
+            mWrapper =
+                LinearLayout(context, null).apply {
+                    tag = "wrapper_children"
+                    orientation = LinearLayout.VERTICAL
+                }
 
             if (isQsbEnabled) {
                 loadWidgets()
                 mWidgetHost.startListening()
             }
             return mWrapper
+        }
+
+        override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+            super.onViewCreated(view, savedInstanceState)
         }
 
         private fun loadWidgets() {
@@ -118,6 +186,8 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
                     Logger.d(TAG, "Component: ${it.flattenToString()}")
                     bindWidget(it)
                 }
+
+            CoroutineScope(Dispatchers.Main).launch { eventFlow.collect { rebindWidgets() } }
         }
 
         private fun rebindWidgets() {
@@ -169,14 +239,41 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
                         id = widgetId
                         layoutTransition = LayoutTransition()
                         setOnLongClickListener {
-                            showDialog(widgetId) {
-                                mWidgetHost.deleteAppWidgetId(widgetId)
-                                mWrapper.removeView(findViewById(widgetId))
+                            if (
+                                (info.resizeMode and AppWidgetProviderInfo.RESIZE_VERTICAL) ==
+                                    AppWidgetProviderInfo.RESIZE_VERTICAL
+                            ) {
+                                launcher.hideWidgetResizeContainer()
+                                launcher.showWidgetResizeContainer(this as RoundedWidgetView)
                             }
                             true
                         }
                     }
-                    .also { mWrapper.addView(it) }
+                    .also {
+                        val opts = mWidgetManager.getAppWidgetOptions(it.appWidgetId)
+                        val params =
+                            LayoutParams(
+                                opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH),
+                                opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT)
+                            )
+
+                        Logger.d(TAG, "Widget height: ${params.height} | opts: $opts")
+
+                        if (params.height > 0) {
+                            mWrapper.addView(it, params)
+                        } else {
+                            mWrapper.addView(it)
+                        }
+
+                        widgetsDbHelper.insert(
+                            WidgetInfo(
+                                mWrapper.indexOfChild(it),
+                                it.appWidgetInfo.provider,
+                                it.appWidgetId,
+                                it.height
+                            )
+                        )
+                    }
             } else {
                 mWidgetHost.deleteAppWidgetId(widgetId)
             }
@@ -208,6 +305,8 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
             Logger.d(TAG, "Request: $requestCode | Result: $resultCode | Widget: $widgetId")
             if (resultCode == RESULT_OK && requestCode == REQUEST_CONFIGURE_APPWIDGET) {
                 addView(widgetId)
+            } else {
+                mWidgetHost.deleteAppWidgetId(widgetId)
             }
         }
 
@@ -217,30 +316,11 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
             widgetObserver.dispose()
         }
 
-        private fun showDialog(widgetId: Int, onRemove: () -> Unit) {
-            val alertDialogBuilder = AlertDialog.Builder(context)
-            val info =
-                LauncherAppWidgetProviderInfo.fromProviderInfo(
-                    context,
-                    mWidgetManager.getAppWidgetInfo(widgetId)
-                )
-
-            alertDialogBuilder.apply {
-                setTitle("Remove ${info.label.lowercase()} widget?")
-                setPositiveButton("Yes") { dialog, _ ->
-                    onRemove()
-                    dialog.dismiss()
-                }
-                setNegativeButton("No") { dialog, _ -> dialog.dismiss() }
-            }
-
-            alertDialogBuilder.create().show()
-        }
-
         companion object {
             const val TAG = "WidgetFragment"
             const val defaultWidgetsAdded = "default_widgets_added"
             val defaultWidgets = ObservableList<ComponentName>()
+            val eventFlow = MutableSharedFlow<Unit>()
 
             @JvmStatic
             fun onWidgetClick(context: Context, view: View, closeSheet: (Boolean) -> Unit) {
@@ -261,7 +341,6 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
                     closeSheet(true)
                     val widget = (view.parent as WidgetCell).tag as PendingAddItemInfo
                     defaultWidgets.add(widget.componentName)
-                    Toast.makeText(context, "Added widget to -1 screen", Toast.LENGTH_SHORT).show()
                 }
             }
         }

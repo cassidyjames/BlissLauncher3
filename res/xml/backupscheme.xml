@@ -4,6 +4,9 @@
     <!-- 1.9.0 Database -->
     <include domain="database" path="launcher_db" />
 
+    <!-- QSB Widgets Database -->
+    <include domain="database" path="qsb_widgets.db" />
+
     <include domain="database" path="launcher.db" />
     <include domain="database" path="launcher_6_by_5.db" />
     <include domain="database" path="launcher_4_by_5.db" />
