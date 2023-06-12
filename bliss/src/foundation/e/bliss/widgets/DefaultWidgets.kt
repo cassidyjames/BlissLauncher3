@@ -8,6 +8,8 @@
 package foundation.e.bliss.widgets
 
 import android.content.ComponentName
+import android.content.Context
+import foundation.e.bliss.utils.BlissDbUtils
 
 object DefaultWidgets {
     private val ecloudWidget =
@@ -20,5 +22,26 @@ object DefaultWidgets {
             "foundation.e.blissweather.widget.WeatherAppWidgetProvider"
         )
 
-    @JvmStatic val widgets = listOf(ecloudWidget, privacyWidget, weatherWidget)
+    private val widgets = listOf(ecloudWidget, privacyWidget, weatherWidget)
+
+    @JvmStatic
+    fun getWidgetsList(context: Context): List<ComponentName> {
+        val providerList: MutableList<ComponentName> = mutableListOf()
+
+        // Get widget details from old database
+        val widgetItemsList: MutableList<BlissDbUtils.WidgetItems> =
+            BlissDbUtils.getWidgetDetails(context)
+
+        for (widgetItem in widgetItemsList) {
+            val provider = widgetItem.componentName
+            provider.let { providerList.add(it) }
+        }
+
+        // Return default widgets if the providerList is empty
+        return if (providerList.isEmpty()) {
+            widgets
+        } else {
+            providerList
+        }
+    }
 }

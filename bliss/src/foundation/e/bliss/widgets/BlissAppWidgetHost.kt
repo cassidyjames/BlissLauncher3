@@ -20,11 +20,11 @@ class BlissAppWidgetHost(val context: Context) : AppWidgetHost(context, WIDGET_H
 
     @SuppressLint("NewApi")
     override fun onCreateView(
-        context: Context?,
+        context: Context,
         appWidgetId: Int,
         appWidget: AppWidgetProviderInfo?
     ): AppWidgetHostView {
-        val blur = DefaultWidgets.widgets.contains(appWidget?.provider)
+        val blur = DefaultWidgets.getWidgetsList(context).contains(appWidget?.provider)
         return RoundedWidgetView(context, blur)
     }
 
