@@ -7,6 +7,7 @@
  */
 package foundation.e.bliss.utils
 
+import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.ContentValues
 import android.content.Context
@@ -230,6 +231,66 @@ object BlissDbUtils {
 
         return true
     }
+
+    fun getWidgetDetails(context: Context): MutableList<WidgetItems> {
+        val widgetsInfoList = mutableListOf<WidgetItems>()
+
+        // Check if old database exists
+        val oldFile = context.getDatabasePath(oldDbName)
+        if (!oldFile.exists()) {
+            // Check if old database with "_old" suffix exists
+            val oldFileWithSuffix = context.getDatabasePath(oldDbName + "_old")
+            if (!oldFileWithSuffix.exists()) {
+                return widgetsInfoList
+            }
+        }
+
+        // Determine the correct database file name to use
+        val dbName = if (oldFile.exists()) oldDbName else oldDbName + "_old"
+
+        // Initialize database helper class
+        val oldDbHelper = BlissDbHelper(context, dbName)
+
+        val appWidgetManager = AppWidgetManager.getInstance(context)
+        oldDbHelper.readableDatabase.use { database ->
+            database.rawQuery("SELECT * FROM widget_items", null).use { cursor ->
+                while (cursor.moveToNext()) {
+                    try {
+                        val id = cursor.getInt(cursor.getColumnIndexOrThrow("id"))
+                        val height = cursor.getInt(cursor.getColumnIndexOrThrow("height"))
+                        val order = cursor.getInt(cursor.getColumnIndexOrThrow("order"))
+
+                        // Get the AppWidgetInfo for the current widget ID
+                        val widgetInfo = appWidgetManager.getAppWidgetInfo(id)
+                        if (widgetInfo != null) {
+                            widgetsInfoList.add(
+                                WidgetItems(
+                                    id,
+                                    height,
+                                    order,
+                                    widgetInfo.provider,
+                                )
+                            )
+                        }
+                    } catch (e: URISyntaxException) {
+                        Logger.e(TAG, "getWidgetDetails: ", e)
+                    }
+                }
+            }
+        }
+
+        // Close oldDbHelper
+        oldDbHelper.close()
+
+        return widgetsInfoList
+    }
+
+    data class WidgetItems(
+        val id: Int,
+        val height: Int,
+        val order: Int,
+        val componentName: ComponentName
+    )
 
     private fun getBaseContentValues(favorite: Favorite): ContentValues {
         return ContentValues().apply {

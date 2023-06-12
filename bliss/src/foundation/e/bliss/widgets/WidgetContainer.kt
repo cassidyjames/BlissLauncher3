@@ -99,7 +99,7 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
                 mWidgetHost.deleteHost()
                 Logger.e(TAG, "default not added ${mWidgetHost.appWidgetIds.size}")
 
-                DefaultWidgets.widgets.forEach {
+                DefaultWidgets.getWidgetsList(context).forEach {
                     try {
                         bindWidget(it)
                     } catch (e: Exception) {
