@@ -106,6 +106,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -155,6 +156,8 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.OvershootInterpolator;
 import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
+import android.widget.SeekBar;
 import android.window.BackEvent;
 import android.window.OnBackAnimationCallback;
 
@@ -222,6 +225,7 @@ import com.android.launcher3.statemanager.StateManager.StateHandler;
 import com.android.launcher3.statemanager.StatefulActivity;
 import com.android.launcher3.states.RotationHelper;
 import com.android.launcher3.testing.TestLogging;
+import com.android.launcher3.testing.shared.ResourceUtils;
 import com.android.launcher3.testing.shared.TestProtocol;
 import com.android.launcher3.touch.AllAppsSwipeController;
 import com.android.launcher3.touch.ItemLongClickListener;
@@ -287,6 +291,9 @@ import foundation.e.bliss.LauncherAppMonitor;
 import foundation.e.bliss.blur.BlurBackgroundView;
 import foundation.e.bliss.blur.BlurWallpaperProvider;
 import foundation.e.bliss.multimode.MultiModeController;
+import foundation.e.bliss.utils.Logger;
+import foundation.e.bliss.widgets.RoundedWidgetView;
+import foundation.e.bliss.widgets.WidgetsDbHelper;
 
 /**
  * Default launcher application.
@@ -414,6 +421,7 @@ public class Launcher extends StatefulActivity<LauncherState>
     public BlurBackgroundView mBlurLayer;
     public FrameLayout swipeSearchContainer;
     private AnimatorSet currentAnimator;
+    private RoundedWidgetView activeRoundedWidgetView;
 
     private final CannedAnimationCoordinator mAnimationCoordinator =
             new CannedAnimationCoordinator(this);
@@ -2999,6 +3007,135 @@ public class Launcher extends StatefulActivity<LauncherState>
         currentAnimator = set;
     }
 
+    @SuppressLint("ClickableViewAccessibility")
+    public void showWidgetResizeContainer(RoundedWidgetView roundedWidgetView) {
+        RelativeLayout widgetResizeContainer = mWorkspace.getFirstPagePinnedItem()
+                .findViewById(R.id.widget_resizer_container);
+
+        if (widgetResizeContainer.getVisibility() != View.VISIBLE) {
+            activeRoundedWidgetView = roundedWidgetView;
+            SeekBar seekBar = widgetResizeContainer.findViewById(R.id.widget_resizer_seekbar);
+            if (currentAnimator != null) {
+                currentAnimator.cancel();
+            }
+
+            seekBar.setOnTouchListener((v, event) -> {
+                seekBar.getParent().requestDisallowInterceptTouchEvent(true);
+                return false;
+            });
+
+            AnimatorSet set = new AnimatorSet();
+            set.play(ObjectAnimator.ofFloat(widgetResizeContainer, View.TRANSLATION_Y,
+                    ResourceUtils.pxFromDp(48, getResources().getDisplayMetrics()), 0));
+            set.setDuration(200);
+            set.setInterpolator(new LinearInterpolator());
+            set.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    super.onAnimationStart(animation);
+                    widgetResizeContainer.setVisibility(View.VISIBLE);
+                }
+
+                @Override
+                public void onAnimationCancel(Animator animation) {
+                    super.onAnimationCancel(animation);
+                    currentAnimator = null;
+                    widgetResizeContainer.setVisibility(View.GONE);
+                    roundedWidgetView.removeBorder();
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    super.onAnimationEnd(animation);
+                    currentAnimator = null;
+                    prepareWidgetResizeSeekBar(seekBar);
+                    roundedWidgetView.addBorder();
+                }
+            });
+            set.start();
+            currentAnimator = set;
+        }
+    }
+
+    private void prepareWidgetResizeSeekBar(SeekBar seekBar) {
+        int minHeight = activeRoundedWidgetView.getAppWidgetInfo().minResizeHeight;
+        int maxHeight = mDeviceProfile.availableHeightPx * 3 / 4;
+        int normalisedDifference = (maxHeight - minHeight) / 100;
+        int defaultHeight = activeRoundedWidgetView.getHeight();
+        int currentProgress = (defaultHeight - minHeight) * 100 / (maxHeight - minHeight);
+
+        seekBar.setMax(100);
+        seekBar.setProgress(currentProgress);
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                int newHeight = minHeight + (normalisedDifference * progress);
+                activeRoundedWidgetView.setHeight(newHeight);
+
+                int maxWidth = mDeviceProfile.availableWidthPx - (2 * ResourceUtils.pxFromDp(8,
+                        getResources().getDisplayMetrics()));
+
+                Bundle newOps = new Bundle();
+                newOps.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, maxWidth);
+                newOps.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH, maxWidth);
+                newOps.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, newHeight);
+                newOps.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, newHeight);
+                activeRoundedWidgetView.updateAppWidgetOptions(newOps);
+                activeRoundedWidgetView.requestLayout();
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                int newHeight = minHeight + (normalisedDifference * seekBar.getProgress());
+                Logger.d("Launcher.WidgetResize", "newHeight: " + newHeight);
+                WidgetsDbHelper.getInstance(getApplicationContext())
+                        .updateHeight(activeRoundedWidgetView.getAppWidgetId(), newHeight);
+            }
+        });
+    }
+
+    public void hideWidgetResizeContainer() {
+        RelativeLayout widgetResizeContainer = mWorkspace.getFirstPagePinnedItem().findViewById(R.id.widget_resizer_container);
+        if (widgetResizeContainer.getVisibility() == View.VISIBLE) {
+            if (currentAnimator != null) {
+                currentAnimator.cancel();
+            }
+            AnimatorSet set = new AnimatorSet();
+            set.play(ObjectAnimator.ofFloat(widgetResizeContainer, View.TRANSLATION_Y,
+                    ResourceUtils.pxFromDp(48, getResources().getDisplayMetrics())));
+            set.setDuration(200);
+            set.setInterpolator(new LinearInterpolator());
+            set.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    super.onAnimationStart(animation);
+                    ((SeekBar) mWorkspace.getFirstPagePinnedItem().findViewById(R.id.widget_resizer_seekbar))
+                            .setOnSeekBarChangeListener(null);
+                }
+
+                @Override
+                public void onAnimationCancel(Animator animation) {
+                    super.onAnimationCancel(animation);
+                    currentAnimator = null;
+                    widgetResizeContainer.setVisibility(View.VISIBLE);
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    super.onAnimationEnd(animation);
+                    currentAnimator = null;
+                    widgetResizeContainer.setVisibility(View.GONE);
+                    activeRoundedWidgetView.removeBorder();
+                }
+            });
+            set.start();
+            currentAnimator = set;
+        }
+    }
 
     // Getters and Setters
 

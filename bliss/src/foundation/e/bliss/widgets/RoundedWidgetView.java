@@ -7,6 +7,7 @@
  */
 package foundation.e.bliss.widgets;
 
+import android.annotation.SuppressLint;
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -15,33 +16,31 @@ import android.graphics.Rect;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+
 import androidx.annotation.Nullable;
 import com.android.launcher3.CheckLongPressHelper;
+import com.android.launcher3.Launcher;
 import com.android.launcher3.R;
+import com.android.launcher3.uioverrides.QuickstepLauncher;
 import com.android.launcher3.widget.LauncherAppWidgetHostView;
 import com.android.launcher3.widget.LauncherAppWidgetProviderInfo;
 
 import foundation.e.bliss.blur.BlurViewDelegate;
 import foundation.e.bliss.blur.BlurWallpaperProvider;
 
+@SuppressLint("ViewConstructor")
 public class RoundedWidgetView extends LauncherAppWidgetHostView {
-
     private final Path stencilPath = new Path();
     private final float cornerRadius;
     private final CheckLongPressHelper mLongPressHelper;
-    private Context mContext;
-    private static final String TAG = "RoundedWidgetView";
+    private final Context mContext;
     private ImageView resizeBorder;
-
-    private OnTouchListener _onTouchListener;
-    private OnLongClickListener _longClick;
-    private long _down;
     private boolean mChildrenFocused;
-
-    private boolean activated = false;
-
     private BlurViewDelegate mBlurDelegate = null;
+    protected QuickstepLauncher mLauncher;
 
     public RoundedWidgetView(Context context, boolean blurBackground) {
         super(context);
@@ -57,15 +56,16 @@ public class RoundedWidgetView extends LauncherAppWidgetHostView {
         }
     }
 
+    public void setHeight(int newHeight) {
+        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) getLayoutParams();
+        params.height = newHeight;
+        setLayoutParams(params);
+    }
+
     @Override
     public void setAppWidget(int appWidgetId, AppWidgetProviderInfo info) {
         super.setAppWidget(appWidgetId, info);
         setPadding(0, 0, 0, 0);
-    }
-
-    @Override
-    public void setPaddingRelative(int start, int top, int end, int bottom) {
-        super.setPaddingRelative(start, top, end, bottom);
     }
 
     @Override
@@ -100,6 +100,7 @@ public class RoundedWidgetView extends LauncherAppWidgetHostView {
         return mLongPressHelper.hasPerformedLongPress();
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         mLongPressHelper.onTouchEvent(event);
@@ -109,7 +110,6 @@ public class RoundedWidgetView extends LauncherAppWidgetHostView {
     @Override
     public void cancelLongPress() {
         super.cancelLongPress();
-
         mLongPressHelper.cancelLongPress();
     }
 
@@ -150,5 +150,32 @@ public class RoundedWidgetView extends LauncherAppWidgetHostView {
     @Override
     public AppWidgetProviderInfo getAppWidgetInfo() {
         return LauncherAppWidgetProviderInfo.fromProviderInfo(mContext, getProviderInfo());
+    }
+
+    public void addBorder() {
+        if (resizeBorder != null) {
+            removeBorder();
+            return;
+        }
+        resizeBorder = new ImageView(mContext);
+        resizeBorder.setImageResource(R.drawable.bliss_resize_frame);
+        LayoutParams layoutParams = new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT);
+        resizeBorder.setLayoutParams(layoutParams);
+        addView(resizeBorder);
+        startWobble();
+    }
+
+    public void startWobble() {
+        mLauncher = Launcher.cast(Launcher.getLauncher(mContext));
+        startAnimation(mLauncher.getWorkspace().getWobbleAnimation());
+    }
+
+    public void removeBorder() {
+        if (resizeBorder != null) {
+            removeView(resizeBorder);
+            clearAnimation();
+            resizeBorder = null;
+        }
     }
 }

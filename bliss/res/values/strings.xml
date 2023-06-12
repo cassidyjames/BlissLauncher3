@@ -8,4 +8,7 @@
     <string name="cancel">Cancel</string>
     <string name="uninstall_app">Do you want to uninstall this app?</string>
     <string name="untitled_folder">Untitled</string>
+    <string name="max">Max</string>
+    <string name="min">Min</string>
+    <string name="widget_no_resize">Cannot resize this widget</string>
 </resources>
