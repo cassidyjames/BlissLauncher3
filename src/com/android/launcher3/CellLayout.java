@@ -90,6 +90,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Stack;
 
+import foundation.e.bliss.multimode.MultiModeController;
+
 public class CellLayout extends ViewGroup {
     private static final String TAG = "CellLayout";
     private static final boolean LOGD = false;
@@ -1527,6 +1529,8 @@ public class CellLayout extends ViewGroup {
         }
 
         void animate() {
+            if (MultiModeController.isSingleLayerMode()) return;
+
             boolean noMovement = (finalDeltaX == 0) && (finalDeltaY == 0);
 
             if (mShakeAnimators.containsKey(child)) {
