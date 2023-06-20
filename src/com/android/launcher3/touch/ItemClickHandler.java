@@ -114,6 +114,7 @@ public class ItemClickHandler {
             Folder folder = Folder.getOpen(launcher);
             if (folder instanceof GridFolder && ((GridFolder) folder).isFolderWobbling()) {
                 ((GridFolder) folder).wobbleFolder(false);
+                workspace.wobbleLayouts(false);
             } else if (workspace.isWobbling()) {
                 workspace.wobbleLayouts(false);
             } else {
