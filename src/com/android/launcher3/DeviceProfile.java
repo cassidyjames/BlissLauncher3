@@ -68,9 +68,11 @@ import com.android.launcher3.util.CellContentDimensions;
 import com.android.launcher3.util.DisplayController;
 import com.android.launcher3.util.DisplayController.Info;
 import com.android.launcher3.util.IconSizeSteps;
+import com.android.launcher3.util.NavigationMode;
 import com.android.launcher3.util.ResourceHelper;
 import com.android.launcher3.util.Themes;
 import com.android.launcher3.util.WindowBounds;
+import com.android.launcher3.util.window.WindowManagerProxy;
 
 import foundation.e.bliss.multimode.MultiModeController;
 import lineageos.providers.LineageSettings;
@@ -319,6 +321,7 @@ public class DeviceProfile {
     public final boolean isTransientTaskbar;
     // DragController
     public int flingToDeleteThresholdVelocity;
+    private final Context context;
 
     /** TODO: Once we fully migrate to staged split, remove "isMultiWindowMode" */
     DeviceProfile(Context context, InvariantDeviceProfile inv, Info info, WindowBounds windowBounds,
@@ -793,6 +796,7 @@ public class DeviceProfile {
         // This is done last, after iconSizePx is calculated above.
         mDotRendererWorkSpace = createDotRenderer(context, iconSizePx, dotRendererCache, showNotificationCount, typeface);
         mDotRendererAllApps = createDotRenderer(context, allAppsIconSizePx, dotRendererCache, showNotificationCount, typeface);
+        this.context = context;
     }
 
     private static DotRenderer createDotRenderer(
@@ -1900,10 +1904,14 @@ public class DeviceProfile {
      * Returns the number of pixels the hotseat is translated from the bottom of the screen.
      */
     private int getHotseatBarBottomPadding() {
+        WindowManagerProxy wm = WindowManagerProxy.newInstance(context);
+        boolean isFullyGesture = wm.getNavigationMode(context) == NavigationMode.NO_BUTTON;
+
         if (isTaskbarPresent) { // QSB on top or inline
             return hotseatBarBottomSpacePx - (Math.abs(hotseatCellHeightPx - iconSizePx) / 2);
         } else {
-            return hotseatBarSizePx - hotseatCellHeightPx;
+            int size = hotseatBarSizePx - hotseatCellHeightPx;
+            return isFullyGesture ? size / 2 : size;
         }
     }
 
