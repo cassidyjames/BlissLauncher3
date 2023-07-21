@@ -66,6 +66,8 @@ import com.android.launcher3.util.RunnableList;
 import com.android.launcher3.views.ActivityContext;
 import com.android.launcher3.views.BaseDragLayer;
 
+import foundation.e.bliss.multimode.MultiModeController;
+
 /** A custom view for rendering an icon, folder, shortcut or widget during drag-n-drop. */
 public abstract class DragView<T extends Context & ActivityContext> extends FrameLayout {
 
@@ -243,6 +245,8 @@ public abstract class DragView<T extends Context & ActivityContext> extends Fram
      */
     @TargetApi(Build.VERSION_CODES.O)
     public void setItemInfo(final ItemInfo info) {
+        if (MultiModeController.isSingleLayerMode()) return;
+
         // Load the adaptive icon on a background thread and add the view in ui thread.
         MODEL_EXECUTOR.getHandler().postAtFrontOfQueue(() -> {
             int w = mWidth;
