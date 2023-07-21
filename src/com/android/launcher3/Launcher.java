@@ -280,6 +280,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import foundation.e.bliss.LauncherAppMonitor;
+import foundation.e.bliss.multimode.MultiModeController;
 
 /**
  * Default launcher application.
@@ -1201,7 +1202,8 @@ public class Launcher extends StatefulActivity<LauncherState>
             mWorkspace.setClipChildren(false);
         }
         // When multiple pages are visible, show persistent page indicator
-        mWorkspace.getPageIndicator().setShouldAutoHide(!state.hasFlag(FLAG_MULTI_PAGE));
+        mWorkspace.getPageIndicator().setShouldAutoHide(!MultiModeController.isSingleLayerMode()
+                || !state.hasFlag(FLAG_MULTI_PAGE));
 
         mPrevLauncherState = mStateManager.getCurrentStableState();
         if (mPrevLauncherState != state && ALL_APPS.equals(state)

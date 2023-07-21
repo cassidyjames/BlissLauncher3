@@ -49,6 +49,8 @@ import com.android.launcher3.R;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.util.Themes;
 
+import foundation.e.bliss.multimode.MultiModeController;
+
 /**
  * {@link PageIndicator} which shows dots per page. The active page is shown with the current
  * accent color.
@@ -229,6 +231,7 @@ public class PageIndicatorDots extends View implements Insettable, PageIndicator
     }
 
     private void hideAfterDelay() {
+        if (MultiModeController.isSingleLayerMode()) return;
         mDelayedPaginationFadeHandler.removeCallbacksAndMessages(null);
         mDelayedPaginationFadeHandler.postDelayed(mHidePaginationRunnable, PAGINATION_FADE_DELAY);
     }
