@@ -60,8 +60,6 @@ public class LauncherProvider extends ContentProvider {
 
     @Override
     public boolean onCreate() {
-        MultiModeController.sharedPreferences = LauncherPrefs.getPrefs(getContext().getApplicationContext());
-        MultiModeController.resources = getContext().getApplicationContext().getResources();
         return true;
     }
 
