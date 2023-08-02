@@ -43,6 +43,8 @@ import com.android.launcher3.uioverrides.flags.FlagsFactory;
 import java.util.function.Predicate;
 import java.util.function.ToIntFunction;
 
+import foundation.e.bliss.multimode.MultiModeController;
+
 /**
  * Defines a set of flags used to control various launcher behaviors.
  * <p>
@@ -70,7 +72,11 @@ public final class FeatureFlags {
      * @deprecated Use {@link BuildConfig#QSB_ON_FIRST_SCREEN} directly
      */
     @Deprecated
-    public static final boolean QSB_ON_FIRST_SCREEN = BuildConfig.QSB_ON_FIRST_SCREEN;
+    public static class QSB_ON_FIRST_SCREEN {
+        public static boolean get() {
+            return  MultiModeController.isSingleLayerMode();
+        }
+    }
 
     /**
      * Feature flag to handle define config changes dynamically instead of killing the process.
