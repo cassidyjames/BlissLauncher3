@@ -77,6 +77,7 @@ public class GridFolder extends Folder implements OnAlarmListener {
         mGridFolderPage = findViewById(R.id.grid_folder_page);
 
         mFolderTab = findViewById(R.id.folder_tab);
+        mFolderName.setSelectAllOnFocus(false);
         mFolderName.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
 
         mFooterHeight = getResources().getDimensionPixelSize(R.dimen.grid_folder_footer_height);

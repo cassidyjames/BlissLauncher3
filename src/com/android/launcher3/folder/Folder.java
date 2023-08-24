@@ -396,8 +396,8 @@ public class Folder extends AbstractFloatingView implements ClipPathView, DragSo
         mFolderIcon.onTitleChanged(newTitle);
 
         if (TextUtils.isEmpty(mInfo.title)) {
-            mFolderName.setHint(R.string.folder_hint_text);
-            mFolderName.setText("");
+            mFolderName.setHint(R.string.untitled_folder);
+            mFolderName.setText(R.string.untitled_folder);
         } else {
             mFolderName.setHint(null);
         }
@@ -514,8 +514,8 @@ public class Folder extends AbstractFloatingView implements ClipPathView, DragSo
             mFolderName.setText(mInfo.title);
             mFolderName.setHint(null);
         } else {
-            mFolderName.setText("");
-            mFolderName.setHint(R.string.folder_hint_text);
+            mFolderName.setText(R.string.untitled_folder);
+            mFolderName.setHint(R.string.untitled_folder);
         }
         // In case any children didn't come across during loading, clean up the folder accordingly
         mFolderIcon.post(() -> {
