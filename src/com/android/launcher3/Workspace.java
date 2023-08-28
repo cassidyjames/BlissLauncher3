@@ -50,6 +50,7 @@ import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Message;
@@ -107,6 +108,7 @@ import com.android.launcher3.pageindicators.PageIndicatorDots;
 import com.android.launcher3.statemanager.StateManager;
 import com.android.launcher3.statemanager.StateManager.StateHandler;
 import com.android.launcher3.states.StateAnimationConfig;
+import com.android.launcher3.touch.ItemLongClickListener;
 import com.android.launcher3.touch.WorkspaceTouchListener;
 import com.android.launcher3.util.EdgeEffectCompat;
 import com.android.launcher3.util.Executors;
@@ -119,6 +121,7 @@ import com.android.launcher3.util.PackageUserKey;
 import com.android.launcher3.util.RunnableList;
 import com.android.launcher3.util.Thunk;
 import com.android.launcher3.util.WallpaperOffsetInterpolator;
+import com.android.launcher3.views.FloatingIconView;
 import com.android.launcher3.widget.LauncherAppWidgetHostView;
 import com.android.launcher3.widget.LauncherWidgetHolder;
 import com.android.launcher3.widget.LauncherWidgetHolder.ProviderChangedListener;
@@ -572,6 +575,9 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         mDragObjectInfo = null;
         if (isWobbling()) {
             wobbleLayouts(true);
+        }
+        if (!wobbleExpireAlarm.alarmPending()) {
+            wobbleExpireAlarm.setAlarm(WOBBLE_EXPIRATION_TIMEOUT);
         }
     }
 
@@ -1160,6 +1166,22 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         if (isTrackpadMultiFingerSwipe(ev)) {
             return false;
         }
+        int[] cell = new int[2];
+        final CellLayout cellLayout = (CellLayout) getChildAt(getCurrentPage());
+        cellLayout.pointToCellExact((int) ev.getX(), (int) ev.getY(), cell);
+
+        if ((cellLayout.isOccupied(cell[0], cell[1]))) {
+            View v= cellLayout.getChildAt(cell[0], cell[1]);
+            if (v instanceof BubbleTextView) {
+                RectF rect = new RectF();
+                FloatingIconView.getLocationBoundsForView(mLauncher, v, false, rect,
+                        new Rect());
+
+                if (rect.contains(ev.getX(), ev.getY()) && ev.getAction() == MotionEvent.ACTION_MOVE) {
+                    return false;
+                }
+            }
+        }
         return super.onTouchEvent(ev);
     }
 
@@ -1171,10 +1193,10 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouch(View v, MotionEvent event) {
-        return shouldConsumeTouch(v);
+        return shouldConsumeTouch(v, event);
     }
 
-    private boolean shouldConsumeTouch(View v) {
+    private boolean shouldConsumeTouch(View v, MotionEvent event) {
         return !workspaceIconsCanBeDragged()
                 || (!workspaceInModalState() && !isVisible(v));
     }
@@ -1734,9 +1756,13 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
     public void startDrag(CellInfo cellInfo, DragOptions options) {
         if (!isWobbling() && MultiModeController.isSingleLayerMode()) {
             wobbleLayouts(true);
+            return;
         }
 
         View child = cellInfo.cell;
+        if (wobbleExpireAlarm.alarmPending()) {
+            wobbleExpireAlarm.cancelAlarm();
+        }
 
         mDragInfo = cellInfo;
         child.clearAnimation();
@@ -3700,6 +3726,10 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
                     ((BubbleTextView) view).applyUninstallIconState(true);
                 }
 
+                if (!(view instanceof FolderIcon)) {
+                    view.setOnTouchListener(ItemLongClickListener.INSTANCE_WORKSPACE_WOBBLE);
+                }
+
                 if (excludeDraggingView && mDragObjectInfo != null) {
                     if (mDragObjectInfo instanceof WorkspaceItemInfo
                             && mDragObjectInfo.equals(view.getTag())) {
@@ -3721,6 +3751,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         } else {
             wobbleExpireAlarm.cancelAlarm();
             mapOverItems((info, view) -> {
+                view.setOnTouchListener(null);
                 view.setLayerType(LAYER_TYPE_NONE, null);
                 view.clearAnimation();
                 if (view instanceof BubbleTextView) {

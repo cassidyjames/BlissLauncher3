@@ -94,7 +94,7 @@ public class ItemClickHandler {
      */
     public static final OnClickListener INSTANCE = ItemClickHandler::onClick;
 
-    private static void onClick(View v) {
+    public static void onClick(View v) {
         // Make sure that rogue clicks don't get through while allapps is launching, or after the
         // view has detached (it's possible for this to happen if the view is removed mid touch).
         if (v.getWindowToken() == null) return;
@@ -103,7 +103,7 @@ public class ItemClickHandler {
         final Workspace<?> workspace = launcher.getWorkspace();
         if (!launcher.getWorkspace().isFinishedSwitchingState()) return;
 
-        if (v instanceof BubbleTextView) {
+        if (v instanceof BubbleTextView && launcher.getWorkspace().isWobbling()) {
             if (((BubbleTextView) v).tryToHandleUninstallClick(launcher)) {
                 return;
             }
