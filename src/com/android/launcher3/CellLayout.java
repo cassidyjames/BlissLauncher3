@@ -928,7 +928,7 @@ public class CellLayout extends ViewGroup {
         DeviceProfile grid = mActivity.getDeviceProfile();
         float iconVisibleRadius = ICON_VISIBLE_AREA_FACTOR * grid.iconSizePx / 2;
         // Halfway between reorder radius and icon.
-        return (getReorderRadius(targetCell, 1, 1) + iconVisibleRadius) / 2;
+        return (getReorderRadius(targetCell, 1, 1) + iconVisibleRadius) / 4;
     }
 
     /**
