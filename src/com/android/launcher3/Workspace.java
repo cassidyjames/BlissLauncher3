@@ -2756,7 +2756,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         IntSet pageIndexesToVerify = IntSet.wrap(nextPage - 1,
                 nextPage + (isTwoPanelEnabled() ? 2 : 1));
 
-        int iconOffset = mLauncher.getDeviceProfile().iconSizePx / 2;
+        int iconOffset = mLauncher.getDeviceProfile().iconSizePx / 3;
         for (int pageIndex : pageIndexesToVerify) {
             // When deciding whether to perform a page switch, we need to consider the most
             // extreme X coordinate between the finger location and the center of the object
@@ -2797,7 +2797,8 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
      * Returns the child CellLayout if the point is inside the page coordinates, null otherwise.
      */
     private CellLayout verifyInsidePage(int pageNo, float x, float y) {
-        if (pageNo >= 0 && pageNo < getPageCount()) {
+        int initialPage = MultiModeController.isSingleLayerMode() ? 1 : 0;
+        if (pageNo >= initialPage && pageNo < getPageCount()) {
             CellLayout cl = (CellLayout) getChildAt(pageNo);
             if (x >= cl.getLeft() && x <= cl.getRight()
                     && y >= cl.getTop() && y <= cl.getBottom()) {
