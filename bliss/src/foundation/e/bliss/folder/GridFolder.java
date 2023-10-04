@@ -38,6 +38,7 @@ import com.android.launcher3.dragndrop.DragOptions;
 import com.android.launcher3.folder.Folder;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.model.data.WorkspaceItemInfo;
+import com.android.launcher3.touch.ItemLongClickListener;
 import com.android.launcher3.views.ActivityContext;
 import com.android.launcher3.views.ClipPathView;
 import com.android.launcher3.views.ScrimView;
@@ -326,6 +327,7 @@ public class GridFolder extends Folder implements OnAlarmListener {
             AtomicInteger index = new AtomicInteger();
             ItemInfo draggingViewInfo = mLauncher.getWorkspace().getDragObjectInfo();
             iterateOverItems((info, view) -> {
+                view.setOnTouchListener(ItemLongClickListener.INSTANCE_WORKSPACE_WOBBLE);
                 if (excludeDraggingView && draggingViewInfo != null) {
                     if (draggingViewInfo instanceof WorkspaceItemInfo && draggingViewInfo.equals(view.getTag())) {
                         return false;
@@ -347,6 +349,7 @@ public class GridFolder extends Folder implements OnAlarmListener {
             wobbleExpireAlarm.cancelAlarm();
             iterateOverItems((info, view) -> {
                 isFolderWobbling = false;
+                view.setOnTouchListener(null);
                 view.clearAnimation();
                 if (view instanceof BubbleTextView) {
                     ((BubbleTextView) view).applyUninstallIconState(false);
