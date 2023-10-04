@@ -30,6 +30,8 @@ import com.android.quickstep.interaction.TutorialController.TutorialType;
 
 import java.util.ArrayList;
 
+import foundation.e.bliss.multimode.MultiModeController;
+
 /** Shows the Home gesture interactive tutorial. */
 public class HomeGestureTutorialFragment extends TutorialFragment {
 
@@ -56,6 +58,8 @@ public class HomeGestureTutorialFragment extends TutorialFragment {
     @Nullable
     @Override
     protected Animator createGestureAnimation() {
+        if (MultiModeController.isSingleLayerMode()) return null;
+
         if (!(mTutorialController instanceof HomeGestureTutorialController)) {
             return null;
         }

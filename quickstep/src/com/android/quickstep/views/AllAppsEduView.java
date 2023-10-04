@@ -49,6 +49,8 @@ import com.android.launcher3.uioverrides.touchcontrollers.PortraitStatesTouchCon
 import com.android.launcher3.util.Themes;
 import com.android.quickstep.util.MultiValueUpdateListener;
 
+import foundation.e.bliss.multimode.MultiModeController;
+
 /**
  * View used to educate the user on how to access All Apps when in No Nav Button navigation mode.
  * If the user drags on the view, the animation is overridden so the user can swipe to All Apps or
@@ -271,6 +273,8 @@ public class AllAppsEduView extends AbstractFloatingView {
      * Shows the All Apps education view and plays the animation.
      */
     public static void show(Launcher launcher) {
+        if (MultiModeController.isSingleLayerMode()) return;
+
         final DragLayer dragLayer = launcher.getDragLayer();
         AllAppsEduView view = (AllAppsEduView) launcher.getLayoutInflater().inflate(
                 R.layout.all_apps_edu_view, dragLayer, false);
