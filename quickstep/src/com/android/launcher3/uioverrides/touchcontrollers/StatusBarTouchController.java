@@ -81,8 +81,8 @@ public class StatusBarTouchController implements TouchController {
 
     private void dispatchTouchEvent(MotionEvent ev) {
         mLastAction = ev.getActionMasked();
-        if (MultiModeController.isSingleLayerMode() && mLauncher.getWorkspace().getCurrentPage() != 0) {
-            if (ev.getAction() == ACTION_UP) {
+        if (MultiModeController.isSingleLayerMode()) {
+            if (ev.getAction() == ACTION_UP && mLauncher.getWorkspace().getCurrentPage() != 0) {
                 mLauncher.toggleSwipeSearchState();
             }
         } else if (mSystemUiProxy.isActive()) {

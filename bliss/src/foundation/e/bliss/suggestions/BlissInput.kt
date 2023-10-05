@@ -19,7 +19,6 @@ import android.view.View
 import android.widget.GridLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
-import androidx.core.content.ContextCompat.startActivity
 import androidx.core.widget.doAfterTextChanged
 import androidx.core.widget.doOnTextChanged
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -28,6 +27,7 @@ import com.android.launcher3.BubbleTextView
 import com.android.launcher3.ExtendedEditText
 import com.android.launcher3.ExtendedEditText.OnBackKeyListener
 import com.android.launcher3.InvariantDeviceProfile
+import com.android.launcher3.Launcher
 import com.android.launcher3.R
 import com.android.launcher3.allapps.AllAppsStore.OnUpdateListener
 import com.android.launcher3.allapps.BaseAllAppsAdapter.AdapterItem
@@ -50,7 +50,7 @@ class BlissInput(context: Context, attrs: AttributeSet) :
     LinearLayout(context, attrs), SearchCallback<AdapterItem>, OnUpdateListener, OnBackKeyListener {
     private val mSearchAlgorithm = DefaultAppSearchAlgorithm(context, true)
     private val appMonitor = LauncherAppMonitor.getInstance(context)
-    private val suggestionProvider by lazy { SearchSuggestionUtil().getSuggestionProvider(context) }
+    private val suggestionProvider by lazy { SearchSuggestionUtil.getSuggestionProvider(context) }
     private val suggestionAdapter by lazy { AutoCompleteAdapter(context) }
     private val idp by lazy { InvariantDeviceProfile.INSTANCE.get(context) }
     private val appUsageStats by lazy { AppUsageStats(context).usageStats }
@@ -199,7 +199,7 @@ class BlissInput(context: Context, attrs: AttributeSet) :
             if (appUsageStats.isNotEmpty()) {
                 appUsageStats
                     .mapNotNull { pkg -> appsList.find { it.targetPackage == pkg.packageName } }
-                    .subList(0, idp.numColumns)
+                    .take(idp.numColumns)
                     .forEachIndexed { index, it -> mIconGrid.addView(createAppView(it), index) }
             }
         }
@@ -208,9 +208,10 @@ class BlissInput(context: Context, attrs: AttributeSet) :
     private fun openSearch(query: String) {
         if (query.isEmpty()) return
 
-        val intent =
-            Intent(Intent.ACTION_VIEW, SearchSuggestionUtil().getUriForQuery(context, query))
-        startActivity(context, intent, null)
+        val launcher = Launcher.getLauncher(context)
+        val intent = Intent(Intent.ACTION_VIEW, SearchSuggestionUtil.getUriForQuery(context, query))
+
+        launcher.startActivitySafely(null, intent, null)
     }
 
     override fun clearSearchResult() {

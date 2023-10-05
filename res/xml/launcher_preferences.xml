@@ -101,7 +101,8 @@
         android:defaultValue="@bool/default_single_mode"
         android:key="pref_single_layer"
         android:persistent="true"
-        android:title="Enable single layer mode" />
+        android:title="Enable single layer mode"
+        launcher:isPreferenceVisible="false" />
 
     <SwitchPreference
         android:defaultValue="true"

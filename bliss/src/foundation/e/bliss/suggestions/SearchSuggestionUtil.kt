@@ -9,10 +9,11 @@ package foundation.e.bliss.suggestions
 
 import android.content.Context
 import android.net.Uri
+import androidx.core.net.toUri
 import foundation.e.bliss.suggestions.duckduckgo.DuckDuckGoProvider
 import foundation.e.bliss.suggestions.qwant.QwantProvider
 
-class SearchSuggestionUtil {
+object SearchSuggestionUtil {
 
     fun getSuggestionProvider(context: Context): SuggestionProvider {
         return with(defaultSearchEngine(context)) {
@@ -27,16 +28,12 @@ class SearchSuggestionUtil {
         val defaultSearchEngine = defaultSearchEngine(context)
 
         return with(defaultSearchEngine) {
-            val url =
-                when {
-                    contains(Providers.QWANT.key, true) -> "${Providers.QWANT.url}?q=$query"
-                    contains(Providers.DUCKDUCKGO.key, true) ->
-                        "${Providers.DUCKDUCKGO.url}?q=$query"
-                    contains(Providers.MOJEEK.key, true) -> "${Providers.MOJEEK.url}search?q=$query"
-                    else -> "${Providers.SPOT.url}?q=$query"
-                }
-
-            Uri.parse(url)
+            when {
+                contains(Providers.QWANT.key, true) -> "${Providers.QWANT.url}?q=$query"
+                contains(Providers.DUCKDUCKGO.key, true) -> "${Providers.DUCKDUCKGO.url}?q=$query"
+                contains(Providers.MOJEEK.key, true) -> "${Providers.MOJEEK.url}search?q=$query"
+                else -> "${Providers.SPOT.url}?q=$query"
+            }.toUri()
         }
     }
 

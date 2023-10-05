@@ -41,7 +41,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center_horizontal"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:paddingBottom="12dp">
 
                 <foundation.e.bliss.blur.BlurLayout
                     android:layout_width="wrap_content"

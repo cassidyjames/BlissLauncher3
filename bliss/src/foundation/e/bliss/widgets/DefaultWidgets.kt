@@ -34,14 +34,10 @@ object DefaultWidgets {
 
         for (widgetItem in widgetItemsList) {
             val provider = widgetItem.componentName
-            provider.let { providerList.add(it) }
+            provider.let(providerList::add)
         }
 
         // Return default widgets if the providerList is empty
-        return if (providerList.isEmpty()) {
-            widgets
-        } else {
-            providerList
-        }
+        return providerList.ifEmpty { widgets }
     }
 }
