@@ -49,6 +49,8 @@ import com.android.launcher3.widget.PendingItemDragHelper;
 import com.android.launcher3.widget.WidgetCell;
 import com.android.launcher3.widget.WidgetImageView;
 
+import foundation.e.bliss.utils.Logger;
+
 /**
  * Class to handle long-clicks on workspace items and start drag as a result.
  */
@@ -63,11 +65,11 @@ public class ItemLongClickListener {
     public static final View.OnTouchListener INSTANCE_WORKSPACE_WOBBLE =
             ItemLongClickListener::onTouchTest;
 
-    public static boolean onTouchTest(View v, MotionEvent motionEvent) {
-        int action = motionEvent.getAction();
-        if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_DOWN) {
+    public static boolean onTouchTest(View v, MotionEvent ev) {
+        if (ev.getEventTime() - ev.getDownTime() < 150) {
             return false;
         }
+
         return onWorkspaceItemLongClick(v);
     }
 
