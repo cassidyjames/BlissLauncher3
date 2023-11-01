@@ -17,6 +17,21 @@
             android:exported="true"
             android:label="Remove Widgets"
             android:theme="@style/HomeSettings.Theme" />
+
+        <!-- Dummy receiver for the migration of weather app -->
+        <receiver
+            android:name="foundation.e.blisslauncher.features.weather.WeatherAppWidgetProvider"
+            android:exported="false"
+            android:label="@string/app_name"
+            tools:ignore="Instantiatable">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/weather_appwidget_info" />
+        </receiver>
+
     </application>
 
 </manifest>
