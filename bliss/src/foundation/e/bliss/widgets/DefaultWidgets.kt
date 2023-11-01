@@ -9,6 +9,7 @@ package foundation.e.bliss.widgets
 
 import android.content.ComponentName
 import android.content.Context
+import android.content.pm.PackageManager
 import foundation.e.bliss.utils.BlissDbUtils
 
 object DefaultWidgets {
@@ -16,7 +17,12 @@ object DefaultWidgets {
         ComponentName("foundation.e.drive", "foundation.e.drive.widgets.EDriveWidget")
     private val privacyWidget =
         ComponentName("foundation.e.advancedprivacy", "foundation.e.advancedprivacy.Widget")
-    private val weatherWidget =
+    val oldWeatherWidget =
+        ComponentName(
+            "foundation.e.blisslauncher",
+            "foundation.e.blisslauncher.features.weather.WeatherAppWidgetProvider"
+        )
+    val weatherWidget =
         ComponentName(
             "foundation.e.blissweather",
             "foundation.e.blissweather.widget.WeatherAppWidgetProvider"
@@ -36,6 +42,14 @@ object DefaultWidgets {
             val provider = widgetItem.componentName
             provider.let(providerList::add)
         }
+
+        // Disable dummy widget provider component after widgets listed.
+        val packageManager = context.packageManager
+        packageManager.setComponentEnabledSetting(
+            oldWeatherWidget,
+            PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+            PackageManager.DONT_KILL_APP
+        )
 
         // Return default widgets if the providerList is empty
         return providerList.ifEmpty { widgets }
