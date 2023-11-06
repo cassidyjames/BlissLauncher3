@@ -217,6 +217,8 @@ public class GridFolder extends Folder implements OnAlarmListener {
             wobbleFolder(false);
         }
 
+        showOrHideDesktop(mLauncher, false);
+
         super.handleClose(animate);
     }
 
