@@ -40,6 +40,7 @@ import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.content.res.AppCompatResources;
 
 import com.android.launcher3.Alarm;
 import com.android.launcher3.BubbleTextView;
@@ -651,7 +652,8 @@ public class FolderIcon extends FrameLayout implements FolderListener, IconLabel
             mDotParams.dotColor = getContext().getResources()
                     .getColor(R.color.notification_dot_bg, getContext().getTheme());
             mDotParams.leftAlign = true;
-            mDotRenderer.draw(canvas, mDotParams, mDotInfo == null ? -1 : mDotInfo.getNotificationCount());
+            Drawable notifIcon = AppCompatResources.getDrawable(getContext(), R.drawable.ic_notification);
+            mDotRenderer.draw(canvas, mDotParams, mDotInfo == null ? -1 : mDotInfo.getNotificationCount(), notifIcon);
         }
     }
 

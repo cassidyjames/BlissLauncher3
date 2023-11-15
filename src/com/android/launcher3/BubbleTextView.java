@@ -72,6 +72,7 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
 import androidx.annotation.VisibleForTesting;
+import androidx.appcompat.content.res.AppCompatResources;
 
 import com.android.launcher3.accessibility.BaseAccessibilityDelegate;
 import com.android.launcher3.config.FeatureFlags;
@@ -667,7 +668,8 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
             final int scrollY = getScrollY();
             canvas.translate(scrollX, scrollY);
             mDotParams.leftAlign = true;
-            mDotRenderer.draw(canvas, mDotParams, mDotInfo == null ? -1 : mDotInfo.getNotificationCount());
+            Drawable notifIcon = AppCompatResources.getDrawable(getContext(), R.drawable.ic_notification);
+            mDotRenderer.draw(canvas, mDotParams, mDotInfo == null ? -1 : mDotInfo.getNotificationCount(), notifIcon);
             canvas.translate(-scrollX, -scrollY);
         }
     }
