@@ -140,7 +140,10 @@ object BlissDbUtils {
         // Store each type separately
         val folderList = mutableMapOf<Favorite, Long>()
         val appsPwaList = mutableListOf<Favorite>()
-        favoritesList.forEach { fav ->
+        // Sort favorites list based on screen to avoid misplacing items, since the possible grid
+        // size different for older and newer launcher.
+        val sortedFavorites = favoritesList.sortedWith(compareBy({ it.screen }, { it.cell }))
+        sortedFavorites.forEach { fav ->
             if (fav.isFolder) {
                 // Value added here is temp, it will be replaced
                 // with id returned from database insertion
@@ -161,7 +164,7 @@ object BlissDbUtils {
                 values.put("cellY", y)
                 values.put("screen", x)
             } else {
-                // Home screen is 4x5 grid size
+                // Home screen is XxX grid size
                 val (y, x) = getGridPosition(fav.cell, rowCount, columnCount)
                 values.put("cellX", x)
                 values.put("cellY", y)
