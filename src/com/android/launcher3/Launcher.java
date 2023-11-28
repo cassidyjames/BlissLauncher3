@@ -711,7 +711,10 @@ public class Launcher extends StatefulActivity<LauncherState>
             }
         }
 
-        // #5 state handler
+        // #5 Close widget resize mode
+        hideWidgetResizeContainer();
+
+        // #6 state handler
         return new OnBackAnimationCallback() {
             @Override
             public void onBackInvoked() {
@@ -1346,6 +1349,7 @@ public class Launcher extends StatefulActivity<LauncherState>
         }
         mAppWidgetHolder.setActivityResumed(false);
         mAppMonitor.onLauncherPaused();
+        hideWidgetResizeContainer();
     }
 
     /**

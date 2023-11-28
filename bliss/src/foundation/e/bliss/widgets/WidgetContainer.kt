@@ -15,17 +15,20 @@ import android.appwidget.AppWidgetProviderInfo
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.graphics.Rect
 import android.os.Bundle
 import android.os.ServiceManager
 import android.os.UserHandle
 import android.util.AttributeSet
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.View.OnLayoutChangeListener
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.LinearLayout
+import android.widget.RelativeLayout
 import android.widget.Toast
 import com.android.app.animation.R.id.launcher
 import com.android.internal.appwidget.IAppWidgetService
@@ -48,7 +51,6 @@ import io.reactivex.rxjava3.disposables.Disposable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 @Suppress("Deprecation", "NewApi")
@@ -57,7 +59,10 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
 
     private lateinit var mRemoveWidgetLayout: FrameLayout
     private lateinit var mWrapper: LinearLayout
+    private lateinit var mResizeContainer: RelativeLayout
+
     private var mWrapperChildCount = 0
+    private val mResizeContainerRect = Rect()
 
     private val layoutListener = OnLayoutChangeListener { view, _, _, _, _, _, _, _, _ ->
         val childCount = (view as LinearLayout).childCount
@@ -67,6 +72,17 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
 
     override fun setPadding(left: Int, top: Int, right: Int, bottom: Int) {
         super.setPadding(0, 0, 0, 0)
+    }
+
+    override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
+        mResizeContainer.getHitRect(mResizeContainerRect)
+        if (
+            ev.action == MotionEvent.ACTION_DOWN &&
+                !mResizeContainerRect.contains(ev.x.toInt(), ev.y.toInt())
+        ) {
+            mLauncher.hideWidgetResizeContainer()
+        }
+        return super.onInterceptTouchEvent(ev)
     }
 
     override fun onAttachedToWindow() {
@@ -87,6 +103,7 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
                 addOnLayoutChangeListener(layoutListener)
                 handleRemoveButtonVisibility(childCount)
             }
+        mResizeContainer = findViewById(R.id.widget_resizer_container)!!
     }
 
     override fun onDetachedFromWindow() {
