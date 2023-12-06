@@ -3092,16 +3092,6 @@ public class Launcher extends StatefulActivity<LauncherState>
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 int newHeight = minHeight + (normalisedDifference * progress);
                 activeRoundedWidgetView.setHeight(newHeight);
-
-                int maxWidth = mDeviceProfile.availableWidthPx - (2 * ResourceUtils.pxFromDp(8,
-                        getResources().getDisplayMetrics()));
-
-                Bundle newOps = new Bundle();
-                newOps.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, maxWidth);
-                newOps.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH, maxWidth);
-                newOps.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, newHeight);
-                newOps.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, newHeight);
-                activeRoundedWidgetView.updateAppWidgetOptions(newOps);
                 activeRoundedWidgetView.requestLayout();
             }
 

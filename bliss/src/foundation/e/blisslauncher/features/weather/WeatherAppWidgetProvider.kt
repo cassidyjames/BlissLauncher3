@@ -10,4 +10,4 @@ package foundation.e.blisslauncher.features.weather
 import android.appwidget.AppWidgetProvider
 
 // Dummy class for the migration of weather app
-object WeatherAppWidgetProvider : AppWidgetProvider()
+class WeatherAppWidgetProvider : AppWidgetProvider()

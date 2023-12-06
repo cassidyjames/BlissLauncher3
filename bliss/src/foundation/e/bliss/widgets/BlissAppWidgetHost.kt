@@ -26,7 +26,7 @@ class BlissAppWidgetHost(val context: Context) : AppWidgetHost(context, WIDGET_H
         appWidgetId: Int,
         appWidget: AppWidgetProviderInfo?
     ): AppWidgetHostView {
-        val blur = DefaultWidgets.getWidgetsList(context).contains(appWidget?.provider)
+        val blur = DefaultWidgets.defaultWidgets.contains(appWidget?.provider)
         return RoundedWidgetView(context, blur)
     }
 
@@ -37,7 +37,7 @@ class BlissAppWidgetHost(val context: Context) : AppWidgetHost(context, WIDGET_H
 
     companion object {
         const val TAG = "BlissAppWidgetHost"
-        const val WIDGET_HOST_ID = 1040
+        const val WIDGET_HOST_ID = 0x7f090001
         const val REQUEST_CONFIGURE_APPWIDGET = 1041
     }
 }

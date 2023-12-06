@@ -10,10 +10,12 @@ package foundation.e.bliss.utils
 import android.animation.ArgbEvaluator
 import android.animation.ValueAnimator
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.LauncherActivityInfo
 import android.content.pm.LauncherApps
+import android.content.pm.PackageManager
 import android.os.Handler
 import android.os.Looper
 import android.os.UserHandle
@@ -93,4 +95,13 @@ fun getUninstallTarget(launcher: Launcher, item: ItemInfo?): ComponentName? {
         }
     }
     return null
+}
+
+fun disableComponent(context: Context, componentName: ComponentName) {
+    val packageManager = context.packageManager
+    packageManager.setComponentEnabledSetting(
+        componentName,
+        PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+        PackageManager.DONT_KILL_APP
+    )
 }

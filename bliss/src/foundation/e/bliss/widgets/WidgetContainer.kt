@@ -32,20 +32,24 @@ import android.widget.RelativeLayout
 import android.widget.Toast
 import com.android.app.animation.R.id.launcher
 import com.android.internal.appwidget.IAppWidgetService
+import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.Launcher
 import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.PendingAddItemInfo
 import com.android.launcher3.R
 import com.android.launcher3.config.FeatureFlags
 import com.android.launcher3.graphics.FragmentWithPreview
+import com.android.launcher3.testing.shared.ResourceUtils
 import com.android.launcher3.widget.LauncherAppWidgetProviderInfo
 import com.android.launcher3.widget.PendingAddShortcutInfo
 import com.android.launcher3.widget.WidgetCell
 import com.android.launcher3.widget.picker.WidgetsFullSheet
 import foundation.e.bliss.LauncherAppMonitor
 import foundation.e.bliss.LauncherAppMonitorCallback
+import foundation.e.bliss.utils.BlissDbUtils
 import foundation.e.bliss.utils.Logger
 import foundation.e.bliss.utils.ObservableList
+import foundation.e.bliss.utils.disableComponent
 import foundation.e.bliss.widgets.BlissAppWidgetHost.Companion.REQUEST_CONFIGURE_APPWIDGET
 import io.reactivex.rxjava3.disposables.Disposable
 import kotlinx.coroutines.CoroutineScope
@@ -126,10 +130,11 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
     class WidgetFragment : FragmentWithPreview() {
         private lateinit var mWrapper: LinearLayout
         private lateinit var widgetObserver: Disposable
+        private lateinit var widgetsDbHelper: WidgetsDbHelper
 
+        private val mOldWidgets by lazy { BlissDbUtils.getWidgetDetails(context) }
         private val mWidgetManager by lazy { AppWidgetManager.getInstance(context) }
         private val mWidgetHost by lazy { BlissAppWidgetHost(context) }
-        private val widgetsDbHelper by lazy { WidgetsDbHelper.getInstance(context) }
         private val launcher by lazy { Launcher.getLauncher(context) }
 
         private val mAppMonitorCallback: LauncherAppMonitorCallback =
@@ -163,6 +168,8 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
             container: ViewGroup?,
             savedInstanceState: Bundle?
         ): View {
+            widgetsDbHelper = WidgetsDbHelper.getInstance(context)
+
             mWrapper =
                 LinearLayout(context, null).apply {
                     tag = "wrapper_children"
@@ -170,8 +177,8 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
                 }
 
             if (isQsbEnabled) {
-                loadWidgets()
                 mWidgetHost.startListening()
+                loadWidgets()
             }
             return mWrapper
         }
@@ -180,19 +187,28 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
             super.onViewCreated(view, savedInstanceState)
         }
 
+        override fun onDestroyView() {
+            mWidgetHost.stopListening()
+            super.onDestroyView()
+        }
+
         private fun loadWidgets() {
             if (!initialWidgetsAdded) {
-                mWidgetHost.deleteHost()
-                Logger.e(TAG, "default not added ${mWidgetHost.appWidgetIds.size}")
-
-                DefaultWidgets.getWidgetsList(context).forEach {
-                    try {
-                        bindWidget(it)
-                    } catch (e: Exception) {
-                        Logger.e(TAG, "Could not add widget ${it.flattenToString()}")
+                val oldWidgets = mWidgetHost.appWidgetIds
+                if (oldWidgets.isEmpty()) {
+                    mWidgetHost.deleteHost()
+                    DefaultWidgets.defaultWidgets.forEach {
+                        try {
+                            bindWidget(it)
+                        } catch (e: Exception) {
+                            Logger.e(TAG, "Could not add widget ${it.flattenToString()}")
+                        }
                     }
+                } else {
+                    rebindWidgets(true)
                 }
 
+                disableComponent(context, DefaultWidgets.oldWeatherWidget)
                 initialWidgetsAdded = true
             } else {
                 rebindWidgets()
@@ -208,9 +224,25 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
             CoroutineScope(Dispatchers.Main).launch { eventFlow.collect { rebindWidgets() } }
         }
 
-        private fun rebindWidgets() {
+        private fun rebindWidgets(backup: Boolean = false) {
             mWrapper.removeAllViews()
-            mWidgetHost.appWidgetIds.sorted().forEach(::addView)
+            if (!backup) {
+                widgetsDbHelper
+                    .getWidgets()
+                    .sortedBy { it.position }
+                    .forEach { addView(it.widgetId) }
+            } else {
+                if (mOldWidgets.isNotEmpty()) {
+                    mOldWidgets
+                        .filter { mWidgetHost.appWidgetIds.contains(it.id) }
+                        .sortedWith(
+                            compareBy(BlissDbUtils.WidgetItems::order, BlissDbUtils.WidgetItems::id)
+                        )
+                        .forEach { addView(it.id, true) }
+                } else {
+                    mWidgetHost.appWidgetIds.sorted().forEach { addView(it, true) }
+                }
+            }
         }
 
         private fun bindWidget(provider: ComponentName) {
@@ -243,7 +275,7 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
             }
         }
 
-        private fun addView(widgetId: Int) {
+        private fun addView(widgetId: Int, backup: Boolean = false) {
             val info =
                 LauncherAppWidgetProviderInfo.fromProviderInfo(
                     Launcher.getLauncher(context),
@@ -269,13 +301,50 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
                     }
                     .also {
                         val opts = mWidgetManager.getAppWidgetOptions(it.appWidgetId)
+                        val maxWidth = launcher.deviceProfile.availableWidthPx - 2 *
+                                ResourceUtils.pxFromDp(8f, resources.displayMetrics)
                         val params =
                             LayoutParams(
-                                opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH),
+                                maxWidth,
                                 opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT)
                             )
 
-                        Logger.d(TAG, "Widget height: ${params.height} | opts: $opts")
+                        if (backup) {
+                            if (it.appWidgetInfo.provider.equals(DefaultWidgets.oldWeatherWidget)) {
+                                mWidgetHost.deleteAppWidgetId(it.id)
+
+                                // Swap with new widget
+                                bindWidget(DefaultWidgets.weatherWidget)
+                                return
+                            }
+                            val oldHeight =
+                                if (mOldWidgets.isNotEmpty()) {
+                                    mOldWidgets
+                                        .find { widgetItems -> widgetItems.id == widgetId }
+                                        ?.height
+                                } else {
+                                    0
+                                }
+                            val minHeight: Int = info.minResizeHeight
+                            val maxHeight: Int =
+                                InvariantDeviceProfile.INSTANCE.get(context)
+                                    .getDeviceProfile(context)
+                                    .heightPx * 3 / 4
+                            val normalisedDifference = (maxHeight - minHeight) / 100
+
+                            if (oldHeight != null && oldHeight > 0) {
+                                params.height = minHeight + normalisedDifference * oldHeight
+                            } else {
+                                params.height = 0
+                            }
+                            opts.remove(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT)
+                            opts.remove(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT)
+                            opts.remove(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH)
+                            opts.remove(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH)
+                            it.updateAppWidgetOptions(opts)
+                        } else {
+                            params.height = widgetsDbHelper.getWidgetHeight(it.id) ?: 0
+                        }
 
                         if (params.height > 0) {
                             mWrapper.addView(it, params)
@@ -288,7 +357,7 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
                                 mWrapper.indexOfChild(it),
                                 it.appWidgetInfo.provider,
                                 it.appWidgetId,
-                                it.height
+                                params.height
                             )
                         )
                     }
