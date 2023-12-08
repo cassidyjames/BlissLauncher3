@@ -11,6 +11,7 @@ import android.app.usage.UsageStats
 import android.app.usage.UsageStatsManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.provider.Settings
 import android.widget.Toast
 import com.android.launcher3.R
@@ -48,11 +49,15 @@ class AppUsageStats(private val mContext: Context) {
                 }
             }
 
-            if (aggregatedStats.isEmpty()) {
+            if (
+                mContext.checkCallingOrSelfPermission(
+                    android.Manifest.permission.PACKAGE_USAGE_STATS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
                 Logger.i(TAG, "The user may not allow the access to apps usage.")
                 Toast.makeText(mContext, "Permission not allowed!", Toast.LENGTH_LONG).show()
                 mContext.startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
-            } else {
+            } else if (aggregatedStats.isNotEmpty()) {
                 val statsMap = aggregatedStats.entries
 
                 statsMap
@@ -68,6 +73,8 @@ class AppUsageStats(private val mContext: Context) {
                         )
                         forEach { (_, stat) -> usageStats.add(stat) }
                     }
+            } else {
+                Logger.i(TAG, "The aggregatedStats are empty can't do much")
             }
 
             return usageStats
