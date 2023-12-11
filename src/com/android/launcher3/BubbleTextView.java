@@ -75,7 +75,6 @@ import androidx.annotation.VisibleForTesting;
 import com.android.launcher3.accessibility.BaseAccessibilityDelegate;
 import com.android.launcher3.config.FeatureFlags;
 import com.android.launcher3.dot.DotInfo;
-import com.android.launcher3.dragndrop.DragController;
 import com.android.launcher3.dragndrop.DragOptions;
 import com.android.launcher3.dragndrop.DragOptions.PreDragCondition;
 import com.android.launcher3.dragndrop.DraggableView;
@@ -116,7 +115,7 @@ import foundation.e.bliss.wobble.UninstallButtonRenderer;
  * too aggressive.
  */
 public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
-        IconLabelDotView, DraggableView, Reorderable, DragController.DragListener {
+        IconLabelDotView, DraggableView, Reorderable {
 
     private static final int DISPLAY_WORKSPACE = 0;
     public static final int DISPLAY_ALL_APPS = 1;
@@ -1344,6 +1343,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
         setForceHideDot(true);
         applyUninstallIconState(false);
         return () -> {
+            setForceHideDot(false);
         };
     }
 
@@ -1377,7 +1377,6 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
     public PreDragCondition startLongPressAction() {
         if (MultiModeController.isSingleLayerMode()) {
             mLauncher = LauncherAppMonitor.getInstanceNoCreate().getLauncher();
-            mLauncher.getDragController().addDragListener(this);
             return createWobblePreDragCondition();
         } else {
             PopupContainerWithArrow popup = PopupContainerWithArrow.showForIcon(this);
@@ -1408,14 +1407,4 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
     public boolean canShowLongPressPopup() {
         return getTag() instanceof ItemInfo && ShortcutUtil.supportsShortcuts((ItemInfo) getTag());
     }
-
-    @Override
-    public void onDragStart(DropTarget.DragObject dragObject, DragOptions options) {
-    }
-
-    @Override
-    public void onDragEnd() {
-        setForceHideDot(false);
-    }
-
 }
