@@ -173,5 +173,5 @@
     <color name="material_color_primary">#445E91</color>
     <color name="material_color_secondary">#575E71</color>
     <color name="material_color_tertiary">#715573</color>
-    <color name="notification_dot_bg">#44B04C</color>
+    <color name="notification_dot_bg">#01D066</color>
 </resources>
