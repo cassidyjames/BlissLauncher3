@@ -77,6 +77,8 @@ public class CellLayoutLayoutParams extends ViewGroup.MarginLayoutParams {
 
     public boolean dropped;
 
+    public boolean isFullscreen = false;
+
     public CellLayoutLayoutParams(Context c, AttributeSet attrs) {
         super(c, attrs);
         cellHSpan = 1;

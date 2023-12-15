@@ -67,7 +67,7 @@ import com.android.launcher3.views.ActivityContext;
 import java.util.ArrayList;
 import java.util.function.Consumer;
 
-import foundation.e.bliss.utils.Logger;
+import foundation.e.bliss.multimode.MultiModeController;
 
 /**
  * An abstraction of the original Workspace which supports browsing through a
@@ -77,6 +77,7 @@ public abstract class PagedView<T extends View & PageIndicator> extends ViewGrou
     private static final String TAG = "PagedView";
     private static final boolean DEBUG = false;
     public static final boolean DEBUG_FAILED_QUICKSWITCH = false;
+
 
     public static final int ACTION_MOVE_ALLOW_EASY_FLING = MotionEvent.ACTION_MASK - 1;
     public static final int INVALID_PAGE = -1;
@@ -714,12 +715,33 @@ public abstract class PagedView<T extends View & PageIndicator> extends ViewGrou
         super.addView(page, index, lp);
     }
 
+    int getViewportWidth() {
+        return mViewport.width();
+    }
+
+    public int getViewportHeight() {
+        return mViewport.height();
+    }
+
+    // Convenience methods to get the offset ASSUMING that we are centering the pages in the
+    // PagedView both horizontally and vertically
+    int getViewportOffsetX() {
+        return (getMeasuredWidth() - getViewportWidth()) / 2;
+    }
+
+    int getViewportOffsetY() {
+        return (getMeasuredHeight() - getViewportHeight()) / 2;
+    }
+
     private int getPageWidthSize(int widthSize) {
         // It's necessary to add the padding back because it is remove when measuring children,
         // like when MeasureSpec.getSize in CellLayout.
         return (widthSize - mInsets.left - mInsets.right - getPaddingLeft() - getPaddingRight())
                 / getPanelCount() + getPaddingLeft() + getPaddingRight();
     }
+
+    private Rect mViewport = new Rect();
+
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
@@ -735,13 +757,9 @@ public abstract class PagedView<T extends View & PageIndicator> extends ViewGrou
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
         int heightSize = MeasureSpec.getSize(heightMeasureSpec);
 
-        /* Allow the height to be set as WRAP_CONTENT. This allows the particular case
-         * of the All apps view on XLarge displays to not take up more space then it needs. Width
-         * is still not allowed to be set as WRAP_CONTENT since many parts of the code expect
-         * each effect_page to have the same width.
-         */
-        final int verticalPadding = getPaddingTop() + getPaddingBottom();
-        final int horizontalPadding = getPaddingLeft() + getPaddingRight();
+        mViewport.set(0, 0, widthSize, heightSize);
+        int verticalPadding = getPaddingTop() + getPaddingBottom();
+
 
         if (widthMode == MeasureSpec.UNSPECIFIED || heightMode == MeasureSpec.UNSPECIFIED) {
             super.onMeasure(widthMeasureSpec, heightMeasureSpec);
@@ -768,8 +786,6 @@ public abstract class PagedView<T extends View & PageIndicator> extends ViewGrou
                     int childHeightMode;
                     int childWidth;
                     int childHeight;
-                    int topPadding;
-                    int bottomPadding;
 
                     if (!lp.isFullScreenPage) {
                         if (lp.width == LayoutParams.WRAP_CONTENT) {
@@ -784,29 +800,17 @@ public abstract class PagedView<T extends View & PageIndicator> extends ViewGrou
                             childHeightMode = MeasureSpec.EXACTLY;
                         }
 
-                        childWidth = getPageWidthSize(widthSize);
-                        childHeight = heightSize - mInsets.top - mInsets.bottom - verticalPadding;
+                        childHeight = getViewportHeight() - verticalPadding
+                                - mInsets.top - mInsets.bottom;
                     } else {
                         childWidthMode = MeasureSpec.EXACTLY;
                         childHeightMode = MeasureSpec.EXACTLY;
 
-                        childWidth = getPageWidthSize(widthSize) - horizontalPadding
-                                - mInsets.left - mInsets.right;
-                        childHeight = heightSize + verticalPadding;
-
-                        topPadding = verticalPadding;
-                        bottomPadding = mInsets.bottom;
-
-                        if (navMode == NavigationMode.NO_BUTTON) {
-                            topPadding += mInsets.top;
-                        } else {
-                            topPadding += mInsets.top + 40;
-                            bottomPadding -= 40;
-                        }
-
-                        child.setPadding(child.getPaddingLeft(), topPadding,
-                                child.getPaddingRight(), bottomPadding);
+                        childHeight = heightSize;
                     }
+
+                    childWidth = getPageWidthSize(widthSize);
+
                     final int childWidthMeasureSpec =
                             MeasureSpec.makeMeasureSpec(childWidth, childWidthMode);
                     final int childHeightMeasureSpec =
@@ -921,6 +925,12 @@ public abstract class PagedView<T extends View & PageIndicator> extends ViewGrou
             ComputePageScrollsLogic scrollLogic) {
         final int childCount = getChildCount();
 
+        int offsetX = getViewportOffsetX();
+        int offsetY = getViewportOffsetY();
+
+        // Update the viewport offsets
+        mViewport.offset(offsetX, offsetY);
+
         final int startIndex = mIsRtl ? childCount - 1 : 0;
         final int endIndex = mIsRtl ? -1 : childCount;
         final int delta = mIsRtl ? -1 : 1;
@@ -935,8 +945,10 @@ public abstract class PagedView<T extends View & PageIndicator> extends ViewGrou
         for (int i = startIndex, childStart = scrollOffsetStart; i != endIndex; i += delta) {
             final View child = getPageAt(i);
             if (scrollLogic.shouldIncludeView(child)) {
+                LayoutParams lp = (LayoutParams) child.getLayoutParams();
+
                 ChildBounds bounds = mOrientationHandler.getChildBounds(child, childStart,
-                    pageCenter, layoutChildren);
+                    pageCenter, layoutChildren, lp, offsetY);
                 final int primaryDimension = bounds.primaryDimension;
                 final int childPrimaryEnd = bounds.childPrimaryEnd;
 

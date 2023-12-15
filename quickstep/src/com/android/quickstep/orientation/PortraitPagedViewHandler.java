@@ -39,6 +39,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.ShapeDrawable;
 import android.util.FloatProperty;
+import android.util.Log;
 import android.util.Pair;
 import android.view.Gravity;
 import android.view.Surface;
@@ -47,6 +48,7 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
 import com.android.launcher3.DeviceProfile;
+import com.android.launcher3.PagedView;
 import com.android.launcher3.R;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.touch.DefaultPagedViewHandler;
@@ -311,6 +313,7 @@ public class PortraitPagedViewHandler extends DefaultPagedViewHandler implements
     }
 
     /* -------------------- */
+
     @Override
     public int getDistanceToBottomOfRect(DeviceProfile dp, Rect rect) {
         return dp.heightPx - rect.bottom;

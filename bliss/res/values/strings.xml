@@ -11,4 +11,6 @@
     <string name="max">Max</string>
     <string name="min">Min</string>
     <string name="widget_no_resize">Cannot resize this widget</string>
+    <string name="widget_add">Add</string>
+    <string name="widget_remove">Remove</string>
 </resources>

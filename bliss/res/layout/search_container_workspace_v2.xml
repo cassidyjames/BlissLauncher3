@@ -19,9 +19,11 @@
         android:scrollbars="none">
 
         <LinearLayout
+            android:id="@+id/widget_linear_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
+            android:paddingTop="50dp"
             android:orientation="vertical">
 
             <include layout="@layout/search_bar" />
@@ -42,7 +44,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center_horizontal"
                 android:orientation="horizontal"
-                android:paddingBottom="12dp">
+                android:paddingTop="10dp">
 
                 <foundation.e.bliss.blur.BlurLayout
                     android:layout_width="wrap_content"
@@ -63,9 +65,9 @@
                         android:paddingHorizontal="24dp"
                         android:paddingVertical="6dp"
                         android:stateListAnimator="@null"
-                        android:text="Add"
+                        android:text="@string/widget_add"
                         android:textAllCaps="false"
-                        android:textColor="#FFF" />
+                        android:textColor="@color/white" />
                 </foundation.e.bliss.blur.BlurLayout>
 
                 <Space
@@ -92,15 +94,16 @@
                         android:paddingHorizontal="24dp"
                         android:paddingVertical="6dp"
                         android:stateListAnimator="@null"
-                        android:text="Remove"
+                        android:text="@string/widget_remove"
                         android:textAllCaps="false"
-                        android:textColor="#FFF" />
+                        android:textColor="@color/white" />
                 </foundation.e.bliss.blur.BlurLayout>
             </LinearLayout>
         </LinearLayout>
     </ScrollView>
 
     <RelativeLayout
+        android:layout_marginBottom="@dimen/widget_page_inset_padding"
         android:id="@+id/widget_resizer_container"
         android:layout_width="match_parent"
         android:layout_height="48dp"
