@@ -43,7 +43,7 @@ fun <T> resourcesToMap(array: List<T>): Map<T, T> {
 }
 
 fun createNavbarColorAnimator(window: Window): ValueAnimator {
-    val navColor: Int = window.navigationBarColor
+    val navColor: Int = window.navigationBarColor or 0x26000000
     val colorAnimation =
         ValueAnimator.ofObject(
             ArgbEvaluator(),

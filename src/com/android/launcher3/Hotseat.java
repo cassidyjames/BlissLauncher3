@@ -79,7 +79,7 @@ public class Hotseat extends CellLayout implements Insettable, OffsetParent {
         super(context, attrs, defStyle);
 
         mQsb = LayoutInflater.from(context).inflate(R.layout.search_container_hotseat, this, false);
-        mBlurDelegate = new BlurViewDelegate(this, BlurWallpaperProvider.Companion.getBlurConfigDock(), null);
+        mBlurDelegate = new BlurViewDelegate(this, BlurWallpaperProvider.blurConfigDock, attrs);
         drawBlur = true;
         setWillNotDraw(false);
         addView(mQsb);

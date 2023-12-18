@@ -251,13 +251,13 @@ class BlurWallpaperProvider(val context: Context) {
 
         const val TAG = "BlurWallpaperProvider"
 
-        val blurConfigBackground = BlurConfig({ it.background }, 2, 8)
+        @JvmField val blurConfigBackground = BlurConfig({ it.background }, 2, 8)
 
-        val blurConfigDock = BlurConfig({ it.dock }, 2, 0)
+        @JvmField val blurConfigDock = BlurConfig({ it.dock }, 2, 0)
 
-        val blurConfigAppGroup = BlurConfig({ it.appGroup }, 6, 8)
+        @JvmField val blurConfigAppGroup = BlurConfig({ it.appGroup }, 6, 8)
 
-        val blurConfigWidget = BlurConfig({ it.widget }, 6, 10)
+        @JvmField val blurConfigWidget = BlurConfig({ it.widget }, 6, 10)
 
         var isEnabled: Boolean = false
     }
