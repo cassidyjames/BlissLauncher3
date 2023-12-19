@@ -184,6 +184,7 @@ class BlissInput(context: Context, attrs: AttributeSet) :
                 setForceHideDot(true)
                 setWidth(width / idp.numColumns)
                 setTextColor(Color.WHITE)
+                setCenterVertically(false)
                 setPaddingRelative(padding, 0, padding, 0)
                 setOnClickListener(appMonitor.launcher.itemOnClickListener)
             }

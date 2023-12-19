@@ -249,7 +249,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
         mIsRtl = (getResources().getConfiguration().getLayoutDirection()
                 == View.LAYOUT_DIRECTION_RTL);
         mDeviceProfile = mActivity.getDeviceProfile();
-        mCenterVertically = a.getBoolean(R.styleable.BubbleTextView_centerVertically, false);
+        mCenterVertically = a.getBoolean(R.styleable.BubbleTextView_centerVertically, MultiModeController.isSingleLayerMode());
 
         SharedPreferences prefs = LauncherPrefs.getPrefs(context.getApplicationContext());
 
@@ -288,7 +288,6 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
             defaultIconSize = mDeviceProfile.iconSizePx;
             mShouldShowLabel = prefs.getBoolean(KEY_SHOW_DESKTOP_LABELS, true);
         }
-
 
         mIconSize = a.getDimensionPixelSize(R.styleable.BubbleTextView_iconSizeOverride,
                 defaultIconSize);
