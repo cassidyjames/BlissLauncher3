@@ -258,13 +258,9 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
         }
 
         private fun configureWidget(widgetId: Int) {
-            val widgetInfo =
-                LauncherAppWidgetProviderInfo.fromProviderInfo(
-                    Launcher.getLauncher(context),
-                    mWidgetManager.getAppWidgetInfo(widgetId)
-                )
-
-            if (widgetInfo != null) {
+            val info = mWidgetManager.getAppWidgetInfo(widgetId)
+            if (info != null) {
+                val widgetInfo = LauncherAppWidgetProviderInfo.fromProviderInfo(launcher, info)
                 if (widgetInfo.configure != null) {
                     sendIntent(widgetId)
                 } else {
@@ -276,21 +272,18 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
         }
 
         private fun addView(widgetId: Int, backup: Boolean = false) {
-            val info =
-                LauncherAppWidgetProviderInfo.fromProviderInfo(
-                    Launcher.getLauncher(context),
-                    mWidgetManager.getAppWidgetInfo(widgetId)
-                )
+            val info = mWidgetManager.getAppWidgetInfo(widgetId)
 
             if (info != null) {
+                val widgetInfo = LauncherAppWidgetProviderInfo.fromProviderInfo(launcher, info)
                 mWidgetHost
-                    .createView(widgetId, info)
+                    .createView(widgetId, widgetInfo)
                     .apply {
                         id = widgetId
                         layoutTransition = LayoutTransition()
                         setOnLongClickListener {
                             if (
-                                (info.resizeMode and AppWidgetProviderInfo.RESIZE_VERTICAL) ==
+                                (widgetInfo.resizeMode and AppWidgetProviderInfo.RESIZE_VERTICAL) ==
                                     AppWidgetProviderInfo.RESIZE_VERTICAL
                             ) {
                                 launcher.hideWidgetResizeContainer()
@@ -325,7 +318,7 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
                                 } else {
                                     0
                                 }
-                            val minHeight: Int = info.minResizeHeight
+                            val minHeight: Int = widgetInfo.minResizeHeight
                             val maxHeight: Int =
                                 InvariantDeviceProfile.INSTANCE.get(context)
                                     .getDeviceProfile(context)
