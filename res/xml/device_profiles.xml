@@ -69,16 +69,6 @@
             launcher:allAppsBorderSpace="16"
             launcher:allAppsCellHeight="104"
             launcher:canBeDefault="true" />
-
-        <display-option
-            launcher:name="Nexus 5"
-            launcher:minWidthDps="335"
-            launcher:minHeightDps="567"
-            launcher:iconImageSize="73"
-            launcher:iconTextSize="12.0"
-            launcher:allAppsBorderSpace="16"
-            launcher:allAppsCellHeight="104"
-            launcher:canBeDefault="true" />
     </grid-option>
 
     <grid-option
@@ -93,6 +83,16 @@
         launcher:inlineNavButtonsEndSpacing="@dimen/taskbar_button_margin_split"
         launcher:defaultLayoutId="@xml/default_workspace_4x6"
         launcher:deviceCategory="phone|multi_display" >
+
+        <display-option
+            launcher:name="Nexus 5"
+            launcher:minWidthDps="335"
+            launcher:minHeightDps="567"
+            launcher:iconImageSize="73"
+            launcher:iconTextSize="12.0"
+            launcher:allAppsBorderSpace="16"
+            launcher:allAppsCellHeight="104"
+            launcher:canBeDefault="true" />
 
         <display-option
             launcher:name="Large Phone"
