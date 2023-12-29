@@ -1372,50 +1372,30 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
 
         if (mIsPageInTransition && MultiModeController.isSingleLayerMode()) {
             mLauncher.hideWidgetResizeContainer();
-            firstPageItemHideHotseat(l);
+            firstPageItemHideHotseat();
         }
     }
 
-    private void firstPageItemHideHotseat(int scrollX) {
-        final DeviceProfile dp = mLauncher.getDeviceProfile();
+    private void firstPageItemHideHotseat() {
+        final int index = mScreenOrder.indexOf(FIRST_SCREEN_ID);
+        final int scrollDelta = getScrollX() - getScrollForPage(index) -
+                getLayoutTransitionOffsetForPage(index);
+        float scrollRange = getScrollForPage(index + 1) - getScrollForPage(index);
+        final float progress = (scrollRange - scrollDelta) / scrollRange;
 
-        float progress = (float) scrollX / dp.availableWidthPx;
-
-        if (progress > 1)
+        if (progress < 0)
             return;
 
-        if (progress >= 0.999)
-            progress = 1;
-        if (progress <= 0.001)
-            progress = 0;
-
         int dockHeight = getHotseat().getHeight() + getPageIndicator().getHeight();
-        int bottomPadding = dp.workspacePadding.bottom;
-        float dockTranslationY = (1 - progress) * dockHeight;
-
-        float qsbPadding = progress * bottomPadding;
-        CellLayout firstScreen = mWorkspaceScreens.get(FIRST_SCREEN_ID);
-
-        if (progress == 0 && firstScreen.getPaddingBottom() != 0) {
-            qsbPadding = 0;
-        }
+        float dockTranslationY = progress * dockHeight;
 
         getHotseat().setForcedTranslationY(dockTranslationY);
         ((PageIndicatorDots) getPageIndicator()).setForcedTranslationY(dockTranslationY);
-        firstScreen.setPadding(
-                firstScreen.getPaddingLeft(),
-                firstScreen.getPaddingTop(),
-                firstScreen.getPaddingRight(),
-                (int) qsbPadding);
+
+        mLauncher.mBlurLayer.setAlpha(progress);
 
         if (getCurrentPage() != 0) {
             mLauncher.mBlurLayer.setAlpha(0f);
-        }
-
-        if (scrollX >= 0 && scrollX < dp.availableWidthPx) {
-            float fraction = (float) (dp.availableWidthPx - scrollX)
-                    / dp.availableWidthPx;
-            mLauncher.mBlurLayer.setAlpha(fraction);
         }
     }
 
