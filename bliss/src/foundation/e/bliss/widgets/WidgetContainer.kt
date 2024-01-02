@@ -295,7 +295,7 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
                     .also {
                         val opts = mWidgetManager.getAppWidgetOptions(it.appWidgetId)
                         val maxWidth = launcher.deviceProfile.availableWidthPx - 2 *
-                                ResourceUtils.pxFromDp(8f, resources.displayMetrics)
+                                ResourceUtils.pxFromDp(8f, launcher.resources.displayMetrics)
                         val params =
                             LayoutParams(
                                 maxWidth,
