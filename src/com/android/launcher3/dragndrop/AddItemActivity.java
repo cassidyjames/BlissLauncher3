@@ -336,7 +336,9 @@ public class AddItemActivity extends BaseActivity
      */
     public void onCancelClick(View v) {
         logCommand(LAUNCHER_ADD_EXTERNAL_ITEM_CANCELLED);
-        mSlideInView.close(/* animate= */ true);
+        if (mSlideInView != null) {
+            mSlideInView.close(/* animate= */ true);
+        }
     }
 
     public void onPlaceAutomaticallyClick(View v) {
@@ -401,7 +403,9 @@ public class AddItemActivity extends BaseActivity
     @Override
     public void onBackPressed() {
         logCommand(LAUNCHER_ADD_EXTERNAL_ITEM_BACK);
-        mSlideInView.close(/* animate= */ true);
+        if (mSlideInView != null) {
+            mSlideInView.close(/* animate= */ true);
+        }
     }
 
     @Override
