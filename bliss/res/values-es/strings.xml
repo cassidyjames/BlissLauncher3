@@ -15,17 +15,9 @@
   ~  along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
-    <string name="maps">Kartor</string>
-    <string name="suggestions">FÖRSLAG</string>
-    <string name="edit">Redigera</string>
-    <string name="min">Min</string>
-    <string name="uninstall_app">Vill du avinstallera denna app?</string>
-    <string name="widget_add">Lägg till</string>
-    <string name="ok">OK</string>
-    <string name="widget_remove">Ta bort</string>
-    <string name="cancel">Avbryt</string>
-    <string name="search">Sök</string>
-    <string name="max">Max</string>
-    <string name="untitled_folder">Namnlös</string>
-    <string name="widget_no_resize">Det går inte att ändra storleken på denna gränssnittskomponent</string>
+    <string name="edit">Editar</string>
+    <string name="search">Búsqueda</string>
+    <string name="suggestions">Sugerencias</string>
+    <string name="cancel">Cancelado</string>
+    <string name="untitled_folder">Sin título</string>
 </resources>
