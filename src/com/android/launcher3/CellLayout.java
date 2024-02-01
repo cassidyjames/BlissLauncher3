@@ -1433,7 +1433,7 @@ public class CellLayout extends ViewGroup {
         int childCount = mShortcutsAndWidgets.getChildCount();
         for (int i = 0; i < childCount; i++) {
             View child = mShortcutsAndWidgets.getChildAt(i);
-            if (child == dragView) continue;
+            //if (child == dragView) continue;
             CellAndSpan c = solution.map.get(child);
             if (c != null) {
                 animateChildToPosition(child, c.cellX, c.cellY, REORDER_ANIMATION_DURATION, 0,
@@ -1634,8 +1634,8 @@ public class CellLayout extends ViewGroup {
     public void reArrangeIcons(int x, int y) {
         ItemConfiguration solution = new ItemConfiguration();
         copyCurrentStateToSolution(solution);
-        View dragView = null;
         int[] intersecting = new int[2];
+        ArrayList<View> views = new ArrayList<>();
 
         if (x == 0) {
             intersecting[0] = getCountX() - 1;
@@ -1645,31 +1645,12 @@ public class CellLayout extends ViewGroup {
             intersecting[1] = y;
         }
 
-        ArrayList<View> views = new ArrayList<>();
         for (Map.Entry <View, CellAndSpan> keyValue : solution.map.entrySet()) {
             CellAndSpan c = keyValue.getValue();
 
             if (c.cellX == x && c.cellY == y) {
                 mTmpOccupied.markCells(c, false);
-                dragView = keyValue.getKey();
-                views.add(dragView);
-                pushIconByRow(c, getCountX(), getCountY(), ViewCluster.LEFT);
-
-                int screenId = getCellLayoutContainer().getCellLayoutId(this);
-                int container = LauncherSettings.Favorites.CONTAINER_DESKTOP;
-
-                CellLayoutLayoutParams lp = (CellLayoutLayoutParams) dragView.getLayoutParams();
-                ItemInfo info = (ItemInfo) dragView.getTag();
-                info.cellX = intersecting[0];
-                lp.setCellX(info.cellX);
-                info.cellY = intersecting[1];
-                lp.setCellY(info.cellY);
-                info.spanX = lp.cellHSpan = 1;
-                info.spanY = lp.cellVSpan = 1;
-                lp.isLockedToGrid = true;
-
-                Launcher.cast(mActivity).getModelWriter().modifyItemInDatabase(info, container,
-                        screenId, info.cellX, info.cellY, info.spanX, info.spanY);
+                views.add(keyValue.getKey());
             }
         }
         ViewCluster cluster = new ViewCluster(this, views, solution);
@@ -1706,8 +1687,8 @@ public class CellLayout extends ViewGroup {
         solution.spanY = 1;
         solution.isSolution = true;
 
-        if (dragView != null) {
-            performReorder(solution, dragView, MODE_ON_DROP);
+        if (views.get(0) != null) {
+            performReorder(solution, views.get(0), MODE_ON_DROP);
         }
     }
 
@@ -1774,19 +1755,6 @@ public class CellLayout extends ViewGroup {
                 }
             }
         }
-        /*
-        if (loc[0] >= 0 && loc[1] >= 0) {
-            if (loc[0] == mCountX - 1) {
-                loc[0] = 0;
-                loc[1]++;
-                if (loc[1] > mCountY - 1) {
-                    return null;
-                }
-            } else {
-                loc[0] = loc[0] + 1;
-            }
-        }
-         */
         return loc;
     }
 
