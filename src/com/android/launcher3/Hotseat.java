@@ -34,6 +34,8 @@ import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import com.android.launcher3.folder.Folder;
+import com.android.launcher3.util.NavigationMode;
+import com.android.launcher3.util.window.WindowManagerProxy;
 
 import com.android.launcher3.util.HorizontalInsettableView;
 import com.android.launcher3.util.MultiTranslateDelegate;
@@ -198,6 +200,8 @@ public class Hotseat extends CellLayout implements Insettable, OffsetParent {
     public void setInsets(Rect insets) {
         FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) getLayoutParams();
         DeviceProfile grid = mActivity.getDeviceProfile();
+        WindowManagerProxy wm = WindowManagerProxy.newInstance(getContext());
+        boolean isFullyGesture = wm.getNavigationMode(getContext()) == NavigationMode.NO_BUTTON;
 
         if (grid.isVerticalBarLayout()) {
             mQsb.setVisibility(View.GONE);
@@ -213,7 +217,11 @@ public class Hotseat extends CellLayout implements Insettable, OffsetParent {
             mQsb.setVisibility(View.VISIBLE);
             lp.gravity = Gravity.BOTTOM;
             lp.width = ViewGroup.LayoutParams.MATCH_PARENT;
-            lp.height = grid.hotseatBarSizePx;
+            if (isFullyGesture) {
+                lp.height = grid.hotseatBarSizePx;
+            } else {
+                lp.height = grid.hotseatBarSizePx + 24;
+            }
         }
 
         Rect padding = grid.getHotseatLayoutPadding(getContext());
