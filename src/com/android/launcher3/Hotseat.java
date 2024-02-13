@@ -333,6 +333,7 @@ public class Hotseat extends CellLayout implements Insettable, OffsetParent {
 
     public void setForcedTranslationY(float translationY){
         super.setTranslationY(translationY);
+        offsetParentDelegate.notifyOffsetChanged();
     }
 
     @Override
