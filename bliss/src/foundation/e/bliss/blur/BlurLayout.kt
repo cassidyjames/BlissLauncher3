@@ -13,10 +13,11 @@ import android.util.AttributeSet
 import android.widget.FrameLayout
 
 open class BlurLayout @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
-    FrameLayout(context, attrs) {
+    FrameLayout(context, attrs), OffsetParent {
 
     private val delegate =
         BlurViewDelegate(this.rootView, BlurWallpaperProvider.blurConfigWidget, attrs)
+    private val offsetParentDelegate = OffsetParent.OffsetParentDelegate()
 
     init {
         this.setWillNotDraw(false)
@@ -28,5 +29,22 @@ open class BlurLayout @JvmOverloads constructor(context: Context, attrs: Attribu
     override fun onDraw(canvas: Canvas) {
         delegate.draw(canvas)
         super.onDraw(canvas)
+    }
+
+    override val offsetX: Float
+        get() = translationX
+
+    override val offsetY: Float
+        get() = translationY
+
+    override val needWallpaperScroll: Boolean
+        get() = true
+
+    override fun addOnOffsetChangeListener(listener: OffsetParent.OnOffsetChangeListener) {
+        offsetParentDelegate.addOnOffsetChangeListener(listener)
+    }
+
+    override fun removeOnOffsetChangeListener(listener: OffsetParent.OnOffsetChangeListener) {
+        offsetParentDelegate.removeOnOffsetChangeListener(listener)
     }
 }
