@@ -217,8 +217,6 @@ public class GridFolder extends Folder implements OnAlarmListener {
             wobbleFolder(false);
         }
 
-        showOrHideDesktop(mLauncher, false);
-
         super.handleClose(animate);
     }
 
@@ -250,6 +248,8 @@ public class GridFolder extends Folder implements OnAlarmListener {
     }
 
     private void showOrHideDesktop(Launcher launcher, boolean hide) {
+        if (isAnimating) return;
+
         AnimatorSet set = new AnimatorSet();
 
         Workspace<?> workspace = launcher.getWorkspace();
@@ -287,15 +287,15 @@ public class GridFolder extends Folder implements OnAlarmListener {
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
                 isAnimating = false;
+                if (!hide && hotseat != null) {
+                    hotseat.setVisibility(VISIBLE);
+                }
             }
 
             @Override
             public void onAnimationStart(Animator animation) {
                 super.onAnimationStart(animation);
                 isAnimating = true;
-                if (!hide && hotseat != null) {
-                    hotseat.setVisibility(VISIBLE);
-                }
             }
         });
         set.start();
