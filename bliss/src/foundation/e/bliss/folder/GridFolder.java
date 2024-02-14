@@ -248,7 +248,8 @@ public class GridFolder extends Folder implements OnAlarmListener {
     }
 
     private void showOrHideDesktop(Launcher launcher, boolean hide) {
-        if (isAnimating) return;
+        if (isAnimating)
+            return;
 
         AnimatorSet set = new AnimatorSet();
 

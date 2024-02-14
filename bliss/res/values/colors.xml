@@ -5,7 +5,7 @@
     <color name="colorAccent">@color/e_accent_light</color>
 
     <color name="gridFolderPreview">#1A202020</color>
-    <color name="gridFolderBackground">#40202020</color>
+    <color name="gridFolderBackground">#20202040</color>
     <color name="white">#FFFFFF</color>
     <color name="notification_dot_shadow">#26000000</color>
 </resources>
