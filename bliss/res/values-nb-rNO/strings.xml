@@ -1,2 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="maps">Kart</string>
+    <string name="suggestions">FORSLAG</string>
+    <string name="edit">Rediger</string>
+    <string name="min">Min</string>
+    <string name="uninstall_app">Vil du avinstallere denne applikasjonen?</string>
+    <string name="widget_add">Legg til</string>
+    <string name="ok">OK</string>
+    <string name="widget_remove">Fjern</string>
+    <string name="cancel">Avbryt</string>
+    <string name="search">Søk</string>
+    <string name="max">Max</string>
+    <string name="untitled_folder">Navnløs</string>
+    <string name="widget_no_resize">Kan ikke endre størrelsen på denne modulen</string>
+</resources>
