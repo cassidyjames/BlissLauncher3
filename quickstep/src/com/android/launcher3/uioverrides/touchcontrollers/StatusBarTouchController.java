@@ -128,7 +128,8 @@ public class StatusBarTouchController implements TouchController {
             // when there is single touch event. (context: InputDispatcher.cpp line 1445)
             if (dy > mTouchSlop && dy > Math.abs(dx) && ev.getPointerCount() == 1 &&
                     (!MultiModeController.isSingleLayerMode() ||
-                            mLauncher.swipeSearchContainer.getVisibility() == View.GONE)) {
+                            (mLauncher.swipeSearchContainer.getVisibility() == View.GONE &&
+                                    mLauncher.getWorkspace().getCurrentPage() != 0))) {
                 ev.setAction(ACTION_DOWN);
                 dispatchTouchEvent(ev);
                 setWindowSlippery(true);
