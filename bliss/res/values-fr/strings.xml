@@ -13,10 +13,17 @@
   ~
   ~ You should have received a copy of the GNU General Public License
   ~  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-  -->
-<resources>
+  --><resources>
     <string name="edit">Modifier</string>
     <string name="search">Rechercher</string>
     <string name="cancel">Annuler</string>
     <string name="untitled_folder">Sans titre</string>
+    <string name="suggestions">SUGGESTIONS</string>
+    <string name="ok">OK</string>
+    <string name="uninstall_app">Voulez-vous désinstaller cette application ?</string>
+    <string name="max">Max</string>
+    <string name="min">Min</string>
+    <string name="widget_add">Ajouter</string>
+    <string name="widget_remove">Enlever</string>
+    <string name="widget_no_resize">Impossible de redimensionner ce widget</string>
 </resources>
