@@ -15,6 +15,7 @@ import android.appwidget.AppWidgetProviderInfo
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.graphics.Insets
 import android.graphics.Rect
 import android.os.Bundle
 import android.os.ServiceManager
@@ -25,6 +26,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.View.OnLayoutChangeListener
 import android.view.ViewGroup
+import android.view.WindowInsets
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.LinearLayout
@@ -32,7 +34,6 @@ import android.widget.RelativeLayout
 import android.widget.Toast
 import com.android.app.animation.R.id.launcher
 import com.android.internal.appwidget.IAppWidgetService
-import com.android.launcher3.Insettable
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.Launcher
 import com.android.launcher3.LauncherPrefs
@@ -59,8 +60,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 
 @Suppress("Deprecation", "NewApi")
-class WidgetContainer(context: Context, attrs: AttributeSet?) :
-    FrameLayout(context, attrs), Insettable {
+class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(context, attrs) {
     private val mLauncher by lazy { Launcher.getLauncher(context) }
 
     private lateinit var mRemoveWidgetLayout: FrameLayout
@@ -69,7 +69,10 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) :
 
     private var mWrapperChildCount = 0
     private val mResizeContainerRect = Rect()
-    private var mInsets: Rect? = null
+    private var mInsets: Insets? = null
+
+    private val mInsetPadding =
+        context.resources.getDimension(R.dimen.widget_page_inset_padding).toInt()
 
     private val layoutListener = OnLayoutChangeListener { view, _, _, _, _, _, _, _, _ ->
         val childCount = (view as LinearLayout).childCount
@@ -95,7 +98,7 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) :
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
 
-        val insetPadding = context.resources.getDimension(R.dimen.widget_page_inset_padding).toInt()
+        mInsets = mLauncher.workspace.rootWindowInsets.getInsets(WindowInsets.Type.systemBars())
 
         findViewById<Button>(R.id.manage_widgets)!!.setOnClickListener {
             WidgetsFullSheet.show(mLauncher, true, true)
@@ -117,14 +120,14 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) :
         mResizeContainer =
             findViewById<RelativeLayout?>(R.id.widget_resizer_container)!!.apply {
                 val layoutParams = this.layoutParams as LayoutParams
-                layoutParams.bottomMargin = insetPadding + (mInsets?.bottom ?: 0)
+                layoutParams.bottomMargin = mInsetPadding + (mInsets?.bottom ?: 0)
                 this.layoutParams = layoutParams
             }
 
         findViewById<LinearLayout>(R.id.widget_linear_layout)!!.apply {
             setPadding(
                 this.paddingLeft,
-                insetPadding + (mInsets?.top ?: 0),
+                mInsetPadding + (mInsets?.top ?: 0),
                 this.paddingRight,
                 (mInsets?.bottom ?: 0),
             )
@@ -134,10 +137,6 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) :
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
         mWrapper.removeOnLayoutChangeListener(layoutListener)
-    }
-
-    override fun setInsets(insets: Rect?) {
-        mInsets = insets
     }
 
     private fun handleRemoveButtonVisibility(childCount: Int) {
