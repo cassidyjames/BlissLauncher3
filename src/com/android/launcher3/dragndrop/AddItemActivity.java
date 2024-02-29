@@ -144,6 +144,7 @@ public class AddItemActivity extends BaseActivity
             if (Objects.requireNonNull(mRequest.getShortcutInfo())
                     .getPackage().equals(BlissConstants.APPS_PACKAGE)) {
                 onPlaceAutomaticallyClick();
+                finish();
                 return;
             }
         } else {
