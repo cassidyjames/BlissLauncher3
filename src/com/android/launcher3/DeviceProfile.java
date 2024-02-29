@@ -803,9 +803,11 @@ public class DeviceProfile {
     private static DotRenderer createDotRenderer(
             @NonNull Context context, int size, @NonNull SparseArray<DotRenderer> cache,
             boolean showNotificationCount, Typeface typeface) {
-        DotRenderer renderer = cache.get(size);
+        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+        int dotSize = (int) (size / (metrics.density / 4));
+        DotRenderer renderer = cache.get(dotSize);
         if (renderer == null) {
-            renderer = new DotRenderer(size, getShapePath(context, DEFAULT_DOT_SIZE),
+            renderer = new DotRenderer(dotSize, getShapePath(context, DEFAULT_DOT_SIZE),
                     DEFAULT_DOT_SIZE, showNotificationCount, typeface);
             cache.put(size, renderer);
         }
