@@ -488,8 +488,11 @@ public class DeviceProfile {
 
         // This is done last, after iconSizePx is calculated above.
         Path dotPath = GraphicsUtils.getShapePath(DEFAULT_DOT_SIZE);
-        mDotRendererWorkSpace = new DotRenderer(iconSizePx, dotPath, DEFAULT_DOT_SIZE, showNotificationCount, typeface);
-        mDotRendererAllApps = iconSizePx == allAppsIconSizePx ? mDotRendererWorkSpace :
+        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+        int icondotSize = (int) (iconSizePx / (metrics.density / 4));
+        int allAppsIcondotSize = (int) (allAppsIconSizePx / (metrics.density / 4));
+        mDotRendererWorkSpace = new DotRenderer(icondotSize, dotPath, DEFAULT_DOT_SIZE, showNotificationCount, typeface);
+        mDotRendererAllApps = icondotSize == allAppsIcondotSize ? mDotRendererWorkSpace :
                 new DotRenderer(allAppsIconSizePx, dotPath, DEFAULT_DOT_SIZE, showNotificationCount, typeface);
     }
 
