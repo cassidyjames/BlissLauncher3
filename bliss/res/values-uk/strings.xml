@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright Murena SAS 2024
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+<resources>
+    <string name="maps">Карти</string>
+    <string name="suggestions">ПОРАДИ</string>
+    <string name="edit">Редагувати</string>
+    <string name="min">Мін.</string>
+    <string name="uninstall_app">Ви хочете видалити цей застосунок?</string>
+    <string name="widget_add">Додати</string>
+    <string name="ok">ОК</string>
+    <string name="widget_remove">Видалити</string>
+    <string name="cancel">Скасувати</string>
+    <string name="search">Пошук</string>
+    <string name="max">Макс.</string>
+    <string name="untitled_folder">Без назви</string>
+    <string name="widget_no_resize">Не вдається змінити розмір цього віджету</string>
+</resources>
