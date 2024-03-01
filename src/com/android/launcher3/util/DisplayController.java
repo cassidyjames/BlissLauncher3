@@ -205,6 +205,10 @@ public class DisplayController implements DisplayListener, ComponentCallbacks, S
                 || !mInfo.mScreenSizeDp.equals(
                         new PortraitSize(config.screenHeightDp, config.screenWidthDp))) {
             handleInfoChange(display);
+
+            // Restart launcher
+            LauncherAppMonitor.getInstance(mContext).getLauncher().getModel().forceReload();
+            System.exit(0);
         }
     }
 
