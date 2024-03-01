@@ -1634,6 +1634,7 @@ public class CellLayout extends ViewGroup {
     public void reArrangeIcons(int x, int y) {
         ItemConfiguration solution = new ItemConfiguration();
         copyCurrentStateToSolution(solution);
+        solution.save();
         int[] intersecting = new int[2];
         ArrayList<View> views = new ArrayList<>();
 
@@ -1682,19 +1683,31 @@ public class CellLayout extends ViewGroup {
         }
         cluster.shift(ViewCluster.LEFT, 1);
 
-        solution.cellX = intersecting[0];
-        solution.cellY = intersecting[1];
-        solution.spanX = 1;
-        solution.spanY = 1;
-        solution.isSolution = true;
+        Rect clusterRect = cluster.getBoundingRect();
+        boolean isSolution = false;
+        if (clusterRect.left >= 0 && clusterRect.right <= mCountX && clusterRect.top >= 0 &&
+                clusterRect.bottom <= mCountY) {
+            isSolution = true;
+        } else {
+            solution.restore();
+        }
 
         for (View v: cluster.views) {
             CellAndSpan c = solution.map.get(v);
             mTmpOccupied.markCells(c, true);
         }
 
-        if (views.size() > 0 && views.get(0) != null) {
-            performReorder(solution, views.get(0), MODE_ON_DROP);
+        if (isSolution) {
+            solution.cellX = intersecting[0];
+            solution.cellY = intersecting[1];
+            solution.spanX = 1;
+            solution.spanY = 1;
+            solution.isSolution = true;
+
+
+            if (views.size() > 0 && views.get(0) != null) {
+                performReorder(solution, views.get(0), MODE_ON_DROP);
+            }
         }
     }
 
