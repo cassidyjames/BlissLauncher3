@@ -52,6 +52,7 @@ import androidx.core.content.res.ResourcesCompat;
 import com.android.launcher3.CellLayout.ContainerType;
 import com.android.launcher3.DevicePaddings.DevicePadding;
 import com.android.launcher3.config.FeatureFlags;
+import com.android.launcher3.graphics.IconShape;
 import com.android.launcher3.icons.DotRenderer;
 import com.android.launcher3.icons.IconNormalizer;
 import com.android.launcher3.model.data.ItemInfo;
@@ -1266,7 +1267,8 @@ public class DeviceProfile {
         updateHotseatSizes(iconSizePx);
 
         // Folder icon
-        folderIconSizePx = IconNormalizer.getNormalizedCircleSize(iconSizePx - iconDrawablePaddingPx);
+        int visibleIcon = (int) Math.ceil(iconSizePx * IconShape.getNormalizationScale());
+        folderIconSizePx = visibleIcon;
         folderIconOffsetYPx = (iconSizePx - folderIconSizePx) / 2;
 
         // Update widget padding:
