@@ -36,6 +36,7 @@ import android.view.Surface;
 import com.android.launcher3.CellLayout.ContainerType;
 import com.android.launcher3.DevicePaddings.DevicePadding;
 import com.android.launcher3.config.FeatureFlags;
+import com.android.launcher3.graphics.IconShape;
 import com.android.launcher3.icons.DotRenderer;
 import com.android.launcher3.icons.GraphicsUtils;
 import com.android.launcher3.icons.IconNormalizer;
@@ -751,7 +752,8 @@ public class DeviceProfile {
         }
 
         // Folder icon
-        folderIconSizePx = IconNormalizer.getNormalizedCircleSize(iconSizePx - iconDrawablePaddingPx);
+        int visibleIcon = (int) Math.ceil(iconSizePx * IconShape.getNormalizationScale());
+        folderIconSizePx = visibleIcon;
         folderIconOffsetYPx = (iconSizePx - folderIconSizePx) / 2;
     }
 
