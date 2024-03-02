@@ -65,13 +65,16 @@ class AppUsageStats(private val mContext: Context) {
                     .filter {
                         !mContext.resources
                             .getStringArray(R.array.blacklisted_apps)
-                            .contains(it.key)
+                            .contains(it.key) &&
+                            mContext.packageManager.getLaunchIntentForPackage(it.key) != null &&
+                            it.value.totalTimeInForeground > 0
                     }
                     .apply {
                         sortedWith(
-                            Comparator.comparingLong { (_, stat) -> stat.totalTimeInForeground }
-                        )
-                        forEach { (_, stat) -> usageStats.add(stat) }
+                                Comparator.comparingLong { (_, stat) -> stat.totalTimeInForeground }
+                            )
+                            .reversed()
+                            .forEach { (_, stat) -> usageStats.add(stat) }
                     }
             } else {
                 Logger.i(TAG, "The aggregatedStats are empty can't do much")
