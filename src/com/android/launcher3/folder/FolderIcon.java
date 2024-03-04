@@ -31,6 +31,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.Property;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -221,7 +222,7 @@ public class FolderIcon extends FrameLayout implements FolderListener, IconLabel
             int cellHeightPx = icon.mFolderName.getIconSize() + icon.mFolderName.getCompoundDrawablePadding() +
                     (int) Math.ceil(fm.bottom - fm.top);
 
-            lp.topMargin = grid.iconSizePx + (grid.getCellSize().y - cellHeightPx) / 2;
+            lp.topMargin = grid.iconSizePx + Math.min(((grid.getCellSize().y - cellHeightPx) / 2), 0);
             icon.mFolderName.setIncludeFontPadding(false);
         } else {
             lp.topMargin = grid.iconSizePx + grid.iconDrawablePaddingPx;
