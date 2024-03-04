@@ -18,7 +18,7 @@ allprojects {
 
             defaultConfig {
                 minSdkVersion 30
-                targetSdkVersion 33
+                targetSdkVersion 34
                 versionCode 1
                 versionName "1.0"
                 vectorDrawables.useSupportLibrary = true
@@ -71,9 +71,67 @@ android {
     useLibrary "android.test.mock"
     android.buildFeatures.buildConfig true
 
+    def versionPropsFile = file('version.properties')
+    Properties versionProps = new Properties()
+
+    if (!versionPropsFile.exists()) {
+        versionProps['VERSION_CHANGE'] = '0'
+        versionProps['VERSION_MAJOR'] = '3'
+        versionProps['VERSION_MINOR'] = '0'
+        versionProps['VERSION_PATCH'] = '1'
+        versionProps['VERSION_CODE'] = '3000010'
+        versionProps.store(versionPropsFile.newWriter(), null)
+    }
+
+    def getVersionCode = { ->
+        if (versionPropsFile.canRead()) {
+            versionProps.load(new FileInputStream(versionPropsFile))
+            def versionChange = versionProps['VERSION_CHANGE'].toInteger() + 1
+            def versionMinor = versionProps['VERSION_MINOR'].toInteger()
+            def versionMajor = versionProps['VERSION_MAJOR'].toInteger()
+            def versionPatch = versionProps['VERSION_PATCH'].toInteger()
+            // Up version on each 100 cycles of builds
+            if (versionChange >= 100) {
+                versionPatch = versionProps['VERSION_PATCH'].toInteger() + 1
+                versionChange = 0
+            }
+            if (versionPatch == 9) {
+                versionMinor = versionProps['VERSION_MINOR'].toInteger() + 1
+                versionPatch = 0
+            }
+            if (versionMinor == 9) {
+                versionMajor = versionProps['VERSION_MAJOR'].toInteger() + 1
+                versionMinor = 0
+            }
+            def versionCode = versionProps['VERSION_CODE'].toInteger()
+
+            versionProps['VERSION_CHANGE'] = versionChange.toString()
+            versionProps['VERSION_PATCH'] = versionPatch.toString()
+            versionProps['VERSION_MINOR'] = versionMinor.toString()
+            versionProps['VERSION_MAJOR'] = versionMajor.toString()
+            versionProps['VERSION_CODE'] = (versionCode.toInteger() + 1).toString()
+            versionProps.store(versionPropsFile.newWriter(), null)
+            return versionCode
+        }
+    }
+
+    def getVersionName = { ->
+        if (versionPropsFile.canRead()) {
+            versionProps.load(new FileInputStream(versionPropsFile))
+
+            def versionMajor = versionProps['VERSION_MAJOR']
+            def versionMinor = versionProps['VERSION_MINOR']
+            def versionPatch = versionProps['VERSION_PATCH']
+
+            return "${versionMajor}.${versionMinor}.${versionPatch}-beta"
+        }
+    }
+
     defaultConfig {
-        versionCode 300_00_20
-        versionName "3.0.0-alpha2"
+        minSdkVersion 30
+        targetSdkVersion 33
+        versionCode getVersionCode()
+        versionName getVersionName()
         buildConfigField "boolean", "IS_STUDIO_BUILD", "false"
         buildConfigField "boolean", "QSB_ON_FIRST_SCREEN", "true"
         buildConfigField "boolean", "WIDGET_ON_FIRST_SCREEN", "false"
