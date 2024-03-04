@@ -215,14 +215,14 @@ public class FolderIcon extends FrameLayout implements FolderListener, IconLabel
         FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) icon.mFolderName.getLayoutParams();
 
         if (MultiModeController.isSingleLayerMode()) {
-            Paint.FontMetrics fm = icon.mFolderName.getPaint().getFontMetrics();
-            int cellHeightPx = icon.mFolderName.getIconSize() + icon.mFolderName.getCompoundDrawablePadding() +
-                    (int) Math.ceil(fm.bottom - fm.top);
-
-            lp.topMargin = grid.iconSizePx + (grid.getCellSize().y - cellHeightPx) / 2;
-            icon.mFolderName.setIncludeFontPadding(false);
+            lp.topMargin = grid.folderIconSizePx + (grid.folderIconOffsetYPx * 2);
+            if (lp.topMargin < grid.getCellSize().x) {
+                icon.mFolderName.setIncludeFontPadding(false);
+            } else {
+                lp.topMargin = grid.folderIconSizePx + grid.folderIconOffsetYPx;
+            }
         } else {
-            lp.topMargin = grid.iconSizePx + grid.iconDrawablePaddingPx;
+            lp.topMargin = grid.folderIconSizePx + grid.iconDrawablePaddingPx;
         }
 
         icon.setTag(folderInfo);
