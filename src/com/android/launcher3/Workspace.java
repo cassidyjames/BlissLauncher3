@@ -1157,7 +1157,7 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
 
     @Override
     protected void determineScrollingStart(MotionEvent ev) {
-        if (!isFinishedSwitchingState()) return;
+        if (!isFinishedSwitchingState()  || (isWobbling() && mDragInfo != null)) return;
 
         float deltaX = ev.getX() - mXDown;
         float absDeltaX = Math.abs(deltaX);
