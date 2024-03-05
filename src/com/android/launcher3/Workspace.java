@@ -1443,11 +1443,22 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
 
     @Override
     public void setCurrentPage(int currentPage, int overridePrevPage) {
-        if (currentPage == FIRST_SCREEN_ID) {
-            Hotseat hotseat = getHotseat();
-             if (hotseat.getTranslationY() >= 0) {
-                 hotseat.setForcedTranslationY(hotseat.getHeight() + getPageIndicator().getHeight());
-             }
+        if (MultiModeController.isSingleLayerMode()) {
+            if (currentPage == FIRST_SCREEN_ID) {
+                Hotseat hotseat = getHotseat();
+                int height = hotseat.getHeight() + getPageIndicator().getHeight();
+                if (hotseat.getTranslationY() >= 0) {
+                    hotseat.setForcedTranslationY(height);
+                }
+
+                PageIndicatorDots pageIndicatorDots = (PageIndicatorDots) getPageIndicator();
+                if (pageIndicatorDots.getTranslationY() >= 0) {
+                    pageIndicatorDots.setForcedTranslationY(height);
+                }
+
+                mLauncher.mBlurLayer.setAlpha(1);
+                getWindowInsetsController().hide(WindowInsetsCompat.Type.statusBars());
+            }
         }
         super.setCurrentPage(currentPage, overridePrevPage);
     }
