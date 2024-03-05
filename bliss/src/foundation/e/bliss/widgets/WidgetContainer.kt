@@ -15,6 +15,7 @@ import android.appwidget.AppWidgetProviderInfo
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.graphics.Insets
 import android.graphics.Rect
 import android.os.Bundle
 import android.os.ServiceManager
@@ -63,6 +64,10 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
     private lateinit var mResizeContainer: RelativeLayout
     private val mResizeContainerRect = Rect()
 
+    private var mInsets: Insets? = null
+    private val mInsetPadding =
+        context.resources.getDimension(R.dimen.widget_page_inset_padding).toInt()
+
     override fun setPadding(left: Int, top: Int, right: Int, bottom: Int) {
         super.setPadding(0, 0, 0, 0)
     }
@@ -80,7 +85,7 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
 
-        val insets = mLauncher.workspace.rootWindowInsets.getInsets(WindowInsets.Type.systemBars())
+        mInsets = mLauncher.workspace.rootWindowInsets.getInsets(WindowInsets.Type.systemBars())
         val insetPadding = context.resources.getDimension(R.dimen.widget_page_inset_padding).toInt()
 
         findViewById<Button>(R.id.manage_widgets).setOnClickListener {
@@ -112,16 +117,16 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
         mResizeContainer =
             findViewById<RelativeLayout?>(R.id.widget_resizer_container).apply {
                 val layoutParams = this.layoutParams as LayoutParams
-                layoutParams.bottomMargin = insetPadding + (insets.bottom)
+                layoutParams.bottomMargin = mInsetPadding + (mInsets?.bottom ?: 0)
                 this.layoutParams = layoutParams
             }
 
         findViewById<LinearLayout>(R.id.widget_linear_layout).apply {
             setPadding(
                 this.paddingLeft,
-                insetPadding + (insets.top),
+                insetPadding + (mInsets!!.top),
                 this.paddingRight,
-                (insets.bottom),
+                (mInsets!!.bottom),
             )
         }
     }
