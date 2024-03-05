@@ -27,6 +27,7 @@ import androidx.appcompat.widget.AppCompatTextView;
 
 import com.android.launcher3.R;
 import com.android.launcher3.statemanager.StatefulActivity;
+import com.android.launcher3.util.Themes;
 
 /**
  * A rounded rectangular component containing a single TextView.
@@ -76,6 +77,10 @@ public class SplitInstructionsView extends FrameLayout {
 
         splitInstructionsView.mTextView = splitInstructionsView.findViewById(
                 R.id.split_instructions_text);
+        splitInstructionsView.mTextView.setTextColor(
+                Themes.getAttrColor(
+                        launcher, com.android.internal.R.attr.textColorOnAccent)
+        );
 
         // Since textview overlays base view, and we sometimes manipulate the alpha of each
         // simultaneously, force overlapping rendering to false prevents redrawing of pixels,
