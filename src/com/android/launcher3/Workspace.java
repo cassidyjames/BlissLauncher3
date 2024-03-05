@@ -1038,12 +1038,18 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
         int currentPage = getNextPage();
         IntArray removeScreens = new IntArray();
         int total = mWorkspaceScreens.size();
+        int maxId = SECOND_SCREEN_ID;
+        if (MultiModeController.isSingleLayerMode() && total > 2) {
+            maxId = FIRST_SCREEN_ID;
+        }
+
         for (int i = 0; i < total; i++) {
             int id = mWorkspaceScreens.keyAt(i);
             CellLayout cl = mWorkspaceScreens.valueAt(i);
             // FIRST_SCREEN_ID can never be removed.
-            if ((!FeatureFlags.QSB_ON_FIRST_SCREEN.get() || id > SECOND_SCREEN_ID)
-                    && cl.getShortcutsAndWidgets().getChildCount() == 0) {
+            if ((!FeatureFlags.QSB_ON_FIRST_SCREEN.get() || id > maxId)
+                    && cl.getShortcutsAndWidgets().getChildCount() == 0
+            ) {
                 removeScreens.add(id);
             }
         }
