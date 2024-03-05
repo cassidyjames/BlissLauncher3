@@ -277,6 +277,7 @@ public class FolderPagedView extends PagedView<PageIndicatorDots> implements Cli
     }
 
     public void removeItem(View v) {
+        v.clearAnimation();
         for (int i = getChildCount() - 1; i >= 0; i --) {
             getPageAt(i).removeView(v);
         }
