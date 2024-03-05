@@ -55,7 +55,7 @@ class WidgetsActivity : Activity(), OnActionClickListener {
         addedWidgets.apply {
             addedWidgets.layoutManager = LinearLayoutManager(this@WidgetsActivity)
             addedWidgets.setHasFixedSize(false)
-            addedWidgets.isNestedScrollingEnabled = false
+            addedWidgets.isNestedScrollingEnabled = true
             addedWidgets.addItemDecoration(
                 DividerItemDecoration(this@WidgetsActivity, DividerItemDecoration.VERTICAL)
             )
