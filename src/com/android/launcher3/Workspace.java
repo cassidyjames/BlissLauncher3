@@ -1266,7 +1266,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
 
     @Override
     protected void determineScrollingStart(MotionEvent ev) {
-        if (!isFinishedSwitchingState()) return;
+        if (!isFinishedSwitchingState()  || (isWobbling() && mDragInfo != null)) return;
 
         float deltaX = ev.getX() - mXDown;
         float absDeltaX = Math.abs(deltaX);
@@ -1770,7 +1770,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
     public void startDrag(CellInfo cellInfo, DragOptions options) {
         if (!isWobbling() && MultiModeController.isSingleLayerMode()) {
             wobbleLayouts(true);
-            return;
+           // return;
         }
 
         View child = cellInfo.cell;
