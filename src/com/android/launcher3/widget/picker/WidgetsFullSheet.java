@@ -773,7 +773,7 @@ public class WidgetsFullSheet extends BaseWidgetSheet
                     apps.getIconCache(),
                     this::getEmptySpaceHeight,
                     v -> WidgetFragment.onWidgetClick(context, v, close -> {
-                        close(close);
+                        closeAllOpenViews(Launcher.getLauncher(context));
                         return null;
                     }),
                     /* iconLongClickListener= */ !isEditMode ? WidgetsFullSheet.this : null);
