@@ -240,10 +240,17 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
         private fun rebindWidgets(backup: Boolean = false) {
             mWrapper.removeAllViews()
             if (!backup) {
-                widgetsDbHelper
-                    .getWidgets()
-                    .sortedBy { it.position }
-                    .forEach { addView(it.widgetId) }
+
+                val dbWidgets =
+                    widgetsDbHelper.getWidgets().apply {
+                        sortedBy { it.position }
+                        forEach { addView(it.widgetId) }
+                    }
+
+                // Remove all widgets not present in db
+                mWidgetHost.appWidgetIds
+                    .filter { id -> dbWidgets.all { info -> info.widgetId != id } }
+                    .forEach { mWidgetHost.deleteAppWidgetId(it) }
             } else {
                 if (mOldWidgets.isNotEmpty()) {
                     mOldWidgets
