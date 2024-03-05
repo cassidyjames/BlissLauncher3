@@ -592,6 +592,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         }
 
         clearEmptyCell();
+        stripEmptyScreens(true);
     }
 
     /**
@@ -931,7 +932,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         if (stripEmptyScreens) {
             // This will remove all empty pages from the Workspace. If there are no more pages left,
             // it will add extra page(s) so that users can put items on at least one page.
-            stripEmptyScreens();
+            stripEmptyScreens(false);
         }
 
         if (onComplete != null) {
@@ -1064,7 +1065,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         return getScreenWithId(getScreenPair(screenId));
     }
 
-    public void stripEmptyScreens() {
+    public void stripEmptyScreens(boolean removeFirstScreen) {
         if (mLauncher.isWorkspaceLoading()) {
             // Don't strip empty screens if the workspace is still loading.
             // This is dangerous and can result in data loss.
@@ -1079,11 +1080,12 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         int currentPage = getNextPage();
         IntArray removeScreens = new IntArray();
         int total = mWorkspaceScreens.size();
+        int max_id = removeFirstScreen ? FIRST_SCREEN_ID : SECOND_SCREEN_ID;
         for (int i = 0; i < total; i++) {
             int id = mWorkspaceScreens.keyAt(i);
             CellLayout cl = mWorkspaceScreens.valueAt(i);
-            // FIRST_SCREEN_ID can never be removed.
-            if ((!FeatureFlags.QSB_ON_FIRST_SCREEN.get() || id > SECOND_SCREEN_ID)
+            // FIRST_SCREEN_ID can be removed if its empty.
+            if ((!FeatureFlags.QSB_ON_FIRST_SCREEN.get() || id > max_id)
                     && cl.getShortcutsAndWidgets().getChildCount() == 0) {
                 removeScreens.add(id);
             }
@@ -1268,7 +1270,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         }
 
         if (mStripScreensOnPageStopMoving) {
-            stripEmptyScreens();
+            stripEmptyScreens(false);
             mStripScreensOnPageStopMoving = false;
         }
 
@@ -3261,6 +3263,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
             CellLayout cellLayout = mWorkspaceScreens.get(mScreenOrder.get(i));
             needCellCleanup(cellLayout);
         }
+
     }
 
     public void needCellCleanup(CellLayout cellLayout) {
@@ -3499,7 +3502,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         }
 
         // Strip all the empty screens
-        stripEmptyScreens();
+        stripEmptyScreens(false);
         clearEmptyCell();
     }
 
