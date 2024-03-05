@@ -50,6 +50,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Parcelable;
@@ -1487,14 +1488,25 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
 
     @Override
     public void setCurrentPage(int currentPage, int overridePrevPage) {
-        Hotseat hotseat = getHotseat();
-        if (currentPage == FIRST_SCREEN_ID) {
-            if (hotseat.getTranslationY() >= 0) {
-                hotseat.setForcedTranslationY(hotseat.getHeight() + getPageIndicator().getHeight());
-            }
-        } else {
-            if (hotseat.getTranslationY() != 0) {
-                hotseat.setForcedTranslationY(0);
+        if (MultiModeController.isSingleLayerMode()) {
+            Hotseat hotseat = getHotseat();
+            if (currentPage == FIRST_SCREEN_ID) {
+                int height = hotseat.getHeight() + getPageIndicator().getHeight();
+                if (hotseat.getTranslationY() >= 0) {
+                    hotseat.setForcedTranslationY(height);
+                }
+
+                PageIndicatorDots pageIndicatorDots = (PageIndicatorDots) getPageIndicator();
+                if (pageIndicatorDots.getTranslationY() >= 0) {
+                    pageIndicatorDots.setForcedTranslationY(height);
+                }
+
+                mLauncher.mBlurLayer.setAlpha(1);
+                getWindowInsetsController().hide(WindowInsetsCompat.Type.statusBars());
+            } else {
+                if (hotseat.getTranslationY() != 0) {
+                    hotseat.setForcedTranslationY(0);
+                }
             }
         }
         super.setCurrentPage(currentPage, overridePrevPage);
