@@ -1027,7 +1027,7 @@ public class WidgetsFullSheet extends BaseWidgetSheet
                     this::getEmptySpaceHeight,
                     /* iconClickListener= */ !isEditMode ? WidgetsFullSheet.this :
                     v -> WidgetFragment.onWidgetClick(context, v, close -> {
-                        close(close);
+                        closeAllOpenViews(Launcher.getLauncher(context));
                         return null;
                     }),
                     /* iconLongClickListener= */ !isEditMode ? WidgetsFullSheet.this : null,
