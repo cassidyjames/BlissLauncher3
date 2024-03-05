@@ -15,7 +15,7 @@ import android.appwidget.AppWidgetProviderInfo
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.graphics.Insets
+import android.content.res.Configuration
 import android.graphics.Rect
 import android.os.Bundle
 import android.os.UserHandle
@@ -23,7 +23,6 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
-import android.view.View.OnLayoutChangeListener
 import android.view.ViewGroup
 import android.view.WindowInsets
 import android.widget.Button
@@ -61,33 +60,23 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
     private val mLauncher by lazy { Launcher.getLauncher(context) }
 
     private lateinit var mRemoveWidgetLayout: FrameLayout
-    private lateinit var mWrapper: LinearLayout
     private lateinit var mResizeContainer: RelativeLayout
+    private lateinit var mWidgetLinearLayout: LinearLayout
 
-    private var mWrapperChildCount = 0
     private val mResizeContainerRect = Rect()
-    private var mInsets: Insets? = null
-
     private val mInsetPadding =
         context.resources.getDimension(R.dimen.widget_page_inset_padding).toInt()
-
-    private val layoutListener = OnLayoutChangeListener { view, _, _, _, _, _, _, _, _ ->
-        val childCount = (view as LinearLayout).childCount
-        if (mWrapperChildCount == childCount) return@OnLayoutChangeListener
-        handleRemoveButtonVisibility(childCount)
-    }
 
     override fun setPadding(left: Int, top: Int, right: Int, bottom: Int) {
         super.setPadding(0, 0, 0, 0)
     }
 
     override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
-        mResizeContainer.getHitRect(mResizeContainerRect)
-        if (
-            ev.action == MotionEvent.ACTION_DOWN &&
-                !mResizeContainerRect.contains(ev.x.toInt(), ev.y.toInt())
-        ) {
-            mLauncher.hideWidgetResizeContainer()
+        if (mResizeContainer.visibility == VISIBLE && ev.action == MotionEvent.ACTION_DOWN) {
+            mResizeContainer.getHitRect(mResizeContainerRect)
+            if (!mResizeContainerRect.contains(ev.x.toInt(), ev.y.toInt())) {
+                mLauncher.hideWidgetResizeContainer()
+            }
         }
         return super.onInterceptTouchEvent(ev)
     }
@@ -95,7 +84,9 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
 
-        mInsets = mLauncher.workspace.rootWindowInsets.getInsets(WindowInsets.Type.systemBars())
+        mRemoveWidgetLayout = findViewById(R.id.remove_widget_parent)!!
+        mResizeContainer = findViewById(R.id.widget_resizer_container)!!
+        mWidgetLinearLayout = findViewById(R.id.widget_linear_layout)!!
 
         findViewById<Button>(R.id.manage_widgets)!!.setOnClickListener {
             WidgetsFullSheet.show(mLauncher, true, true)
@@ -107,37 +98,51 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
             context.startActivity(intent)
         }
 
-        mRemoveWidgetLayout = findViewById(R.id.remove_widget_parent)!!
-        mWrapper =
-            findViewWithTag<LinearLayout?>("wrapper_children").apply {
-                addOnLayoutChangeListener(layoutListener)
-                handleRemoveButtonVisibility(childCount)
-            }
+        findViewWithTag<LinearLayout?>("wrapper_children").apply {
+            setOnHierarchyChangeListener(
+                object : OnHierarchyChangeListener {
+                    override fun onChildViewAdded(parent: View?, child: View?) {
+                        handleRemoveButtonVisibility((parent as LinearLayout).childCount)
+                    }
 
-        mResizeContainer =
-            findViewById<RelativeLayout?>(R.id.widget_resizer_container)!!.apply {
+                    override fun onChildViewRemoved(parent: View?, child: View?) {
+                        handleRemoveButtonVisibility((parent as LinearLayout).childCount)
+                    }
+                }
+            )
+        }
+
+        updatePadding()
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration?) {
+        super.onConfigurationChanged(newConfig)
+        updatePadding()
+    }
+
+    private fun updatePadding() {
+        val insets = mLauncher.workspace.rootWindowInsets.getInsets(WindowInsets.Type.systemBars())
+        if (::mResizeContainer.isInitialized) {
+            mResizeContainer.apply {
                 val layoutParams = this.layoutParams as LayoutParams
-                layoutParams.bottomMargin = mInsetPadding + (mInsets?.bottom ?: 0)
+                layoutParams.bottomMargin = mInsetPadding + (insets.bottom)
                 this.layoutParams = layoutParams
             }
+        }
 
-        findViewById<LinearLayout>(R.id.widget_linear_layout)!!.apply {
-            setPadding(
-                this.paddingLeft,
-                mInsetPadding + (mInsets?.top ?: 0),
-                this.paddingRight,
-                (mInsets?.bottom ?: 0),
-            )
+        if (::mWidgetLinearLayout.isInitialized) {
+            mWidgetLinearLayout.apply {
+                setPadding(
+                    this.paddingLeft,
+                    mInsetPadding + (insets.top),
+                    this.paddingRight,
+                    (insets.bottom),
+                )
+            }
         }
     }
 
-    override fun onDetachedFromWindow() {
-        super.onDetachedFromWindow()
-        mWrapper.removeOnLayoutChangeListener(layoutListener)
-    }
-
     private fun handleRemoveButtonVisibility(childCount: Int) {
-        mWrapperChildCount = childCount
         CoroutineScope(Dispatchers.Main).launch {
             if (childCount == 0) {
                 mRemoveWidgetLayout.visibility = View.GONE
