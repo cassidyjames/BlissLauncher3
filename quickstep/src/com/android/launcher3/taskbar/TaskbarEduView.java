@@ -30,6 +30,7 @@ import android.widget.Button;
 import com.android.launcher3.Insettable;
 import com.android.launcher3.R;
 import com.android.launcher3.taskbar.overlay.TaskbarOverlayContext;
+import com.android.launcher3.util.Themes;
 import com.android.launcher3.views.AbstractSlideInView;
 
 /** Education view about the Taskbar. */
@@ -82,6 +83,8 @@ public class TaskbarEduView extends AbstractSlideInView<TaskbarOverlayContext>
         mContent = findViewById(R.id.edu_view);
         mStartButton = findViewById(R.id.edu_start_button);
         mEndButton = findViewById(R.id.edu_end_button);
+        mEndButton.setTextColor(Themes.getAttrColor(
+                getContext(), com.android.internal.R.attr.textColorOnAccent));
         mPagedView = findViewById(R.id.content);
         mPagedView.setTaskbarEduView(this);
     }

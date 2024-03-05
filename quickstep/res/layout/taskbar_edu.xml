@@ -15,7 +15,6 @@
 -->
 
 <com.android.launcher3.taskbar.TaskbarEduView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:launcher="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -73,7 +72,6 @@
             app:layout_constraintBottom_toBottomOf="@id/edu_start_button"
             app:layout_constraintEnd_toEndOf="parent"
             android:text="@string/taskbar_edu_next"
-            style="@style/TaskbarEdu.Button.Next"
-            android:textColor="?androidprv:attr/textColorOnAccent"/>
+            style="@style/TaskbarEdu.Button.Next" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.android.launcher3.taskbar.TaskbarEduView>

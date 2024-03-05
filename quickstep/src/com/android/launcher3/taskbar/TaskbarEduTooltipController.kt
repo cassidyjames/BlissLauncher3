@@ -24,6 +24,7 @@ import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
+import android.widget.Button
 import androidx.annotation.IntDef
 import androidx.annotation.LayoutRes
 import com.airbnb.lottie.LottieAnimationView
@@ -36,6 +37,7 @@ import com.android.launcher3.taskbar.TaskbarAutohideSuspendController.FLAG_AUTOH
 import com.android.launcher3.taskbar.TaskbarControllers.LoggableTaskbarController
 import com.android.launcher3.util.DisplayController
 import com.android.launcher3.util.OnboardingPrefs.TASKBAR_EDU_TOOLTIP_STEP
+import com.android.launcher3.util.Themes
 import java.io.PrintWriter
 
 /** First EDU step for swiping up to show transient Taskbar. */
@@ -131,7 +133,13 @@ class TaskbarEduTooltipController(val activityContext: TaskbarActivityContext) :
                 settingsEdu.visibility = VISIBLE
             }
 
-            findViewById<View>(R.id.done_button)?.setOnClickListener { hide() }
+            val button: Button? = findViewById(R.id.done_button)
+            if (button != null) {
+                button.setTextColor(Themes.getAttrColor(context,
+                    com.android.internal.R.attr.textColorOnAccent))
+                button.setOnClickListener { hide() }
+            }
+
             if (DisplayController.isTransientTaskbar(activityContext)) {
                 (layoutParams as ViewGroup.MarginLayoutParams).bottomMargin +=
                     activityContext.deviceProfile.taskbarHeight
