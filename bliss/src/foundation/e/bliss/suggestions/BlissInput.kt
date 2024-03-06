@@ -53,7 +53,7 @@ class BlissInput(context: Context, attrs: AttributeSet) :
     private val suggestionProvider by lazy { SearchSuggestionUtil.getSuggestionProvider(context) }
     private val suggestionAdapter by lazy { AutoCompleteAdapter(context) }
     private val idp by lazy { InvariantDeviceProfile.INSTANCE.get(context) }
-    private val appUsageStats by lazy { AppUsageStats(context).usageStats }
+    private val appUsageStats by lazy { AppUsageStats(context) }
     private val mAppsStore by lazy { appMonitor.launcher.appsView.appsStore }
 
     private var results: SuggestionsResult? = null
@@ -197,8 +197,9 @@ class BlissInput(context: Context, attrs: AttributeSet) :
 
         mIconGrid.removeAllViews()
         if (appsList.isNotEmpty()) {
-            if (appUsageStats.isNotEmpty()) {
-                appUsageStats
+            val usageStats = appUsageStats.usageStats
+            if (usageStats.isNotEmpty()) {
+                usageStats
                     .mapNotNull { pkg -> appsList.find { it.targetPackage == pkg.packageName } }
                     .take(idp.numColumns)
                     .forEachIndexed { index, it -> mIconGrid.addView(createAppView(it), index) }
