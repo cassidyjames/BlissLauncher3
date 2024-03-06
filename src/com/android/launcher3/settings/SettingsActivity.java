@@ -260,6 +260,8 @@ public class SettingsActivity extends FragmentActivity
                     if (info.isTablet(info.realBounds)) {
                         // Launcher supports rotation by default. No need to show this setting.
                         return false;
+                    } else {
+                        preference.setVisible(false);
                     }
                     if (!getContext().getResources().getBoolean(
                             com.android.internal.R.bool.config_supportAutoRotation)) {
