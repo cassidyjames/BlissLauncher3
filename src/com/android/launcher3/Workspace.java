@@ -1343,6 +1343,10 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         final int scrollDelta = getScrollX() - getScrollForPage(index) -
                 getLayoutTransitionOffsetForPage(index);
         float scrollRange = getScrollForPage(index + 1) - getScrollForPage(index);
+
+        if (scrollRange == 0)
+            return;
+
         final float progress = (scrollRange - scrollDelta) / scrollRange;
 
         if (progress < 0)
