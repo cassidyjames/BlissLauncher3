@@ -83,6 +83,7 @@
         android:title="@string/pref_themed_icons_title"
         android:summary="@string/pref_themed_icons_summary"
         android:defaultValue="false"
+        launcher:isPreferenceVisible="false"
         android:persistent="true" />
 
     <SwitchPreference
