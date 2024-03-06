@@ -149,7 +149,6 @@ public class BgDataModel {
         }
         if (FeatureFlags.QSB_ON_FIRST_SCREEN.get() || screenSet.isEmpty()) {
             screenSet.add(Workspace.FIRST_SCREEN_ID);
-            screenSet.add(Workspace.SECOND_SCREEN_ID);
         }
         return screenSet.getArray();
     }
