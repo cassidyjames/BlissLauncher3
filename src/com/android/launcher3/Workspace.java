@@ -1105,6 +1105,8 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
         if (pageShift >= 0) {
             setCurrentPage(currentPage - pageShift);
         }
+        // Update the page indicator to reflect the removed page.
+        showPageIndicatorAtCurrentScroll();
     }
 
     /**
