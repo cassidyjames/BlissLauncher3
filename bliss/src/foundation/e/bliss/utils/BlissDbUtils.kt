@@ -309,7 +309,7 @@ object BlissDbUtils {
             put("itemType", ITEM_TYPE_APPLICATION)
             put("modified", System.currentTimeMillis())
             put("options", 0)
-            put("profileId", 0)
+            put("profileId", UserHandle.myUserId())
             put("rank", 0)
             put("restored", 0)
             put("screen", favorite.screen)
