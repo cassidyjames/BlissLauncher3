@@ -259,7 +259,6 @@ dependencies {
     implementation project(':IconLoader')
 
     implementation fileTree(dir: "prebuilts", include: 'Launcher3QuickStepLib.jar')
-    implementation fileTree(dir: "prebuilts", include: 'libGoogleFeed.jar')
 }
 
 protobuf {
