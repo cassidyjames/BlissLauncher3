@@ -86,9 +86,6 @@ public class SettingsActivity extends FragmentActivity
 
     private static final int DELAY_HIGHLIGHT_DURATION_MILLIS = 600;
     public static final String SAVE_HIGHLIGHTED_KEY = "android:preference_highlighted";
-
-    private static final String KEY_MINUS_ONE = "pref_enable_minus_one";
-    private static final String SEARCH_PACKAGE = "com.google.android.googlequicksearchbox";
     public static final String KEY_TRUST_APPS = "pref_trust_apps";
 
     private static final String KEY_SUGGESTIONS = "pref_suggestions";
@@ -283,9 +280,6 @@ public class SettingsActivity extends FragmentActivity
                         return true;
                     }
                     return false;
-
-                case KEY_MINUS_ONE:
-                    return LineageUtils.isPackageEnabled(getActivity(), SEARCH_PACKAGE);
 
                 case KEY_TRUST_APPS:
                     preference.setOnPreferenceClickListener(p -> {
