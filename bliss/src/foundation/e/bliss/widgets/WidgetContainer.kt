@@ -18,7 +18,6 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Rect
 import android.os.Bundle
-import android.os.ServiceManager
 import android.os.UserHandle
 import android.util.AttributeSet
 import android.view.LayoutInflater
@@ -31,7 +30,6 @@ import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.Toast
-import com.android.internal.appwidget.IAppWidgetService
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.Launcher
 import com.android.launcher3.PendingAddItemInfo
@@ -393,20 +391,11 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
 
         private fun sendIntent(widgetId: Int) {
             val bundle = Bundle().apply { putInt(EXTRA_APPWIDGET_ID, widgetId) }
-            // Access internal AppWidgetService through Stub
-            val intentSender =
-                IAppWidgetService.Stub.asInterface(
-                        ServiceManager.getService(Context.APPWIDGET_SERVICE)
-                    )
-                    .createAppWidgetConfigIntentSender(context.opPackageName, widgetId, 0)
-
-            startIntentSenderForResult(
-                intentSender,
+            mWidgetHost.startAppWidgetConfigureActivityForResult(
+                launcher,
+                widgetId,
+                0,
                 REQUEST_CONFIGURE_APPWIDGET,
-                null,
-                0,
-                0,
-                0,
                 bundle
             )
         }
