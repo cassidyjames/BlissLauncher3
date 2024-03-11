@@ -1157,10 +1157,10 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouch(View v, MotionEvent event) {
-        return shouldConsumeTouch(v, event);
+        return shouldConsumeTouch(v);
     }
 
-    private boolean shouldConsumeTouch(View v, MotionEvent event) {
+    private boolean shouldConsumeTouch(View v) {
         return !workspaceIconsCanBeDragged()
                 || (!workspaceInModalState() && !isVisible(v));
     }
@@ -1234,28 +1234,6 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
             // Below START_DAMPING_TOUCH_SLOP_ANGLE, we don't do anything special
             super.determineScrollingStart(ev);
         }
-    }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent ev) {
-        int[] cell = new int[2];
-        final CellLayout cellLayout = (CellLayout) getChildAt(getCurrentPage());
-        cellLayout.pointToCellExact((int) ev.getX(), (int) ev.getY(), cell);
-
-        if ((cellLayout.isOccupied(cell[0], cell[1]))) {
-            View v= cellLayout.getChildAt(cell[0], cell[1]);
-            if (v instanceof BubbleTextView) {
-                RectF rect = new RectF();
-                FloatingIconView.getLocationBoundsForView(mLauncher, v, false, rect,
-                        new Rect());
-
-                if (rect.contains(ev.getX(), ev.getY()) && ev.getAction() == MotionEvent.ACTION_MOVE) {
-                    return false;
-                }
-            }
-        }
-
-        return super.onTouchEvent(ev);
     }
 
     protected void onPageBeginTransition() {
@@ -1738,12 +1716,17 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
     }
 
     public void startDrag(CellLayout.CellInfo cellInfo, DragOptions options) {
-        if (!isWobbling() && MultiModeController.isSingleLayerMode()) {
-            wobbleLayouts(true);
-           // return;
+        View child = cellInfo.cell;
+
+        if (MultiModeController.isSingleLayerMode() ) {
+            if (!isWobbling()) {
+                wobbleLayouts(true);
+                return;
+            } else {
+                child.setOnTouchListener(null);
+            }
         }
 
-        View child = cellInfo.cell;
         if (wobbleExpireAlarm.alarmPending()) {
             wobbleExpireAlarm.cancelAlarm();
         }
