@@ -1222,10 +1222,10 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouch(View v, MotionEvent event) {
-        return shouldConsumeTouch(v, event);
+        return shouldConsumeTouch(v);
     }
 
-    private boolean shouldConsumeTouch(View v, MotionEvent event) {
+    private boolean shouldConsumeTouch(View v) {
         return !workspaceIconsCanBeDragged()
                 || (!workspaceInModalState() && !isVisible(v));
     }
@@ -1774,12 +1774,17 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
     }
 
     public void startDrag(CellInfo cellInfo, DragOptions options) {
-        if (!isWobbling() && MultiModeController.isSingleLayerMode()) {
-            wobbleLayouts(true);
-           // return;
+        View child = cellInfo.cell;
+
+        if (MultiModeController.isSingleLayerMode() ) {
+            if (!isWobbling()) {
+                wobbleLayouts(true);
+                return;
+            } else {
+                child.setOnTouchListener(null);
+            }
         }
 
-        View child = cellInfo.cell;
         if (wobbleExpireAlarm.alarmPending()) {
             wobbleExpireAlarm.cancelAlarm();
         }
