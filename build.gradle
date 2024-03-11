@@ -256,7 +256,6 @@ dependencies {
     implementation libs.square.retrofit
 
     implementation fileTree(dir: "prebuilts", include: 'Launcher3QuickStepLib.jar')
-    implementation fileTree(dir: "prebuilts", include: 'libGoogleFeed.jar')
     implementation project(':IconLoader')
 }
 
