@@ -1260,46 +1260,31 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
 
         if (mIsPageInTransition && MultiModeController.isSingleLayerMode()) {
             mLauncher.hideWidgetResizeContainer();
-            firstPageItemHideHotseat(l);
+            firstPageItemHideHotseat();
         }
     }
 
-    private void firstPageItemHideHotseat(int scrollX) {
-        final DeviceProfile dp = mLauncher.getDeviceProfile();
-        float progress = (float) scrollX / dp.availableWidthPx;
+    private void firstPageItemHideHotseat() {
+        final int index = mScreenOrder.indexOf(FIRST_SCREEN_ID);
+        final int scrollDelta = getScrollX() - getScrollForPage(index) -
+                getLayoutTransitionOffsetForPage(index);
+        float scrollRange = getScrollForPage(index + 1) - getScrollForPage(index);
 
-        if (progress > 1)
+        if (scrollRange == 0)
             return;
 
-        if (progress >= 0.98)
-            progress = 1;
-        if (progress <= 0.001)
-            progress = 0;
+        final float progress = (scrollRange - scrollDelta) / scrollRange;
+
+        if (progress < 0)
+            return;
 
         int dockHeight = getHotseat().getHeight() + getPageIndicator().getHeight();
-        int bottomPadding = dp.workspacePadding.bottom;
-        float dockTranslationY = (1 - progress) * dockHeight;
-
-        float qsbPadding = progress * bottomPadding;
-        CellLayout firstScreen = mWorkspaceScreens.get(FIRST_SCREEN_ID);
-
-        if (progress == 0 && firstScreen.getPaddingBottom() != 0) {
-            qsbPadding = 0;
-        }
+        float dockTranslationY = progress * dockHeight;
 
         getHotseat().setForcedTranslationY(dockTranslationY);
-        ((PageIndicatorDots) getPageIndicator()).setForcedTranslationY(dockTranslationY);
-        firstScreen.setPadding(
-                firstScreen.getPaddingLeft(),
-                firstScreen.getPaddingTop(),
-                firstScreen.getPaddingRight(),
-                (int) qsbPadding);
+        getPageIndicator().setForcedTranslationY(dockTranslationY);
 
-        if (scrollX >= 0 && scrollX < dp.availableWidthPx) {
-            float fraction = (float) (dp.availableWidthPx - scrollX)
-                    / dp.availableWidthPx;
-            mLauncher.mBlurLayer.setAlpha(fraction);
-        }
+        mLauncher.mBlurLayer.setAlpha(progress);
     }
 
     public void showPageIndicatorAtCurrentScroll() {
