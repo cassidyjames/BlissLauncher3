@@ -337,7 +337,7 @@ public class LauncherModel extends LauncherApps.Callback implements InstallSessi
                 }
             }
         }
-        LauncherAppMonitor.getInstance(mApp.getContext()).onReceive(intent);
+        LauncherAppMonitor.getInstanceNoCreate().onReceive(intent);
     }
 
     /**
