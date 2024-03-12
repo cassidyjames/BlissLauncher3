@@ -11,11 +11,10 @@ import android.annotation.SuppressLint
 import android.app.WallpaperManager
 import android.content.Context
 import android.graphics.*
-import android.util.DisplayMetrics
-import android.view.WindowManager
 import android.widget.Toast
 import androidx.core.graphics.drawable.toBitmap
 import com.android.launcher3.Utilities
+import com.android.launcher3.util.DisplayController
 import com.android.launcher3.util.Executors
 import com.android.launcher3.util.MainThreadInitializedObject
 import foundation.e.bliss.utils.Logger
@@ -27,9 +26,8 @@ import kotlin.math.ceil
 class BlurWallpaperProvider(val context: Context) {
 
     private val mWallpaperManager: WallpaperManager = WallpaperManager.getInstance(context)
-    private val mWindowManager by lazy { context.getSystemService(WindowManager::class.java) }
     private val mListeners = ArrayList<Listener>()
-    private val mDisplayMetrics = DisplayMetrics()
+    private val mDisplaySize = DisplayController.INSTANCE.get(context).info.currentSize
 
     var wallpapers: BlurSizes? = null
         private set(value) {
@@ -76,10 +74,8 @@ class BlurWallpaperProvider(val context: Context) {
             return
         }
 
-        val display = mWindowManager.defaultDisplay
-        display.getRealMetrics(mDisplayMetrics)
-        val width = mDisplayMetrics.widthPixels
-        val height = mDisplayMetrics.heightPixels
+        val width = mDisplaySize.x
+        val height = mDisplaySize.y
 
         // Prepare a placeholder before hand so that it can be used in case wallpaper is null
         placeholder = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
@@ -106,9 +102,9 @@ class BlurWallpaperProvider(val context: Context) {
         wallpaper = scaleAndCropToScreenSize(wallpaper)
         mWallpaperWidth = wallpaper.width
 
-        var offsetY = 0f
+        val offsetY: Float
         if (wallpaper.height > height) {
-            offsetY = (wallpaper.height - display.height) * 0.5f
+            offsetY = (wallpaper.height - height) * 0.5f
             mListeners.forEach { it.onOffsetChanged(offsetY) }
         }
 
@@ -162,8 +158,8 @@ class BlurWallpaperProvider(val context: Context) {
     }
 
     private fun scaleAndCropToScreenSize(wallpaper: Bitmap): Bitmap {
-        val width = mDisplayMetrics.widthPixels
-        val height = mDisplayMetrics.heightPixels
+        val width = mDisplaySize.x
+        val height = mDisplaySize.y
 
         val widthFactor = width.toFloat() / wallpaper.width
         val heightFactor = height.toFloat() / wallpaper.height
@@ -193,7 +189,7 @@ class BlurWallpaperProvider(val context: Context) {
         if (!isEnabled) return
         if (wallpapers == null) return
 
-        val availableWidth = mDisplayMetrics.widthPixels - mWallpaperWidth
+        val availableWidth = mDisplaySize.x - mWallpaperWidth
         var xPixels = availableWidth / 2
         if (availableWidth < 0) {
             xPixels += (availableWidth * (offset - .5f) + .5f).toInt()
@@ -203,7 +199,7 @@ class BlurWallpaperProvider(val context: Context) {
             Utilities.boundToRange(
                 (-xPixels).toFloat(),
                 0f,
-                (mWallpaperWidth - mDisplayMetrics.widthPixels).toFloat()
+                (mWallpaperWidth - mDisplaySize.x).toFloat()
             )
 
         runOnMainThread { mListeners.forEach { it.onScrollOffsetChanged(scrollOffset) } }
