@@ -510,6 +510,13 @@ public class WidgetsFullSheet extends BaseWidgetSheet
         List<WidgetsListBaseEntry> allWidgets =
                 mActivityContext.getPopupDataProvider().getAllWidgets();
 
+        if (isEditMode) {
+            allWidgets.removeIf(item -> {
+                item.mWidgets.removeIf(widget -> widget.widgetInfo == null);
+                return item.mWidgets.isEmpty();
+            });
+        }
+
         AdapterHolder primaryUserAdapterHolder = mAdapters.get(AdapterHolder.PRIMARY);
         primaryUserAdapterHolder.mWidgetsListAdapter.setWidgets(allWidgets);
 
@@ -713,7 +720,6 @@ public class WidgetsFullSheet extends BaseWidgetSheet
                 getWidgetSheetId(activity),
                 activity.getDragLayer(),
                 false);
-        isEditMode = false;
         sheet.attachToContainer();
         sheet.mIsOpen = true;
         sheet.open(animate);
