@@ -442,10 +442,16 @@ class LauncherPrefs(private val encryptedContext: Context) {
         val WIDGETS_EDUCATION_TIP_SEEN = backedUpItem("launcher.widgets_education_tip_seen", false)
 
         @JvmField
-        val IS_NOTIF_COUNT_ENABLED = backedUpItem(BlissPrefs.PREF_NOTIF_COUNT, true)
+        val IS_NOTIF_COUNT_ENABLED = ConstantItem(BlissPrefs.PREF_NOTIF_COUNT,
+            isBackedUp = true,
+            defaultValue = true,
+            encryptionType = EncryptionType.DEVICE_PROTECTED)
 
         @JvmField
-        val IS_SINGLE_LAYER_ENABLED = backedUpItem(BlissPrefs.PREF_SINGLE_LAYER_MODE, true)
+        val IS_SINGLE_LAYER_ENABLED = ConstantItem(BlissPrefs.PREF_SINGLE_LAYER_MODE,
+            isBackedUp = true,
+            defaultValue = true,
+            encryptionType = EncryptionType.DEVICE_PROTECTED)
 
         @VisibleForTesting
         @JvmStatic

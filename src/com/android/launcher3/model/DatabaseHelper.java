@@ -162,7 +162,7 @@ public class DatabaseHelper extends NoLocaleSQLiteHelper implements
         if (LOGD) {
             Log.d(TAG, "onUpgrade triggered: " + oldVersion);
         }
-        LauncherAppMonitor.getInstance(mContext).onLauncherDbUpgrade(db, oldVersion, newVersion);
+        LauncherAppMonitor.getInstanceNoCreate().onLauncherDbUpgrade(db, oldVersion, newVersion);
         switch (oldVersion) {
             // The version cannot be lower that 12, as Launcher3 never supported a lower
             // version of the DB.

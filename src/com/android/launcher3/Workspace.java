@@ -351,7 +351,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         wobbleExpireAlarm.setOnAlarmListener(this);
         mWobbleAnimation = AnimationUtils.loadAnimation(getContext(), R.anim.wobble);
         mReverseWobbleAnimation = AnimationUtils.loadAnimation(getContext(), R.anim.wobble_reverse);
-        LauncherAppMonitor.getInstance(context).registerCallback(mLauncherAppMonitorCallback);
+        LauncherAppMonitor.getInstanceNoCreate().registerCallback(mLauncherAppMonitorCallback);
     }
 
     private final LauncherAppMonitorCallback mLauncherAppMonitorCallback =

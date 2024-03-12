@@ -318,7 +318,7 @@ public class DisplayController implements ComponentCallbacks, SafeCloseable {
             mInfo = newInfo;
             final int flags = change;
             MAIN_EXECUTOR.execute(() -> {
-                LauncherAppMonitor.getInstance(mContext).onUIConfigChanged();
+                LauncherAppMonitor.getInstanceNoCreate().onUIConfigChanged();
                 notifyChange(displayInfoContext, flags); }
             );
         }

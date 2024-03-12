@@ -242,7 +242,7 @@ public class AlphabeticalAppsList<T extends Context & ActivityContext> implement
         }
 
         appSteam.forEachOrdered(mApps::add);
-        LauncherAppMonitor.getInstance(mActivityContext).onAllAppsListUpdated(mApps);
+        LauncherAppMonitor.getInstanceNoCreate().onAllAppsListUpdated(mApps);
         privateAppStream.forEachOrdered(mPrivateApps::add);
         // Recompose the set of adapter items from the current set of apps
         if (mSearchResults.isEmpty()) {
