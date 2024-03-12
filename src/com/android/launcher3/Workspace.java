@@ -1454,13 +1454,13 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
     public void setCurrentPage(int currentPage, int overridePrevPage) {
         if (MultiModeController.isSingleLayerMode()) {
             Hotseat hotseat = getHotseat();
+            PageIndicatorDots pageIndicatorDots = getPageIndicator();
             if (currentPage == FIRST_SCREEN_ID) {
                 int height = hotseat.getHeight() + getPageIndicator().getHeight();
                 if (hotseat.getTranslationY() >= 0) {
                     hotseat.setForcedTranslationY(height);
                 }
 
-                PageIndicatorDots pageIndicatorDots = (PageIndicatorDots) getPageIndicator();
                 if (pageIndicatorDots.getTranslationY() >= 0) {
                     pageIndicatorDots.setForcedTranslationY(height);
                 }
@@ -1468,8 +1468,15 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
                 mLauncher.mBlurLayer.setAlpha(1);
                 getWindowInsetsController().hide(WindowInsetsCompat.Type.statusBars());
             } else {
+                mLauncher.mBlurLayer.setAlpha(0);
+                getWindowInsetsController().show(WindowInsetsCompat.Type.statusBars());
+
                 if (hotseat.getTranslationY() != 0) {
                     hotseat.setForcedTranslationY(0);
+                }
+
+                if (pageIndicatorDots.getTranslationY() != 0) {
+                    pageIndicatorDots.setForcedTranslationY(0);
                 }
             }
         }
