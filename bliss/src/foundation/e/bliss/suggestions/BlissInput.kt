@@ -53,12 +53,13 @@ class BlissInput(context: Context, attrs: AttributeSet) :
     OnUpdateListener,
     OnBackKeyListener {
     private val mSearchAlgorithm = DefaultAppSearchAlgorithm(context)
-    private val appMonitor = LauncherAppMonitor.getInstance(context)
     private val suggestionProvider by lazy { SearchSuggestionUtil.getSuggestionProvider(context) }
     private val suggestionAdapter by lazy { AutoCompleteAdapter(context) }
     private val idp by lazy { InvariantDeviceProfile.INSTANCE.get(context) }
     private val appUsageStats by lazy { AppUsageStats(context) }
-    private val mAppsStore by lazy { appMonitor.launcher.appsView.appsStore }
+    private val mAppsStore by lazy {
+        LauncherAppMonitor.getInstanceNoCreate().launcher.appsView.appsStore
+    }
 
     private var results: SuggestionsResult? = null
     private lateinit var mSearchInput: ExtendedEditText
@@ -186,7 +187,9 @@ class BlissInput(context: Context, attrs: AttributeSet) :
                 setCenterVertically(false)
                 setWidth(width / idp.numColumns)
                 setPaddingRelative(padding, 0, padding, 0)
-                setOnClickListener(appMonitor.launcher.itemOnClickListener)
+                setOnClickListener(
+                    LauncherAppMonitor.getInstanceNoCreate().launcher.itemOnClickListener
+                )
             }
     }
 

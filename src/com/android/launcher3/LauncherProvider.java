@@ -786,7 +786,7 @@ public class LauncherProvider extends ContentProvider {
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
             if (LOGD) Log.d(TAG, "onUpgrade triggered: " + oldVersion);
-            LauncherAppMonitor.getInstance(mContext).onLauncherDbUpgrade(db, oldVersion, newVersion);
+            LauncherAppMonitor.getInstanceNoCreate().onLauncherDbUpgrade(db, oldVersion, newVersion);
 
             switch (oldVersion) {
                 // The version cannot be lower that 12, as Launcher3 never supported a lower
