@@ -401,7 +401,6 @@ public class TouchInteractionService extends Service
 
     private TaskbarManager mTaskbarManager;
     private Function<GestureState, AnimatedFloat> mSwipeUpProxyProvider = i -> null;
-
     @Override
     public void onCreate() {
         super.onCreate();
@@ -413,6 +412,7 @@ public class TouchInteractionService extends Service
         mTaskbarManager = new TaskbarManager(this);
         mRotationTouchHelper = mDeviceState.getRotationTouchHelper();
         BootAwarePreloader.start(this);
+        LauncherAppMonitor.getInstance(this);
 
         // Call runOnUserUnlocked() before any other callbacks to ensure everything is initialized.
         mDeviceState.runOnUserUnlocked(this::onUserUnlocked);
@@ -459,8 +459,6 @@ public class TouchInteractionService extends Service
 
     @UiThread
     public void onUserUnlocked() {
-        LauncherAppMonitor.getInstance(this);
-
         mTaskAnimationManager = new TaskAnimationManager(this);
         mOverviewComponentObserver = new OverviewComponentObserver(this, mDeviceState);
         mOverviewCommandHelper = new OverviewCommandHelper(this,

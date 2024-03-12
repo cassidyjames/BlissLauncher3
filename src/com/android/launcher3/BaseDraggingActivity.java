@@ -112,7 +112,7 @@ public abstract class BaseDraggingActivity extends BaseActivity
     private void updateTheme() {
         if (mThemeRes != Themes.getActivityThemeRes(this)) {
             recreate();
-            LauncherAppMonitor.getInstance(this).onThemeChanged();
+            LauncherAppMonitor.getInstanceNoCreate().onThemeChanged();
         }
     }
 
