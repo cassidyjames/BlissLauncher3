@@ -24,7 +24,6 @@
         <item name="android:listPreferredItemPaddingStart">24dp</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:switchStyle">@style/HomeSettings.SwitchStyle</item>
         <item name="android:textAppearanceListItem">@style/HomeSettings.PreferenceTitle</item>
         <item name="android:windowActionBar">false</item>
         <item name="android:windowNoTitle">true</item>
@@ -79,10 +78,10 @@
     </style>
 
     <style name="HomeSettings.CollapsingToolbar" parent="@style/Theme.MaterialComponents.DayNight">
-        <item name="colorAccent">@color/home_settings_header_accent</item>
-        <item name="colorPrimary">@color/home_settings_header_expanded</item>
-        <item name="elevationOverlayColor">?attr/colorPrimary</item>
-        <item name="elevationOverlayEnabled">true</item>
+        <item name="colorAccent">@color/e_accent</item>
+        <item name="colorPrimary">@color/e_background</item>
+        <item name="elevationOverlayColor">@color/e_background</item>
+        <item name="elevationOverlayEnabled">false</item>
     </style>
 
     <style name="HomeSettings.CollapsedToolbarTitle"
