@@ -40,6 +40,8 @@ import com.android.launcher3.R;
 import com.android.launcher3.notification.NotificationListener;
 import com.android.launcher3.util.SettingsCache;
 
+import foundation.e.blisslauncher.features.notification.NotificationService;
+
 /**
  * A {@link Preference} for indicating notification dots status.
  * Also has utility methods for updating UI based on dots status changes.
@@ -137,9 +139,14 @@ public class NotificationDotsPreference extends Preference
                     getContext().getContentResolver(), NOTIFICATION_ENABLED_LISTENERS);
             ComponentName myListener =
                     new ComponentName(getContext(), NotificationListener.class);
+            ComponentName myListener2 =
+                    new ComponentName(getContext(), NotificationService.class);
             serviceEnabled = enabledListeners != null &&
                     (enabledListeners.contains(myListener.flattenToString()) ||
-                            enabledListeners.contains(myListener.flattenToShortString()));
+                            enabledListeners.contains(myListener.flattenToShortString()) ||
+                    enabledListeners.contains(myListener2.flattenToString()) ||
+                            enabledListeners.contains(myListener2.flattenToShortString()));
+
             if (!serviceEnabled) {
                 summary = R.string.title_missing_notification_access;
             }
