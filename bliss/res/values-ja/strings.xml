@@ -1,2 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="edit">編集</string>
+    <string name="search">検索</string>
+    <string name="suggestions">提案</string>
+    <string name="maps">地図</string>
+    <string name="ok">OK</string>
+    <string name="cancel">キャンセル</string>
+    <string name="uninstall_app">このアプリをアンインストールしますか？</string>
+    <string name="untitled_folder">無題</string>
+    <string name="max">最大</string>
+    <string name="min">最小</string>
+    <string name="widget_no_resize">このウィジェットの大きさを変更できません</string>
+    <string name="widget_add">追加</string>
+    <string name="widget_remove">削除</string>
+</resources>
