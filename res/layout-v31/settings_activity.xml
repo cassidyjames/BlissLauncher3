@@ -38,7 +38,7 @@
             android:layout_height="226dp"
             android:clipToPadding="false"
             app:collapsedTitleTextAppearance="@style/HomeSettings.CollapsedToolbarTitle"
-            app:contentScrim="@color/home_settings_header_collapsed"
+            app:contentScrim="@color/e_background"
             app:expandedTitleMarginEnd="24dp"
             app:expandedTitleMarginStart="24dp"
             app:expandedTitleTextAppearance="@style/HomeSettings.ExpandedToolbarTitle"

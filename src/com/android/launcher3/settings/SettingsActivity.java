@@ -93,8 +93,6 @@ public class SettingsActivity extends FragmentActivity
     @VisibleForTesting
     static final String EXTRA_FRAGMENT_ARGS = ":settings:fragment_args";
 
-    private static final String KEY_MINUS_ONE = "pref_enable_minus_one";
-    private static final String SEARCH_PACKAGE = "com.google.android.googlequicksearchbox";
     public static final String KEY_TRUST_APPS = "pref_trust_apps";
 
     private static final String KEY_SUGGESTIONS = "pref_suggestions";
@@ -290,6 +288,8 @@ public class SettingsActivity extends FragmentActivity
                     if (info.isTablet(info.realBounds)) {
                         // Launcher supports rotation by default. No need to show this setting.
                         return false;
+                    } else {
+                        preference.setVisible(false);
                     }
                     // Initialize the UI once
                     preference.setDefaultValue(RotationHelper.getAllowRotationDefaultValue(info));
@@ -302,9 +302,6 @@ public class SettingsActivity extends FragmentActivity
                 case DEVELOPER_OPTIONS_KEY:
                     mDeveloperOptionPref = preference;
                     return updateDeveloperOption();
-
-                case KEY_MINUS_ONE:
-                    return LineageUtils.isPackageEnabled(getActivity(), SEARCH_PACKAGE);
 
                 case KEY_TRUST_APPS:
                     preference.setOnPreferenceClickListener(p -> {

@@ -40,11 +40,11 @@
                 tools:ignore="FragmentTagUsage" />
 
             <LinearLayout
+                android:id="@+id/manage_widget_parent"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center_horizontal"
-                android:orientation="horizontal"
-                android:paddingTop="10dp">
+                android:orientation="horizontal">
 
                 <foundation.e.bliss.blur.BlurLayout
                     android:layout_width="wrap_content"

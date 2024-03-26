@@ -28,4 +28,6 @@
     <string name="widget_no_resize">Cannot resize this widget</string>
     <string name="widget_add">Add</string>
     <string name="widget_remove">Remove</string>
+    <string name="remove_widgets">Remove Widgets</string>
+    <string name="show_notification_count">Show notification count</string>
 </resources>

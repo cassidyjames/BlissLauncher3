@@ -277,6 +277,11 @@ public class FolderPagedView extends PagedView<PageIndicatorDots> implements Cli
     }
 
     public void removeItem(View v) {
+        if (mFolder instanceof GridFolder && ((GridFolder) mFolder).isFolderWobbling()
+                && v != null) {
+            v.clearAnimation();
+        }
+
         for (int i = getChildCount() - 1; i >= 0; i --) {
             getPageAt(i).removeView(v);
         }

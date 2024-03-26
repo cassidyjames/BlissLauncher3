@@ -352,7 +352,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         wobbleExpireAlarm.setOnAlarmListener(this);
         mWobbleAnimation = AnimationUtils.loadAnimation(getContext(), R.anim.wobble);
         mReverseWobbleAnimation = AnimationUtils.loadAnimation(getContext(), R.anim.wobble_reverse);
-        LauncherAppMonitor.getInstance(context).registerCallback(mLauncherAppMonitorCallback);
+        LauncherAppMonitor.getInstanceNoCreate().registerCallback(mLauncherAppMonitorCallback);
     }
 
     private final LauncherAppMonitorCallback mLauncherAppMonitorCallback =
@@ -1079,12 +1079,18 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         int currentPage = getNextPage();
         IntArray removeScreens = new IntArray();
         int total = mWorkspaceScreens.size();
+        int maxId = SECOND_SCREEN_ID;
+        if (MultiModeController.isSingleLayerMode() && total > 2) {
+            maxId = FIRST_SCREEN_ID;
+        }
+
         for (int i = 0; i < total; i++) {
             int id = mWorkspaceScreens.keyAt(i);
             CellLayout cl = mWorkspaceScreens.valueAt(i);
             // FIRST_SCREEN_ID can never be removed.
-            if ((!FeatureFlags.QSB_ON_FIRST_SCREEN.get() || id > SECOND_SCREEN_ID)
-                    && cl.getShortcutsAndWidgets().getChildCount() == 0) {
+            if ((!FeatureFlags.QSB_ON_FIRST_SCREEN.get() || id > maxId)
+                    && cl.getShortcutsAndWidgets().getChildCount() == 0
+            ) {
                 removeScreens.add(id);
             }
         }
@@ -1139,6 +1145,8 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         if (pageShift >= 0) {
             setCurrentPage(currentPage - pageShift);
         }
+        // Update the page indicator to reflect the removed page.
+        showPageIndicatorAtCurrentScroll();
     }
 
     /**
@@ -1149,10 +1157,10 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouch(View v, MotionEvent event) {
-        return shouldConsumeTouch(v, event);
+        return shouldConsumeTouch(v);
     }
 
-    private boolean shouldConsumeTouch(View v, MotionEvent event) {
+    private boolean shouldConsumeTouch(View v) {
         return !workspaceIconsCanBeDragged()
                 || (!workspaceInModalState() && !isVisible(v));
     }
@@ -1195,7 +1203,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
 
     @Override
     protected void determineScrollingStart(MotionEvent ev) {
-        if (!isFinishedSwitchingState()) return;
+        if (!isFinishedSwitchingState()  || (isWobbling() && mDragInfo != null)) return;
 
         float deltaX = ev.getX() - mXDown;
         float absDeltaX = Math.abs(deltaX);
@@ -1226,28 +1234,6 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
             // Below START_DAMPING_TOUCH_SLOP_ANGLE, we don't do anything special
             super.determineScrollingStart(ev);
         }
-    }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent ev) {
-        int[] cell = new int[2];
-        final CellLayout cellLayout = (CellLayout) getChildAt(getCurrentPage());
-        cellLayout.pointToCellExact((int) ev.getX(), (int) ev.getY(), cell);
-
-        if ((cellLayout.isOccupied(cell[0], cell[1]))) {
-            View v= cellLayout.getChildAt(cell[0], cell[1]);
-            if (v instanceof BubbleTextView) {
-                RectF rect = new RectF();
-                FloatingIconView.getLocationBoundsForView(mLauncher, v, false, rect,
-                        new Rect());
-
-                if (rect.contains(ev.getX(), ev.getY()) && ev.getAction() == MotionEvent.ACTION_MOVE) {
-                    return false;
-                }
-            }
-        }
-
-        return super.onTouchEvent(ev);
     }
 
     protected void onPageBeginTransition() {
@@ -1337,6 +1323,10 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         final int scrollDelta = getScrollX() - getScrollForPage(index) -
                 getLayoutTransitionOffsetForPage(index);
         float scrollRange = getScrollForPage(index + 1) - getScrollForPage(index);
+
+        if (scrollRange == 0)
+            return;
+
         final float progress = (scrollRange - scrollDelta) / scrollRange;
 
         if (progress < 0)
@@ -1437,11 +1427,22 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
 
     @Override
     public void setCurrentPage(int currentPage, int overridePrevPage) {
-        if (currentPage == FIRST_SCREEN_ID) {
-            Hotseat hotseat = getHotseat();
-             if (hotseat.getTranslationY() >= 0) {
-                 hotseat.setForcedTranslationY(hotseat.getHeight() + getPageIndicator().getHeight());
-             }
+        if (MultiModeController.isSingleLayerMode()) {
+            if (currentPage == FIRST_SCREEN_ID) {
+                Hotseat hotseat = getHotseat();
+                int height = hotseat.getHeight() + getPageIndicator().getHeight();
+                if (hotseat.getTranslationY() >= 0) {
+                    hotseat.setForcedTranslationY(height);
+                }
+
+                PageIndicatorDots pageIndicatorDots = (PageIndicatorDots) getPageIndicator();
+                if (pageIndicatorDots.getTranslationY() >= 0) {
+                    pageIndicatorDots.setForcedTranslationY(height);
+                }
+
+                mLauncher.mBlurLayer.setAlpha(1);
+                getWindowInsetsController().hide(WindowInsetsCompat.Type.statusBars());
+            }
         }
         super.setCurrentPage(currentPage, overridePrevPage);
     }
@@ -1715,12 +1716,17 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
     }
 
     public void startDrag(CellLayout.CellInfo cellInfo, DragOptions options) {
-        if (!isWobbling() && MultiModeController.isSingleLayerMode()) {
-            wobbleLayouts(true);
-            return;
+        View child = cellInfo.cell;
+
+        if (MultiModeController.isSingleLayerMode() ) {
+            if (!isWobbling()) {
+                wobbleLayouts(true);
+                return;
+            } else {
+                child.setOnTouchListener(null);
+            }
         }
 
-        View child = cellInfo.cell;
         if (wobbleExpireAlarm.alarmPending()) {
             wobbleExpireAlarm.cancelAlarm();
         }

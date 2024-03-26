@@ -66,7 +66,7 @@ public abstract class StatefulActivity<STATE_TYPE extends BaseState<STATE_TYPE>>
 
         mOldConfig = new Configuration(getResources().getConfiguration());
         mOldRotation = WindowManagerProxy.INSTANCE.get(this).getRotation(this);
-        mAppMonitor = LauncherAppMonitor.INSTANCE.get(this);
+        mAppMonitor = LauncherAppMonitor.getInstanceNoCreate();
     }
 
     /**
