@@ -101,9 +101,10 @@ public class FolderNameProvider implements ResourceBasedOverride {
         if (DEBUG) {
             Log.d(TAG, "getSuggestedFolderName:" + nameInfos.toString());
         }
+        ArrayList<WorkspaceItemInfo> items = new ArrayList<>(workspaceItemInfos);
         // If all the icons are from work profile,
         // Then, suggest "Work" as the folder name
-        Set<UserHandle> users = workspaceItemInfos.stream().map(w -> w.user)
+        Set<UserHandle> users = items.stream().map(w -> w.user)
                 .collect(Collectors.toSet());
         if (users.size() == 1 && !users.contains(Process.myUserHandle())) {
             setAsLastSuggestion(nameInfos,
@@ -112,7 +113,7 @@ public class FolderNameProvider implements ResourceBasedOverride {
 
         // If all the icons are from same package (e.g., main icon, shortcut, shortcut)
         // Then, suggest the package's title as the folder name
-        Set<String> packageNames = workspaceItemInfos.stream()
+        Set<String> packageNames = items.stream()
                 .map(WorkspaceItemInfo::getTargetComponent)
                 .filter(Objects::nonNull)
                 .map(ComponentName::getPackageName)

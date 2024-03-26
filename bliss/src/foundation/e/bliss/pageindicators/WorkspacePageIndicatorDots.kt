@@ -53,7 +53,9 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
                 if (isGestureMode) {
                     padding.bottom
                 } else {
-                    padding.bottom + grid.hotseatBarTopPaddingPx + grid.workspacePageIndicatorHeight
+                    padding.bottom +
+                        grid.hotseatBarBottomPaddingPx +
+                        grid.workspacePageIndicatorHeight
                 }
         }
     }

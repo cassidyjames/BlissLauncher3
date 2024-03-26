@@ -69,7 +69,7 @@ class MultiModeController(val context: Context, val monitor: LauncherAppMonitor)
         }
 
     init {
-        sharedPreferences = Utilities.getPrefs(context)
+        sharedPreferences = Utilities.getPrefs(context.createDeviceProtectedStorageContext())
         resources = context.resources
         monitor.registerCallback(mAppMonitorCallback)
     }

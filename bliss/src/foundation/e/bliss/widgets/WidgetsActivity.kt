@@ -29,7 +29,7 @@ class WidgetsActivity : Activity(), OnActionClickListener {
     private val mCompositeDisposable = CompositeDisposable()
 
     private fun refreshRecyclerView() {
-        val widgetIds = mAppWidgetHost.appWidgetIds
+        val widgetIds = mAppWidgetHost.appWidgetIds.sorted()
         val widgets = mutableListOf<BlissWidget>()
 
         for (id in widgetIds) {
@@ -55,7 +55,7 @@ class WidgetsActivity : Activity(), OnActionClickListener {
         addedWidgets.apply {
             addedWidgets.layoutManager = LinearLayoutManager(this@WidgetsActivity)
             addedWidgets.setHasFixedSize(false)
-            addedWidgets.isNestedScrollingEnabled = false
+            addedWidgets.isNestedScrollingEnabled = true
             addedWidgets.addItemDecoration(
                 DividerItemDecoration(this@WidgetsActivity, DividerItemDecoration.VERTICAL)
             )

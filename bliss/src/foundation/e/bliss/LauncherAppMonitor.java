@@ -99,8 +99,11 @@ public class LauncherAppMonitor extends LauncherApps.Callback
 
     public LauncherAppMonitor(Context context) {
         context.getSystemService(LauncherApps.class).registerCallback(this);
-        Utilities.getPrefs(context).registerOnSharedPreferenceChangeListener(this);
         mMultiModeController = new MultiModeController(context, this);
+    }
+
+    public void onUserUnlocked(Context context) {
+        Utilities.getPrefs(context).registerOnSharedPreferenceChangeListener(this);
     }
 
     @Override

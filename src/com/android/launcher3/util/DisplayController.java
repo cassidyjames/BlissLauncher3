@@ -280,7 +280,7 @@ public class DisplayController implements DisplayListener, ComponentCallbacks, S
             mInfo = newInfo;
             final int flags = change;
             MAIN_EXECUTOR.execute(() -> {
-                LauncherAppMonitor.getInstance(mContext).onUIConfigChanged();
+                LauncherAppMonitor.getInstanceNoCreate().onUIConfigChanged();
                 notifyChange(displayContext, flags); }
             );
         }

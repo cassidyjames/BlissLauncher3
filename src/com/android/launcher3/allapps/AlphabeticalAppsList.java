@@ -257,7 +257,7 @@ public class AlphabeticalAppsList implements AllAppsStore.OnUpdateListener {
             }
         }
 
-        LauncherAppMonitor.getInstance(mLauncher).onAllAppsListUpdated(mApps);
+        LauncherAppMonitor.getInstanceNoCreate().onAllAppsListUpdated(mApps);
         // Recompose the set of adapter items from the current set of apps
         if (mSearchResults == null) {
             updateAdapterItems();

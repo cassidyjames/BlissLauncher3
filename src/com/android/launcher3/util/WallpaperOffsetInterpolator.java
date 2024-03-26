@@ -38,7 +38,7 @@ public class WallpaperOffsetInterpolator extends BroadcastReceiver {
 
     private boolean mRegistered = false;
     private IBinder mWindowToken;
-    private boolean mWallpaperIsLiveWallpaper;
+    private static boolean mWallpaperIsLiveWallpaper;
 
     private boolean mLockedToDefaultPage;
     private int mNumScreens;
@@ -210,8 +210,14 @@ public class WallpaperOffsetInterpolator extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         mWallpaperIsLiveWallpaper =
                 WallpaperManager.getInstance(mWorkspace.getContext()).getWallpaperInfo() != null;
+        setIsLiveWallpaper();
         BlurWallpaperProvider.Companion.getInstanceNoCreate().updateAsync();
         updateOffset();
+    }
+
+    public static void setIsLiveWallpaper() {
+        BlurWallpaperProvider.Companion.getInstanceNoCreate().setLiveWallpaper(
+                mWallpaperIsLiveWallpaper);
     }
 
     private static final int MSG_START_ANIMATION = 1;
@@ -302,6 +308,7 @@ public class WallpaperOffsetInterpolator extends BroadcastReceiver {
         private void setOffsetSafely(IBinder token) {
             try {
                 mWM.setWallpaperOffsets(token, mCurrentOffset, 0.5f);
+                setIsLiveWallpaper();
                 BlurWallpaperProvider.Companion.getInstanceNoCreate()
                         .setWallpaperOffset(mCurrentOffset);
             } catch (IllegalArgumentException e) {
