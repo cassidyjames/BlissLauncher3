@@ -13,4 +13,5 @@
     <string name="max">Max</string>
     <string name="untitled_folder">Navnløs</string>
     <string name="widget_no_resize">Kan ikke endre størrelsen på denne modulen</string>
+    <string name="remove_widgets">Fjern moduler</string>
 </resources>
