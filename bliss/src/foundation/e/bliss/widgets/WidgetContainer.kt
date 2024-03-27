@@ -32,9 +32,9 @@ import android.widget.RelativeLayout
 import android.widget.Toast
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.Launcher
+import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.PendingAddItemInfo
 import com.android.launcher3.R
-import com.android.launcher3.Utilities
 import com.android.launcher3.config.FeatureFlags
 import com.android.launcher3.graphics.FragmentWithPreview
 import com.android.launcher3.widget.LauncherAppWidgetProviderInfo
@@ -184,10 +184,13 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
 
         private var initialWidgetsAdded: Boolean
             set(value) {
-                Utilities.getPrefs(context).edit().putBoolean(defaultWidgetsAdded, value).apply()
+                LauncherPrefs.getPrefs(context)
+                    .edit()
+                    .putBoolean(defaultWidgetsAdded, value)
+                    .apply()
             }
             get() {
-                return Utilities.getPrefs(context).getBoolean(defaultWidgetsAdded, false)
+                return LauncherPrefs.getPrefs(context).getBoolean(defaultWidgetsAdded, false)
             }
 
         private val isQsbEnabled: Boolean

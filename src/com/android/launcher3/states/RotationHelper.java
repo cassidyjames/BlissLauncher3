@@ -28,6 +28,7 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 
 import com.android.launcher3.BaseActivity;
 import com.android.launcher3.DeviceProfile;
+import com.android.launcher3.LauncherPrefs;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.util.UiThreadHelper;
 
@@ -94,7 +95,7 @@ public class RotationHelper implements OnSharedPreferenceChangeListener,
         mIgnoreAutoRotateSettings = ignoreAutoRotateSettings;
         if (!mIgnoreAutoRotateSettings) {
             if (mSharedPrefs == null) {
-                mSharedPrefs = Utilities.getPrefs(mActivity);
+                mSharedPrefs = LauncherPrefs.getPrefs(mActivity);
                 mSharedPrefs.registerOnSharedPreferenceChangeListener(this);
             }
             mHomeRotationEnabled = mSharedPrefs.getBoolean(ALLOW_ROTATION_PREFERENCE_KEY,

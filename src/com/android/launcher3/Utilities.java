@@ -599,18 +599,6 @@ public final class Utilities {
         return spanned;
     }
 
-    public static SharedPreferences getPrefs(Context context) {
-        // Use application context for shared preferences, so that we use a single cached instance
-        return context.getApplicationContext().getSharedPreferences(
-                LauncherFiles.SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE);
-    }
-
-    public static SharedPreferences getDevicePrefs(Context context) {
-        // Use application context for shared preferences, so that we use a single cached instance
-        return context.getApplicationContext().getSharedPreferences(
-                LauncherFiles.DEVICE_PREFERENCES_KEY, Context.MODE_PRIVATE);
-    }
-
     public static boolean isWallpaperAllowed(Context context) {
         return context.getSystemService(WallpaperManager.class).isSetWallpaperAllowed();
     }
@@ -889,7 +877,7 @@ public final class Utilities {
     }
 
     public static boolean isWorkspaceEditAllowed(Context context) {
-        SharedPreferences prefs = getPrefs(context.getApplicationContext());
+        SharedPreferences prefs = LauncherPrefs.getPrefs(context.getApplicationContext());
         return !prefs.getBoolean(InvariantDeviceProfile.KEY_WORKSPACE_LOCK, false);
     }
 }

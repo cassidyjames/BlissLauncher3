@@ -30,6 +30,7 @@ import android.util.AttributeSet;
 import android.util.SparseArray;
 import android.util.TypedValue;
 
+import com.android.launcher3.LauncherPrefs;
 import com.android.launcher3.R;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.config.FeatureFlags;
@@ -75,7 +76,7 @@ public class Themes {
      */
     public static boolean isThemedIconEnabled(Context context) {
         return FeatureFlags.ENABLE_THEMED_ICONS.get()
-                && Utilities.getPrefs(context).getBoolean(KEY_THEMED_ICONS, false);
+                && LauncherPrefs.getPrefs(context).getBoolean(KEY_THEMED_ICONS, false);
     }
 
     public static String getDefaultBodyFont(Context context) {

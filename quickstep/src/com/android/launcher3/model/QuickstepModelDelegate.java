@@ -23,7 +23,7 @@ import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_PREDICT
 import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_WIDGETS_PREDICTION;
 import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPLICATION;
 import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT;
-import static com.android.launcher3.Utilities.getDevicePrefs;
+import static com.android.launcher3.LauncherPrefs.getDevicePrefs;
 import static com.android.launcher3.hybridhotseat.HotseatPredictionModel.convertDataModelToAppTargetBundle;
 import static com.android.launcher3.model.PredictionHelper.getAppTargetFromItemInfo;
 import static com.android.launcher3.model.PredictionHelper.wrapAppTargetWithItemLocation;

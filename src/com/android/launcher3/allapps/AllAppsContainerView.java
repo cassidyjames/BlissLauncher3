@@ -57,6 +57,7 @@ import com.android.launcher3.DragSource;
 import com.android.launcher3.DropTarget.DragObject;
 import com.android.launcher3.Insettable;
 import com.android.launcher3.InsettableFrameLayout;
+import com.android.launcher3.LauncherPrefs;
 import com.android.launcher3.R;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.allapps.search.SearchAdapterProvider;
@@ -153,7 +154,7 @@ public class AllAppsContainerView extends SpringRelativeLayout implements DragSo
         mAH = new AdapterHolder[2];
 
         mWorkManager = new WorkProfileManager(mLauncher.getSystemService(UserManager.class), this,
-                Utilities.getPrefs(mLauncher));
+                LauncherPrefs.getPrefs(mLauncher));
         mAH[AdapterHolder.MAIN] = new AdapterHolder(false /* isWork */);
         mAH[AdapterHolder.WORK] = new AdapterHolder(true /* isWork */);
 

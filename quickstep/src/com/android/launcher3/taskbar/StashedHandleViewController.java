@@ -25,6 +25,7 @@ import android.graphics.Rect;
 import android.view.View;
 import android.view.ViewOutlineProvider;
 
+import com.android.launcher3.LauncherPrefs;
 import com.android.launcher3.R;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.anim.RevealOutlineAnimation;
@@ -74,7 +75,7 @@ public class StashedHandleViewController {
     public StashedHandleViewController(TaskbarActivityContext activity,
             StashedHandleView stashedHandleView) {
         mActivity = activity;
-        mPrefs = Utilities.getPrefs(mActivity);
+        mPrefs = LauncherPrefs.getPrefs(mActivity);
         mStashedHandleView = stashedHandleView;
         mTaskbarStashedHandleAlpha = new MultiValueAlpha(mStashedHandleView, NUM_ALPHA_CHANNELS);
         mTaskbarStashedHandleAlpha.setUpdateVisibility(true);

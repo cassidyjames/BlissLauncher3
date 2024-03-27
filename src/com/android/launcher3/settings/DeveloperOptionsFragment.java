@@ -59,6 +59,7 @@ import androidx.preference.PreferenceScreen;
 import androidx.preference.PreferenceViewHolder;
 import androidx.preference.SwitchPreference;
 
+import com.android.launcher3.LauncherPrefs;
 import com.android.launcher3.R;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.config.FeatureFlags;
@@ -381,7 +382,7 @@ public class DeveloperOptionsFragment extends PreferenceFragmentCompat {
             onboardingPref.setTitle(title);
             onboardingPref.setSummary("Tap to reset");
             onboardingPref.setOnPreferenceClickListener(preference -> {
-                SharedPreferences.Editor sharedPrefsEdit = Utilities.getPrefs(getContext()).edit();
+                SharedPreferences.Editor sharedPrefsEdit = LauncherPrefs.getPrefs(getContext()).edit();
                 for (String key : keys) {
                     sharedPrefsEdit.remove(key);
                 }

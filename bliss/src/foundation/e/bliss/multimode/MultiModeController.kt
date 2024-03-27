@@ -11,8 +11,8 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.content.res.Resources
 import com.android.launcher3.InvariantDeviceProfile
+import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.R
-import com.android.launcher3.Utilities
 import com.android.launcher3.model.data.AppInfo
 import com.android.launcher3.util.Executors.MODEL_EXECUTOR
 import foundation.e.bliss.BaseController
@@ -69,7 +69,7 @@ class MultiModeController(val context: Context, val monitor: LauncherAppMonitor)
         }
 
     init {
-        sharedPreferences = Utilities.getPrefs(context.createDeviceProtectedStorageContext())
+        sharedPreferences = LauncherPrefs.getPrefs(context.createDeviceProtectedStorageContext())
         resources = context.resources
         monitor.registerCallback(mAppMonitorCallback)
     }

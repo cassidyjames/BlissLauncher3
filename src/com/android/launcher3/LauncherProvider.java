@@ -376,7 +376,7 @@ public class LauncherProvider extends ContentProvider {
             case LauncherSettings.Settings.METHOD_WAS_EMPTY_DB_CREATED : {
                 Bundle result = new Bundle();
                 result.putBoolean(LauncherSettings.Settings.EXTRA_VALUE,
-                        Utilities.getPrefs(getContext()).getBoolean(
+                        LauncherPrefs.getPrefs(getContext()).getBoolean(
                                 mOpenHelper.getKey(getEmptyDatabaseCreated()), false));
                 return result;
             }
@@ -514,7 +514,7 @@ public class LauncherProvider extends ContentProvider {
     }
 
     private void clearFlagEmptyDbCreated() {
-        Utilities.getPrefs(getContext()).edit()
+        LauncherPrefs.getPrefs(getContext()).edit()
                 .remove(mOpenHelper.getKey(getEmptyDatabaseCreated())).commit();
     }
 
@@ -526,7 +526,7 @@ public class LauncherProvider extends ContentProvider {
      *   4) The default configuration for the particular device
      */
     synchronized private void loadDefaultFavoritesIfNecessary() {
-        SharedPreferences sp = Utilities.getPrefs(getContext());
+        SharedPreferences sp = LauncherPrefs.getPrefs(getContext());
 
         if (BlissDbUtils.migrateDataFromDb(getContext())) {
             copyTable(mOpenHelper.getReadableDatabase(), Favorites.TABLE_NAME_ALL,
@@ -738,7 +738,7 @@ public class LauncherProvider extends ContentProvider {
          */
         protected void onEmptyDbCreated() {
             // Set the flag for empty DB
-            Utilities.getPrefs(mContext).edit().putBoolean(getKey(getEmptyDatabaseCreated()), true)
+            LauncherPrefs.getPrefs(mContext).edit().putBoolean(getKey(getEmptyDatabaseCreated()), true)
                     .commit();
         }
 

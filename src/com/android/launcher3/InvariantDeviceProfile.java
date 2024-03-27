@@ -217,7 +217,7 @@ public class InvariantDeviceProfile implements OnSharedPreferenceChangeListener 
     private InvariantDeviceProfile(Context context) {
         mContext = context;
 
-        SharedPreferences prefs = Utilities.getPrefs(context);
+        SharedPreferences prefs = LauncherPrefs.getPrefs(context);
         prefs.registerOnSharedPreferenceChangeListener(this);
         String gridName = getCurrentGridName(context);
         String newGridName = initGrid(context, gridName);
@@ -334,7 +334,7 @@ public class InvariantDeviceProfile implements OnSharedPreferenceChangeListener 
 
     public static String getCurrentGridName(Context context) {
         return Utilities.isGridOptionsEnabled(context)
-                ? Utilities.getPrefs(context).getString(KEY_IDP_GRID_NAME, null) : null;
+                ? LauncherPrefs.getPrefs(context).getString(KEY_IDP_GRID_NAME, null) : null;
     }
 
     private String initGrid(Context context, String gridName) {
@@ -443,7 +443,7 @@ public class InvariantDeviceProfile implements OnSharedPreferenceChangeListener 
 
     public void setCurrentGrid(Context context, String gridName) {
         Context appContext = context.getApplicationContext();
-        Utilities.getPrefs(appContext).edit().putString(KEY_IDP_GRID_NAME, gridName).apply();
+        LauncherPrefs.getPrefs(appContext).edit().putString(KEY_IDP_GRID_NAME, gridName).apply();
         MAIN_EXECUTOR.execute(() -> onConfigChanged(appContext));
     }
 
@@ -458,7 +458,7 @@ public class InvariantDeviceProfile implements OnSharedPreferenceChangeListener 
 
         // Re-init grid
         String gridName = getCurrentGridName(context);
-        initGrid(context, Utilities.getPrefs(context).getString(KEY_IDP_GRID_NAME, gridName));
+        initGrid(context, LauncherPrefs.getPrefs(context).getString(KEY_IDP_GRID_NAME, gridName));
 
         boolean modelPropsChanged = !Arrays.equals(oldState, toModelState());
         for (OnIDPChangeListener listener : mChangeListeners) {
