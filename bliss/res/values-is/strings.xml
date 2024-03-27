@@ -13,8 +13,7 @@
   ~
   ~ You should have received a copy of the GNU General Public License
   ~  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-  -->
-<resources>
+  --><resources>
     <string name="maps">Landakort</string>
     <string name="suggestions">TILLÖGUR</string>
     <string name="edit">Breyta</string>
@@ -28,4 +27,6 @@
     <string name="max">Hám</string>
     <string name="untitled_folder">Ónefnt</string>
     <string name="widget_no_resize">Get ekki breytt stærð þessa viðmótshluta</string>
+    <string name="remove_widgets">Fjarlægja viðmótshluta</string>
+    <string name="show_notification_count">Birta fjölda tilkynninga</string>
 </resources>
