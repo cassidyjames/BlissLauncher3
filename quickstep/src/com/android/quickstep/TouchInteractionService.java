@@ -373,6 +373,7 @@ public class TouchInteractionService extends Service
         mDisplayManager = getSystemService(DisplayManager.class);
         mTaskbarManager = new TaskbarManager(this);
         mRotationTouchHelper = mDeviceState.getRotationTouchHelper();
+        BootAwarePreloader.start(this);
         mLauncherAppMonitor = LauncherAppMonitor.getInstance(this);
 
         // Call runOnUserUnlocked() before any other callbacks to ensure everything is initialized.
