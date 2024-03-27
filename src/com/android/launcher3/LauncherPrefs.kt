@@ -9,6 +9,7 @@ import androidx.annotation.VisibleForTesting
 import com.android.launcher3.LauncherFiles.DEVICE_PREFERENCES_KEY
 import com.android.launcher3.LauncherFiles.SHARED_PREFERENCES_KEY
 import com.android.launcher3.util.MainThreadInitializedObject
+import foundation.e.bliss.preferences.BlissPrefs
 
 /**
  * Use same context for shared preferences, so that we use a single cached instance
@@ -259,6 +260,20 @@ class LauncherPrefs(private val encryptedContext: Context) {
                 defaultValue = false,
                 isBootAware = true
             )
+
+        @JvmField
+        val IS_NOTIF_COUNT_ENABLED = ConstantItem(
+            BlissPrefs.PREF_NOTIF_COUNT,
+            isBackedUp = true,
+            defaultValue = true,
+            isBootAware = true)
+
+        @JvmField
+        val IS_SINGLE_LAYER_ENABLED = ConstantItem(
+            BlissPrefs.PREF_SINGLE_LAYER_MODE,
+            isBackedUp = true,
+            defaultValue = true,
+            isBootAware = true)
 
         @VisibleForTesting
         @JvmStatic
