@@ -25,5 +25,6 @@
     <string name="min">Min</string>
     <string name="widget_add">Ajouter</string>
     <string name="widget_remove">Enlever</string>
-    <string name="widget_no_resize">Impossible de redimensionner ce widget</string>
+    <string name="widget_no_resize">Ce widget ne peut pas être redimensionné</string>
+    <string name="remove_widgets">Suppression de widgets</string>
 </resources>
