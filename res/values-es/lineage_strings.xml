@@ -14,6 +14,7 @@
      limitations under the License.
 -->
 <resources>
+    <string name="settings_lock_layout_title">Guardar configuración</string>
     <string name="settings_lock_layout_summary_on">Los iconos y widgets no se pueden añadir, eliminar y mover en la pantalla principal</string>
     <string name="settings_lock_layout_summary_off">Los iconos y widgets se pueden añadir, eliminar y mover en la pantalla principal</string>
     <string name="settings_edit_widgets_error">Imposible añadir widgets a la pantalla de inicio</string>
