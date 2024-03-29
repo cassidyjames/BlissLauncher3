@@ -405,6 +405,10 @@ public class LauncherProvider extends ContentProvider {
                         mOpenHelper.generateNewItemId());
                 return result;
             }
+            case LauncherSettings.Settings.METHOD_UPDATE_ITEM_ID: {
+                mOpenHelper.updateItemId();
+                return null;
+            }
             case LauncherSettings.Settings.METHOD_NEW_SCREEN_ID: {
                 Bundle result = new Bundle();
                 result.putInt(LauncherSettings.Settings.EXTRA_VALUE,
@@ -728,8 +732,12 @@ public class LauncherProvider extends ContentProvider {
             // In the case where neither onCreate nor onUpgrade gets called, we read the maxId from
             // the DB here
             if (mMaxItemId == -1) {
-                mMaxItemId = initializeMaxItemId(getWritableDatabase());
+                updateItemId();
             }
+        }
+
+        public void updateItemId() {
+            mMaxItemId = initializeMaxItemId(getWritableDatabase());
         }
 
         @Override
