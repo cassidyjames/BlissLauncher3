@@ -16,7 +16,6 @@ import android.os.UserHandle
 import android.os.UserManager
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.LauncherProvider
-import com.android.launcher3.LauncherSettings
 import com.android.launcher3.LauncherSettings.Favorites.INTENT
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPLICATION
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT
@@ -44,20 +43,18 @@ object BlissDbUtils {
     private const val folderType = 2
 
     @JvmStatic
-    fun migrateDataFromDb(context: Context): Boolean {
+    fun migrateDataFromDb(context: Context, dbHelper: LauncherProvider.DatabaseHelper): Boolean {
         // Check if old database exists
         val oldFile = context.getDatabasePath(oldDbName)
         if (!oldFile.exists()) return false
 
         // Current database details
-        val currentDbName = InvariantDeviceProfile.INSTANCE[context].dbFile
         val rowCount = InvariantDeviceProfile.INSTANCE[context].numRows
         val columnCount = InvariantDeviceProfile.INSTANCE[context].numColumns
         val numFolderRows = InvariantDeviceProfile.INSTANCE[context].numFolderRows
         val numFolderColumns = InvariantDeviceProfile.INSTANCE[context].numFolderColumns
 
         // Init database helper classes
-        val dbHelper = LauncherProvider.DatabaseHelper(context, currentDbName, false)
         val oldDbHelper = BlissDbHelper(context, oldDbName)
 
         // Retrieve data from the old table
@@ -218,17 +215,9 @@ object BlissDbUtils {
             }
         }
 
-        dbHelper.close()
-
         // Rename the database to old
         val newFile = context.getDatabasePath(oldDbName + "_old")
         oldFile.renameTo(newFile)
-
-        // Update item id after migrating
-        LauncherSettings.Settings.call(
-            context.contentResolver,
-            LauncherSettings.Settings.METHOD_UPDATE_ITEM_ID
-        )
 
         return true
     }
@@ -265,14 +254,12 @@ object BlissDbUtils {
                         val widgetInfo = appWidgetManager.getAppWidgetInfo(id)
 
                         if (widgetInfo != null) {
-                            var provider: ComponentName = widgetInfo.provider
-
                             widgetsInfoList.add(
                                 WidgetItems(
                                     id,
                                     height,
                                     order,
-                                    provider,
+                                    widgetInfo.provider,
                                 )
                             )
                         }

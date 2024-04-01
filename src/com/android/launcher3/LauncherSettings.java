@@ -434,9 +434,6 @@ public class LauncherSettings {
         public static final String METHOD_DELETE_EMPTY_FOLDERS = "delete_empty_folders";
 
         public static final String METHOD_NEW_ITEM_ID = "generate_new_item_id";
-
-        public static final String METHOD_UPDATE_ITEM_ID = "update_item_id";
-
         public static final String METHOD_NEW_SCREEN_ID = "generate_new_screen_id";
 
         public static final String METHOD_CREATE_EMPTY_DB = "create_empty_db";

@@ -405,10 +405,6 @@ public class LauncherProvider extends ContentProvider {
                         mOpenHelper.generateNewItemId());
                 return result;
             }
-            case LauncherSettings.Settings.METHOD_UPDATE_ITEM_ID: {
-                mOpenHelper.updateItemId();
-                return null;
-            }
             case LauncherSettings.Settings.METHOD_NEW_SCREEN_ID: {
                 Bundle result = new Bundle();
                 result.putInt(LauncherSettings.Settings.EXTRA_VALUE,
@@ -566,9 +562,10 @@ public class LauncherProvider extends ContentProvider {
     synchronized private void loadDefaultFavoritesIfNecessary() {
         SharedPreferences sp = LauncherPrefs.getPrefs(getContext());
 
-        if (BlissDbUtils.migrateDataFromDb(getContext())) {
+        if (BlissDbUtils.migrateDataFromDb(getContext(), mOpenHelper)) {
             copyTable(mOpenHelper.getReadableDatabase(), Favorites.TABLE_NAME_ALL,
                     mOpenHelper.getWritableDatabase(),Favorites.TABLE_NAME, getContext());
+            mOpenHelper.updateItemId();
             clearFlagEmptyDbCreated();
             return;
         }
