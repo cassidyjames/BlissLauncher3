@@ -13,11 +13,19 @@
   ~
   ~ You should have received a copy of the GNU General Public License
   ~  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-  -->
-<resources>
+  --><resources>
     <string name="edit">Modifica</string>
     <string name="search">Cerca</string>
-    <string name="suggestions">PREFERITE</string>
+    <string name="suggestions">PROPOSTE</string>
     <string name="cancel">Annulla</string>
     <string name="untitled_folder">Senza titolo</string>
+    <string name="maps">Maps</string>
+    <string name="ok">OK</string>
+    <string name="uninstall_app">Vuoi disinstallare l\'app?</string>
+    <string name="max">Max</string>
+    <string name="min">Min</string>
+    <string name="widget_no_resize">Non riesco a ridimensionare il widget</string>
+    <string name="widget_add">Aggiungi</string>
+    <string name="widget_remove">Rimuovi</string>
+    <string name="remove_widgets">Rimuovi Widget</string>
 </resources>
