@@ -13,4 +13,5 @@
     <string name="widget_no_resize">このウィジェットの大きさを変更できません</string>
     <string name="widget_add">追加</string>
     <string name="widget_remove">削除</string>
+    <string name="remove_widgets">ウィジェットを削除</string>
 </resources>
