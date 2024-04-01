@@ -13,8 +13,7 @@
   ~
   ~ You should have received a copy of the GNU General Public License
   ~  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-  -->
-<resources>
+  --><resources>
     <string name="maps">Karten</string>
     <string name="suggestions">VORSCHLÄGE</string>
     <string name="edit">Bearbeiten</string>
@@ -28,4 +27,6 @@
     <string name="max">Max.</string>
     <string name="untitled_folder">Ohne Titel</string>
     <string name="widget_no_resize">Dieses Widget kann nicht in der Größe verändert werden</string>
+    <string name="remove_widgets">Widgets entfernen</string>
+    <string name="show_notification_count">Benachrichtigungszähler anzeigen</string>
 </resources>
