@@ -101,7 +101,12 @@ public class DatabaseHelper extends NoLocaleSQLiteHelper implements
         // the DB here
         if (mMaxItemId == -1) {
             mMaxItemId = initializeMaxItemId(getWritableDatabase());
+            updateItemId();
         }
+    }
+
+    public void updateItemId() {
+        mMaxItemId = initializeMaxItemId(getWritableDatabase());
     }
 
     @Override

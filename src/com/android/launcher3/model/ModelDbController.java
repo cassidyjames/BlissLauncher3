@@ -417,10 +417,11 @@ public class ModelDbController {
     public synchronized void loadDefaultFavoritesIfNecessary() {
         createDbIfNotExists();
 
-        if (BlissDbUtils.migrateDataFromDb(mContext)) {
+        if (BlissDbUtils.migrateDataFromDb(mContext, mOpenHelper)) {
             copyTable(mOpenHelper.getReadableDatabase(), Favorites.TABLE_NAME_ALL,
                     mOpenHelper.getWritableDatabase(),Favorites.TABLE_NAME, mContext);
             clearFlagEmptyDbCreated();
+            mOpenHelper.updateItemId();
             return;
         }
 
