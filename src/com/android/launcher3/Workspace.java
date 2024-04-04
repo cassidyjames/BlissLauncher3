@@ -148,6 +148,7 @@ import foundation.e.bliss.LauncherAppMonitorCallback;
 import foundation.e.bliss.folder.GridFolder;
 import foundation.e.bliss.multimode.MultiModeController;
 import foundation.e.bliss.pageindicators.WorkspacePageIndicatorDots;
+import foundation.e.bliss.widgets.WidgetContainer;
 
 /**
  * The workspace is a wide area with a wallpaper and a finite number of pages.
@@ -375,6 +376,9 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
 
         updateWorkspaceScreensPadding();
         updateWorkspaceWidgetsSizes();
+        if (getFirstPagePinnedItem() instanceof WidgetContainer) {
+            ((WidgetContainer) getFirstPagePinnedItem()).updateWidgets();
+        }
     }
 
     private void updateWorkspaceScreensPadding() {
