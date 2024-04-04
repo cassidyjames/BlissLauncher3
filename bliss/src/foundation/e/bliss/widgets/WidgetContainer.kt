@@ -9,6 +9,7 @@ package foundation.e.bliss.widgets
 
 import android.animation.LayoutTransition
 import android.app.Activity.RESULT_OK
+import android.appwidget.AppWidgetHostView
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetManager.EXTRA_APPWIDGET_ID
 import android.appwidget.AppWidgetProviderInfo
@@ -30,6 +31,7 @@ import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.Toast
+import androidx.core.view.forEach
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.Launcher
 import com.android.launcher3.LauncherPrefs
@@ -41,6 +43,7 @@ import com.android.launcher3.widget.LauncherAppWidgetProviderInfo
 import com.android.launcher3.widget.PendingAddShortcutInfo
 import com.android.launcher3.widget.WidgetCell
 import com.android.launcher3.widget.picker.WidgetsFullSheet
+import com.android.launcher3.widget.util.WidgetSizes
 import foundation.e.bliss.LauncherAppMonitor
 import foundation.e.bliss.LauncherAppMonitorCallback
 import foundation.e.bliss.utils.BlissDbUtils
@@ -63,6 +66,7 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
     private lateinit var mRemoveWidgetLayout: FrameLayout
     private lateinit var mResizeContainer: RelativeLayout
     private lateinit var mWidgetLinearLayout: LinearLayout
+    private lateinit var mWrapper: LinearLayout
 
     private val mResizeContainerRect = Rect()
     private val mInsetPadding =
@@ -100,19 +104,20 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
             context.startActivity(intent)
         }
 
-        findViewWithTag<LinearLayout?>("wrapper_children").apply {
-            setOnHierarchyChangeListener(
-                object : OnHierarchyChangeListener {
-                    override fun onChildViewAdded(parent: View?, child: View?) {
-                        handleRemoveButtonVisibility((parent as LinearLayout).childCount)
-                    }
+        mWrapper =
+            findViewWithTag<LinearLayout?>("wrapper_children").apply {
+                setOnHierarchyChangeListener(
+                    object : OnHierarchyChangeListener {
+                        override fun onChildViewAdded(parent: View?, child: View?) {
+                            handleRemoveButtonVisibility((parent as LinearLayout).childCount)
+                        }
 
-                    override fun onChildViewRemoved(parent: View?, child: View?) {
-                        handleRemoveButtonVisibility((parent as LinearLayout).childCount)
+                        override fun onChildViewRemoved(parent: View?, child: View?) {
+                            handleRemoveButtonVisibility((parent as LinearLayout).childCount)
+                        }
                     }
-                }
-            )
-        }
+                )
+            }
 
         updatePadding()
     }
@@ -161,6 +166,36 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
                 mRemoveWidgetLayout.visibility = View.GONE
             } else if (mRemoveWidgetLayout.visibility == View.GONE) {
                 mRemoveWidgetLayout.visibility = View.VISIBLE
+            }
+        }
+    }
+
+    fun updateWidgets() {
+        if (::mWrapper.isInitialized) {
+            val widgetDbHelper = WidgetsDbHelper.getInstance(context)
+            val widgetManager = AppWidgetManager.getInstance(context)
+
+            mWrapper.forEach {
+                val height = widgetDbHelper.getWidgetHeight(it.id) ?: 0
+
+                val info = (it as AppWidgetHostView).appWidgetInfo
+                val opts =
+                    WidgetSizes.getWidgetSizeOptions(
+                        context,
+                        info.provider,
+                        mLauncher.deviceProfile.inv.numColumns,
+                        mLauncher.deviceProfile.inv.numRows
+                    )
+
+                if (height > 0) {
+                    opts.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, height)
+                    opts.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, height)
+                }
+                val blacklistedComponents =
+                    context.resources.getStringArray(R.array.blacklisted_widget_options)
+                if (!blacklistedComponents.contains(info.provider.className)) {
+                    widgetManager.updateAppWidgetOptions(it.appWidgetId, opts)
+                }
             }
         }
     }
@@ -352,7 +387,7 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
                         }
                     }
                     .also {
-                        val opts = mWidgetManager.getAppWidgetOptions(it.appWidgetId)
+                        var opts = mWidgetManager.getAppWidgetOptions(it.appWidgetId)
                         val params =
                             LayoutParams(
                                 -1,
@@ -400,6 +435,25 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
                             mWrapper.addView(it, params)
                         } else {
                             mWrapper.addView(it)
+                        }
+
+                        opts =
+                            WidgetSizes.getWidgetSizeOptions(
+                                context,
+                                info.provider,
+                                launcher.deviceProfile.inv.numColumns,
+                                launcher.deviceProfile.inv.numRows
+                            )
+
+                        if (params.height > 0) {
+                            opts.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, params.height)
+                            opts.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, params.height)
+                        }
+
+                        val blacklistedComponents =
+                            context.resources.getStringArray(R.array.blacklisted_widget_options)
+                        if (!blacklistedComponents.contains(info.provider.className)) {
+                            mWidgetManager.updateAppWidgetOptions(it.appWidgetId, opts)
                         }
 
                         widgetsDbHelper.insert(
