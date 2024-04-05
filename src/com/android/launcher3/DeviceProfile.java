@@ -1833,13 +1833,20 @@ public class DeviceProfile {
             float workspaceCellWidth = (float) widthPx / inv.numColumns;
             float hotseatCellWidth = (float) widthPx / numShownHotseatIcons;
             int hotseatAdjustment = Math.round((workspaceCellWidth - hotseatCellWidth) / 2);
+
+            WindowManagerProxy wm = WindowManagerProxy.newInstance(context);
+            boolean isFullyGesture = wm.getNavigationMode(context) == NavigationMode.NO_BUTTON;
+            boolean noHint = isFullyGesture && LineageSettings.System.getInt(
+                    context.getContentResolver(), LineageSettings.System.NAVIGATION_BAR_HINT, 0) != 1;
+
             hotseatBarPadding.set(
                     hotseatAdjustment + workspacePadding.left + cellLayoutPaddingPx.left
                             + mInsets.left,
-                    0,
+                    noHint ? (hotseatBarSizePx - hotseatCellHeightPx) / 2 : 0,
                     hotseatAdjustment + workspacePadding.right + cellLayoutPaddingPx.right
                             + mInsets.right,
-                    getHotseatBarBottomPadding());
+                    noHint ? getHotseatBarBottomPadding() - (getHotseatBarBottomPadding() / 2)
+                            : getHotseatBarBottomPadding());
         }
         return hotseatBarPadding;
     }
