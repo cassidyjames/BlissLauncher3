@@ -12,6 +12,7 @@ import android.content.ComponentName
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.UserHandle
 import android.os.UserManager
 import com.android.launcher3.InvariantDeviceProfile
@@ -146,6 +147,15 @@ object BlissDbUtils {
             }
         }
 
+        val installedPwaList = getInstalledPwa(context)
+        if (installedPwaList.isNotEmpty() && appsPwaList.isNotEmpty()) {
+            installedPwaList.forEach { installedPwa ->
+                if (!appsPwaList.any { it.itemId == installedPwa.shortcutId }) {
+                    deleteInstalledPwa(context, installedPwa.shortcutId)
+                }
+            }
+        }
+
         // Insert folder first, so we can store it's id and use it for apps/pwa.
         for (item in folderList) {
             val fav = item.key
@@ -221,6 +231,51 @@ object BlissDbUtils {
 
         return true
     }
+
+    private fun deleteInstalledPwa(context: Context, shortcutId: String) {
+        try {
+            context.contentResolver.delete(
+                Uri.parse("content://foundation.e.pwaplayer.provider/pwa"),
+                null,
+                arrayOf(shortcutId)
+            )
+        } catch (e: Exception) {
+            Logger.e(TAG, "deleteInstalledPwa: ", e)
+        }
+    }
+
+    private fun getInstalledPwa(context: Context): MutableList<PwaItems> {
+        val pwaInfoList = mutableListOf<PwaItems>()
+        try {
+            context.contentResolver
+                .query(
+                    Uri.parse("content://foundation.e.pwaplayer.provider/pwa"),
+                    null,
+                    null,
+                    null,
+                    null
+                )
+                ?.let { cursor ->
+                    cursor.moveToFirst()
+                    while (!cursor.isAfterLast) {
+                        val pwaItemDbId = cursor.getLong(cursor.columnNames.indexOf("_id"))
+                        val pwaItemUrl = cursor.getString(cursor.columnNames.indexOf("url"))
+                        val pwaShortcutId =
+                            cursor.getString(cursor.columnNames.indexOf("shortcutId"))
+                        val pwaTitle = cursor.getString(cursor.columnNames.indexOf("title"))
+                        pwaInfoList.add(PwaItems(pwaItemDbId, pwaItemUrl, pwaShortcutId, pwaTitle))
+                        cursor.moveToNext()
+                    }
+                    cursor.close()
+                }
+        } catch (e: Exception) {
+            Logger.e(TAG, "getInstalledPwa: ", e)
+        }
+
+        return pwaInfoList
+    }
+
+    data class PwaItems(val id: Long, val url: String, val shortcutId: String, val title: String)
 
     fun getWidgetDetails(context: Context): MutableList<WidgetItems> {
         val widgetsInfoList = mutableListOf<WidgetItems>()
