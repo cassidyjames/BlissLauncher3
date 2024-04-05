@@ -954,6 +954,11 @@ public class DeviceProfile {
             int bottomPadding;
             if (mode == SysUINavigationMode.Mode.NO_BUTTON) {
                 bottomPadding = verticalPadding;
+                if (LineageSettings.System.getInt(context.getContentResolver(),
+                        LineageSettings.System.NAVIGATION_BAR_HINT, 0) != 1) {
+                    bottomPadding -= hotseatBarTopPaddingPx / 2;
+                    verticalPadding += hotseatBarTopPaddingPx + (hotseatBarTopPaddingPx / 2);
+                }
             } else {
                 bottomPadding = verticalPadding + Math.round(mInsets.bottom / 1.5f);
             }
