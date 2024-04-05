@@ -12,6 +12,7 @@ import android.content.ComponentName
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.UserHandle
 import android.os.UserManager
 import com.android.launcher3.InvariantDeviceProfile
@@ -43,20 +44,18 @@ object BlissDbUtils {
     private const val folderType = 2
 
     @JvmStatic
-    fun migrateDataFromDb(context: Context): Boolean {
+    fun migrateDataFromDb(context: Context, dbHelper: LauncherProvider.DatabaseHelper): Boolean {
         // Check if old database exists
         val oldFile = context.getDatabasePath(oldDbName)
         if (!oldFile.exists()) return false
 
         // Current database details
-        val currentDbName = InvariantDeviceProfile.INSTANCE[context].dbFile
         val rowCount = InvariantDeviceProfile.INSTANCE[context].numRows
         val columnCount = InvariantDeviceProfile.INSTANCE[context].numColumns
         val numFolderRows = InvariantDeviceProfile.INSTANCE[context].numFolderRows
         val numFolderColumns = InvariantDeviceProfile.INSTANCE[context].numFolderColumns
 
         // Init database helper classes
-        val dbHelper = LauncherProvider.DatabaseHelper(context, currentDbName, false)
         val oldDbHelper = BlissDbHelper(context, oldDbName)
 
         // Retrieve data from the old table
@@ -148,6 +147,15 @@ object BlissDbUtils {
             }
         }
 
+        val installedPwaList = getInstalledPwa(context)
+        if (installedPwaList.isNotEmpty() && appsPwaList.isNotEmpty()) {
+            installedPwaList.forEach { installedPwa ->
+                if (!appsPwaList.any { it.itemId == installedPwa.shortcutId }) {
+                    deleteInstalledPwa(context, installedPwa.shortcutId)
+                }
+            }
+        }
+
         // Insert folder first, so we can store it's id and use it for apps/pwa.
         for (item in folderList) {
             val fav = item.key
@@ -217,14 +225,57 @@ object BlissDbUtils {
             }
         }
 
-        dbHelper.close()
-
         // Rename the database to old
         val newFile = context.getDatabasePath(oldDbName + "_old")
         oldFile.renameTo(newFile)
 
         return true
     }
+
+    private fun deleteInstalledPwa(context: Context, shortcutId: String) {
+        try {
+            context.contentResolver.delete(
+                Uri.parse("content://foundation.e.pwaplayer.provider/pwa"),
+                null,
+                arrayOf(shortcutId)
+            )
+        } catch (e: Exception) {
+            Logger.e(TAG, "deleteInstalledPwa: ", e)
+        }
+    }
+
+    private fun getInstalledPwa(context: Context): MutableList<PwaItems> {
+        val pwaInfoList = mutableListOf<PwaItems>()
+        try {
+            context.contentResolver
+                .query(
+                    Uri.parse("content://foundation.e.pwaplayer.provider/pwa"),
+                    null,
+                    null,
+                    null,
+                    null
+                )
+                ?.let { cursor ->
+                    cursor.moveToFirst()
+                    while (!cursor.isAfterLast) {
+                        val pwaItemDbId = cursor.getLong(cursor.columnNames.indexOf("_id"))
+                        val pwaItemUrl = cursor.getString(cursor.columnNames.indexOf("url"))
+                        val pwaShortcutId =
+                            cursor.getString(cursor.columnNames.indexOf("shortcutId"))
+                        val pwaTitle = cursor.getString(cursor.columnNames.indexOf("title"))
+                        pwaInfoList.add(PwaItems(pwaItemDbId, pwaItemUrl, pwaShortcutId, pwaTitle))
+                        cursor.moveToNext()
+                    }
+                    cursor.close()
+                }
+        } catch (e: Exception) {
+            Logger.e(TAG, "getInstalledPwa: ", e)
+        }
+
+        return pwaInfoList
+    }
+
+    data class PwaItems(val id: Long, val url: String, val shortcutId: String, val title: String)
 
     fun getWidgetDetails(context: Context): MutableList<WidgetItems> {
         val widgetsInfoList = mutableListOf<WidgetItems>()
@@ -258,14 +309,12 @@ object BlissDbUtils {
                         val widgetInfo = appWidgetManager.getAppWidgetInfo(id)
 
                         if (widgetInfo != null) {
-                            var provider: ComponentName = widgetInfo.provider
-
                             widgetsInfoList.add(
                                 WidgetItems(
                                     id,
                                     height,
                                     order,
-                                    provider,
+                                    widgetInfo.provider,
                                 )
                             )
                         }

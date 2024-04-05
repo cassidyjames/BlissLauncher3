@@ -69,6 +69,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
 
 import com.android.launcher3.BaseDraggingActivity;
+import com.android.launcher3.LauncherPrefs;
 import com.android.launcher3.R;
 import com.android.launcher3.ResourceUtils;
 import com.android.launcher3.Utilities;
@@ -372,6 +373,7 @@ public class TouchInteractionService extends Service
         mDisplayManager = getSystemService(DisplayManager.class);
         mTaskbarManager = new TaskbarManager(this);
         mRotationTouchHelper = mDeviceState.getRotationTouchHelper();
+        BootAwarePreloader.start(this);
         mLauncherAppMonitor = LauncherAppMonitor.getInstance(this);
 
         // Call runOnUserUnlocked() before any other callbacks to ensure everything is initialized.
@@ -440,7 +442,7 @@ public class TouchInteractionService extends Service
 
         // Temporarily disable model preload
         // new ModelPreload().start(this);
-        mBackGestureNotificationCounter = Math.max(0, Utilities.getDevicePrefs(this)
+        mBackGestureNotificationCounter = Math.max(0, LauncherPrefs.getDevicePrefs(this)
                 .getInt(KEY_BACK_NOTIFICATION_COUNT, MAX_BACK_NOTIFICATION_COUNT));
         resetHomeBounceSeenOnQuickstepEnabledFirstTime();
 
@@ -460,7 +462,7 @@ public class TouchInteractionService extends Service
         }
 
         // Reset home bounce seen on quick step enabled for first time
-        SharedPreferences sharedPrefs = Utilities.getPrefs(this);
+        SharedPreferences sharedPrefs = LauncherPrefs.getPrefs(this);
         if (!sharedPrefs.getBoolean(HAS_ENABLED_QUICKSTEP_ONCE, true)) {
             sharedPrefs.edit()
                     .putBoolean(HAS_ENABLED_QUICKSTEP_ONCE, true)

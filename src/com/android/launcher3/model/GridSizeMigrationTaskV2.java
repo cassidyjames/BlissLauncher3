@@ -36,6 +36,7 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.launcher3.InvariantDeviceProfile;
 import com.android.launcher3.LauncherAppState;
+import com.android.launcher3.LauncherPrefs;
 import com.android.launcher3.LauncherSettings;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.graphics.LauncherPreviewRenderer;
@@ -146,7 +147,7 @@ public class GridSizeMigrationTaskV2 {
             return true;
         }
 
-        SharedPreferences prefs = Utilities.getPrefs(context);
+        SharedPreferences prefs = LauncherPrefs.getPrefs(context);
         HashSet<String> validPackages = getValidPackages(context);
 
         if (migrateForPreview) {

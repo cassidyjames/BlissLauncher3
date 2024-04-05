@@ -16,7 +16,8 @@
 
 package com.android.launcher3.pm;
 
-import static com.android.launcher3.Utilities.getPrefs;
+import static com.android.launcher3.LauncherPrefs.getPrefs;
+
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;

@@ -30,6 +30,7 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.view.ViewConfiguration;
 
+import com.android.launcher3.LauncherPrefs;
 import com.android.launcher3.R;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.util.MultiValueAlpha.AlphaProperty;
@@ -143,7 +144,7 @@ public class TaskbarStashController {
 
     public TaskbarStashController(TaskbarActivityContext activity) {
         mActivity = activity;
-        mPrefs = Utilities.getPrefs(mActivity);
+        mPrefs = LauncherPrefs.getPrefs(mActivity);
         final Resources resources = mActivity.getResources();
         mStashedHeight = resources.getDimensionPixelSize(R.dimen.taskbar_stashed_size);
         mSystemUiProxy = SystemUiProxy.INSTANCE.get(activity);

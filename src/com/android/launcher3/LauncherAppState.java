@@ -16,7 +16,7 @@
 
 package com.android.launcher3;
 
-import static com.android.launcher3.Utilities.getDevicePrefs;
+import static com.android.launcher3.LauncherPrefs.getDevicePrefs;
 import static com.android.launcher3.config.FeatureFlags.ENABLE_THEMED_ICONS;
 import static com.android.launcher3.util.Executors.MODEL_EXECUTOR;
 import static com.android.launcher3.util.SettingsCache.NOTIFICATION_BADGING_URI;
@@ -119,7 +119,7 @@ public class LauncherAppState implements SafeCloseable {
         mOnTerminateCallback.add(iconChangeTracker::close);
         MODEL_EXECUTOR.execute(observer::verifyIconChanged);
         if (ENABLE_THEMED_ICONS.get()) {
-            SharedPreferences prefs = Utilities.getPrefs(mContext);
+            SharedPreferences prefs = LauncherPrefs.getPrefs(mContext);
             prefs.registerOnSharedPreferenceChangeListener(observer);
             mOnTerminateCallback.add(
                     () -> prefs.unregisterOnSharedPreferenceChangeListener(observer));

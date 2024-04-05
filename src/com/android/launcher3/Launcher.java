@@ -504,7 +504,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
         InvariantDeviceProfile idp = app.getInvariantDeviceProfile();
         initDeviceProfile(idp);
         idp.addOnChangeListener(this);
-        mSharedPrefs = Utilities.getPrefs(this);
+        mSharedPrefs = LauncherPrefs.getPrefs(this);
         mIconCache = app.getIconCache();
         mAccessibilityDelegate = createAccessibilityDelegate();
 
@@ -1613,7 +1613,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
 
     @Override
     public SharedPreferences getDevicePrefs() {
-        return Utilities.getDevicePrefs(this);
+        return LauncherPrefs.getDevicePrefs(this);
     }
 
     public int getOrientation() {
@@ -3442,6 +3442,9 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 int newHeight = minHeight + (normalisedDifference * seekBar.getProgress());
+                if (getWorkspace().getFirstPagePinnedItem() instanceof WidgetContainer) {
+                    ((WidgetContainer) getWorkspace().getFirstPagePinnedItem()).updateWidgets();
+                }
                 Logger.d("Launcher.WidgetResize", "newHeight: " + newHeight);
                 WidgetsDbHelper.getInstance(getApplicationContext())
                         .updateHeight(activeRoundedWidgetView.getAppWidgetId(), newHeight);

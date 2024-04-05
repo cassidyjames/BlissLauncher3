@@ -23,7 +23,7 @@ import android.text.TextUtils;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.android.launcher3.Utilities;
+import com.android.launcher3.LauncherPrefs;
 import com.android.launcher3.model.data.AppInfo;
 import com.android.launcher3.InvariantDeviceProfile;
 import com.android.launcher3.Launcher;
@@ -103,7 +103,7 @@ public class LauncherAppMonitor extends LauncherApps.Callback
     }
 
     public void onUserUnlocked(Context context) {
-        Utilities.getPrefs(context).registerOnSharedPreferenceChangeListener(this);
+        LauncherPrefs.getPrefs(context).registerOnSharedPreferenceChangeListener(this);
     }
 
     @Override
