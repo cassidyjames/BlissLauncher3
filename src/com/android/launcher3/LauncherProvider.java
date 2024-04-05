@@ -562,9 +562,10 @@ public class LauncherProvider extends ContentProvider {
     synchronized private void loadDefaultFavoritesIfNecessary() {
         SharedPreferences sp = LauncherPrefs.getPrefs(getContext());
 
-        if (BlissDbUtils.migrateDataFromDb(getContext())) {
+        if (BlissDbUtils.migrateDataFromDb(getContext(), mOpenHelper)) {
             copyTable(mOpenHelper.getReadableDatabase(), Favorites.TABLE_NAME_ALL,
                     mOpenHelper.getWritableDatabase(),Favorites.TABLE_NAME, getContext());
+            mOpenHelper.updateItemId();
             clearFlagEmptyDbCreated();
             return;
         }
@@ -728,8 +729,12 @@ public class LauncherProvider extends ContentProvider {
             // In the case where neither onCreate nor onUpgrade gets called, we read the maxId from
             // the DB here
             if (mMaxItemId == -1) {
-                mMaxItemId = initializeMaxItemId(getWritableDatabase());
+                updateItemId();
             }
+        }
+
+        public void updateItemId() {
+            mMaxItemId = initializeMaxItemId(getWritableDatabase());
         }
 
         @Override

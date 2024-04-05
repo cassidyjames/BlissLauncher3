@@ -12,4 +12,8 @@
     <string-array name="aliased_apps">
         <item>com.generalmagic.magicearth</item> <item>@string/maps</item>
     </string-array>
+
+    <string-array name="blacklisted_widget_options">
+        <item>org.chromium.chrome.browser.quickactionsearchwidget.QuickActionSearchWidgetProvider$QuickActionSearchWidgetProviderDino</item>
+    </string-array>
 </resources>
