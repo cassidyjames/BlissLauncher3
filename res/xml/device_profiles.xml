@@ -45,6 +45,14 @@
             launcher:canBeDefault="true" />
 
         <display-option
+            launcher:name="medium Phone"
+            launcher:minWidthDps="380"
+            launcher:minHeightDps="650"
+            launcher:iconImageSize="73"
+            launcher:iconTextSize="12.0"
+            launcher:canBeDefault="true" />
+
+        <display-option
             launcher:name="Nexus S"
             launcher:minWidthDps="296"
             launcher:minHeightDps="491.33"
