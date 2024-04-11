@@ -408,6 +408,17 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
             mWorkspaceScreens.get(mScreenOrder.get(i))
                     .setPadding(paddingLeft, 0, paddingRight, paddingBottom);
         }
+
+        mWorkspaceScreens.forEach(
+                s -> {
+                    int widgetPadding = getResources().getDimensionPixelSize(R.dimen.widget_page_all_padding);
+                    if (s == mWorkspaceScreens.get(FIRST_SCREEN_ID)) {
+                        s.setPadding(widgetPadding, s.getPaddingTop(), widgetPadding, s.getPaddingBottom());
+                    } else {
+                        widgetPadding = getResources().getDimensionPixelSize(R.dimen.widget_apps_tabs_vertical_padding);
+                        s.setPadding(s.getPaddingLeft() + widgetPadding, s.getPaddingTop(), s.getPaddingRight() + widgetPadding, s.getPaddingBottom());
+                    }
+                });
     }
 
     private void updateWorkspaceWidgetsSizes() {
