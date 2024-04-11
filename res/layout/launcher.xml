@@ -67,9 +67,9 @@
             android:id="@+id/swipe_search_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="8dp"
-            android:paddingHorizontal="8dp"
-            android:paddingVertical="10dp"
+            android:layout_marginVertical="@dimen/widget_page_all_padding"
+            android:layout_marginHorizontal="@dimen/widget_page_all_padding"
+            android:paddingVertical="@dimen/widget_page_all_padding"
             android:visibility="gone">
 
             <LinearLayout

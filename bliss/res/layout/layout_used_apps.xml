@@ -3,8 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="4dp"
-    android:layout_marginVertical="8dp"
+    android:layout_marginHorizontal="@dimen/widget_page_all_padding"
+    android:layout_marginVertical="@dimen/widget_page_all_padding"
+    android:paddingTop="@dimen/widget_page_all_padding"
     app:blurCornerRadius="15dp">
 
     <LinearLayout
@@ -31,7 +32,7 @@
 
             <GridLayout
                 android:id="@+id/suggestedAppGrid"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:animateLayoutChanges="true"
