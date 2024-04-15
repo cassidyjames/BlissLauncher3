@@ -22,7 +22,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingHorizontal="8dp"
-            android:paddingTop="4dp"
+            android:paddingBottom="@dimen/widget_page_inset_padding"
             android:text="@string/suggestions" />
 
         <FrameLayout
