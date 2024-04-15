@@ -12,12 +12,16 @@ import android.appwidget.AppWidgetHost
 import android.appwidget.AppWidgetHostView
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
+import com.android.launcher3.R
 
 class BlissAppWidgetHost(val context: Context) : AppWidgetHost(context, WIDGET_HOST_ID) {
     private val widgetsDbHelper = WidgetsDbHelper.getInstance(context)
 
     fun createView(widgetId: Int, widgetInfo: AppWidgetProviderInfo): AppWidgetHostView {
-        return createView(context, widgetId, widgetInfo).apply { setPaddingRelative(8, 24, 8, 24) }
+        return createView(context, widgetId, widgetInfo).apply {
+            val widgetPadding = resources.getDimensionPixelSize(R.dimen.widget_page_all_padding)
+            setPaddingRelative(8, widgetPadding, 8, widgetPadding)
+        }
     }
 
     @SuppressLint("NewApi")
