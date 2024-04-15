@@ -19,7 +19,8 @@ class BlissAppWidgetHost(val context: Context) : AppWidgetHost(context, WIDGET_H
 
     fun createView(widgetId: Int, widgetInfo: AppWidgetProviderInfo): AppWidgetHostView {
         return createView(context, widgetId, widgetInfo).apply {
-            val widgetPadding = resources.getDimensionPixelSize(R.dimen.widget_page_all_padding)
+            val widgetPadding =
+                resources.getDimensionPixelSize(R.dimen.widget_page_top_bottom_padding)
             setPaddingRelative(8, widgetPadding, 8, widgetPadding)
         }
     }
