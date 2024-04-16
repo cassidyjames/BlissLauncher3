@@ -14,3 +14,4 @@ local.properties
 build/
 .DS_Store
 blissWithQuickstep/
+version.properties
