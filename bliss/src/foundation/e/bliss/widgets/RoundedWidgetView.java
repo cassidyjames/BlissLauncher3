@@ -63,7 +63,8 @@ public class RoundedWidgetView extends LauncherAppWidgetHostView implements Offs
     @Override
     public void setAppWidget(int appWidgetId, AppWidgetProviderInfo info) {
         super.setAppWidget(appWidgetId, info);
-        setPadding(0, 0, 0, 0);
+        int widgetPadding = getResources().getDimensionPixelSize(R.dimen.widget_page_top_bottom_padding);
+        setPadding(0, widgetPadding, 0, widgetPadding);
     }
 
     @Override
