@@ -110,6 +110,7 @@ import com.android.launcher3.anim.PendingAnimation;
 import com.android.launcher3.appprediction.PredictionRowView;
 import com.android.launcher3.config.FeatureFlags;
 import com.android.launcher3.dragndrop.DragOptions;
+import com.android.launcher3.folder.Folder;
 import com.android.launcher3.hybridhotseat.HotseatPredictionController;
 import com.android.launcher3.logging.InstanceId;
 import com.android.launcher3.logging.StatsLogManager;
@@ -440,7 +441,13 @@ public class QuickstepLauncher extends Launcher {
             } else {
                 SystemUiProxy.INSTANCE.get(this).setShelfHeight(visible, profile.hotseatBarSizePx);
             }
+
+            Folder folder = Folder.getOpen(this);
+            if (folder != null && !folder.isFolderWobbling()) {
+                folder.setVisibility((state == NORMAL) ? View.VISIBLE : View.INVISIBLE);
+            }
         }
+
         if (state == NORMAL && !inTransition) {
             ((RecentsView) getOverviewPanel()).setSwipeDownShouldLaunchApp(false);
         }
