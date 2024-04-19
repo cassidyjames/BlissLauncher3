@@ -183,7 +183,7 @@ public final class FeatureFlags {
                     "Always use hardware optimization for folder animations.");
 
     public static final BooleanFlag SEPARATE_RECENTS_ACTIVITY = getDebugFlag(270392980,
-            "SEPARATE_RECENTS_ACTIVITY", true,
+            "SEPARATE_RECENTS_ACTIVITY", false,
             "Uses a separate recents activity instead of using the integrated recents+Launcher UI");
 
     public static final BooleanFlag ENABLE_MINIMAL_DEVICE = getDebugFlag(270392984,
