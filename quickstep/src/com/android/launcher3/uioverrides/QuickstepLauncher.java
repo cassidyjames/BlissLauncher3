@@ -50,6 +50,7 @@ import com.android.launcher3.Workspace;
 import com.android.launcher3.accessibility.LauncherAccessibilityDelegate;
 import com.android.launcher3.anim.AnimatorPlaybackController;
 import com.android.launcher3.appprediction.PredictionRowView;
+import com.android.launcher3.folder.Folder;
 import com.android.launcher3.hybridhotseat.HotseatPredictionController;
 import com.android.launcher3.logging.InstanceId;
 import com.android.launcher3.logging.StatsLogManager;
@@ -225,7 +226,13 @@ public class QuickstepLauncher extends BaseQuickstepLauncher {
                     && profile.isPhone && !profile.isLandscape;
             UiThreadHelper.runAsyncCommand(this, SET_SHELF_HEIGHT, visible ? 1 : 0,
                     profile.hotseatBarSizePx);
+
+            Folder folder = Folder.getOpen(this);
+            if (folder != null && !folder.isFolderWobbling()) {
+                folder.setVisibility((state == NORMAL) ? View.VISIBLE : View.INVISIBLE);
+            }
         }
+
         if (state == NORMAL && !inTransition) {
             ((RecentsView) getOverviewPanel()).setSwipeDownShouldLaunchApp(false);
         }
