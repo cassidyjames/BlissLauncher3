@@ -19,4 +19,6 @@
     <string name="suggestions">Sugerencias</string>
     <string name="cancel">Cancelar</string>
     <string name="untitled_folder">Sin título</string>
+    <string name="widget_add">Agregar</string>
+    <string name="widget_remove">Eliminar</string>
 </resources>

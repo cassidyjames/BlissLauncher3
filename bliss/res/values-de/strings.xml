@@ -28,4 +28,5 @@
     <string name="untitled_folder">Ohne Titel</string>
     <string name="widget_no_resize">Dieses Widget kann nicht in der Größe verändert werden</string>
     <string name="remove_widgets">Widgets entfernen</string>
+    <string name="show_notification_count">Benachrichtigungszähler anzeigen</string>
 </resources>

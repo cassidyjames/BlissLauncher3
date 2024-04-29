@@ -93,5 +93,5 @@
         android:defaultValue="true"
         android:key="pref_notif_count"
         android:persistent="true"
-        android:title="Show notification count" />
+        android:title="@string/show_notification_count" />
 </androidx.preference.PreferenceScreen>
