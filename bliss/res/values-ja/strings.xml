@@ -14,4 +14,5 @@
     <string name="widget_add">追加</string>
     <string name="widget_remove">削除</string>
     <string name="remove_widgets">ウィジェットを削除</string>
+    <string name="show_notification_count">通知数を表示</string>
 </resources>
