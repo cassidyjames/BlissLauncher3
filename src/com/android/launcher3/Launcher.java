@@ -90,6 +90,7 @@ import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.database.ContentObserver;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.graphics.Rect;
@@ -103,6 +104,7 @@ import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.text.method.TextKeyListener;
 import android.util.AttributeSet;
@@ -439,19 +441,24 @@ public class Launcher extends StatefulActivity<LauncherState>
     public FrameLayout swipeSearchContainer;
     private AnimatorSet currentAnimator;
     private RoundedWidgetView activeRoundedWidgetView;
+    private ContentObserver mSettingsChangeObserver;
 
     @Override
     @TargetApi(Build.VERSION_CODES.S)
     protected void onCreate(Bundle savedInstanceState) {
         Logger.plant();
 
-        if (!BuildConfig.DEBUG) {
-            try {
-                Telemetry.init(BuildConfig.SENTRY_DSN, getApplication(), true);
-            } catch (Exception e) {
-                Logger.e(TAG, "Failed to initialize Sentry");
+        initSentry();
+
+        mSettingsChangeObserver = new ContentObserver(mHandler) {
+            @Override
+            public void onChange(boolean selfChange) {
+                initSentry();
             }
-        }
+        };
+        getApplicationContext().getContentResolver().registerContentObserver(
+                Settings.System.getUriFor("e_telemetry"),
+                false, mSettingsChangeObserver);
 
         // Only use a hard-coded cookie since we only want to trace this once.
         if (Utilities.ATLEAST_S) {
@@ -623,6 +630,16 @@ public class Launcher extends StatefulActivity<LauncherState>
         }
         setTitle(R.string.home_screen);
         getWindow().setNavigationBarColor(getWindow().getNavigationBarColor() | 0x26000000);
+    }
+
+    private void initSentry() {
+        if (!BuildConfig.DEBUG) {
+            try {
+                Telemetry.init(BuildConfig.SENTRY_DSN, getApplication(), true);
+            } catch (Exception e) {
+                Logger.e(TAG, "Failed to initialize Sentry");
+            }
+        }
     }
 
     /**
@@ -1869,6 +1886,10 @@ public class Launcher extends StatefulActivity<LauncherState>
     public void onDestroy() {
         super.onDestroy();
         ACTIVITY_TRACKER.onActivityDestroyed(this);
+
+        if (mSettingsChangeObserver != null) {
+            getApplicationContext().getContentResolver().unregisterContentObserver(mSettingsChangeObserver);
+        }
 
         ScreenOnTracker.INSTANCE.get(this).removeListener(mScreenOnListener);
         mWorkspace.removeFolderListeners();
