@@ -174,7 +174,7 @@ public final class FeatureFlags {
             "Shows user a tutorial on how to get to All Apps after X amount of attempts.");
 
     public static final BooleanFlag SEPARATE_RECENTS_ACTIVITY = getDebugFlag(
-            "SEPARATE_RECENTS_ACTIVITY", false,
+            "SEPARATE_RECENTS_ACTIVITY", true,
             "Uses a separate recents activity instead of using the integrated recents+Launcher UI");
 
     public static final BooleanFlag ENABLE_MINIMAL_DEVICE = getDebugFlag(
