@@ -27,4 +27,5 @@
     <string name="widget_remove">Enlever</string>
     <string name="widget_no_resize">Ce widget ne peut pas être redimensionné</string>
     <string name="remove_widgets">Suppression de widgets</string>
+    <string name="show_notification_count">Afficher le nombre de notifications</string>
 </resources>
