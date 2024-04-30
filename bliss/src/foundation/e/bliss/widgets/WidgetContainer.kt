@@ -191,7 +191,7 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
                     opts.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, height)
                 }
                 val blacklistedComponents =
-                    context.resources.getStringArray(R.array.blacklisted_widget_options)
+                    mLauncher.resources.getStringArray(R.array.blacklisted_widget_options)
                 if (!blacklistedComponents.contains(info.provider.className)) {
                     widgetManager.updateAppWidgetOptions(it.appWidgetId, opts)
                 }
@@ -440,7 +440,7 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
                         }
 
                         val blacklistedComponents =
-                            context.resources.getStringArray(R.array.blacklisted_widget_options)
+                            launcher.resources.getStringArray(R.array.blacklisted_widget_options)
                         if (!blacklistedComponents.contains(info.provider.className)) {
                             mWidgetManager.updateAppWidgetOptions(it.appWidgetId, opts)
                         }
