@@ -213,7 +213,17 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
         private val mAppMonitorCallback: LauncherAppMonitorCallback =
             object : LauncherAppMonitorCallback {
                 override fun onPackageRemoved(packageName: String?, user: UserHandle?) {
-                    rebindWidgets()
+                    if (!::widgetsDbHelper.isInitialized) {
+                        return
+                    }
+                    val widgets =
+                        widgetsDbHelper.getWidgets().filter {
+                            it.component.packageName == packageName
+                        }
+                    if (packageName != null && widgets.isNotEmpty()) {
+                        widgets.map { it.widgetId }.forEach { widgetsDbHelper.delete(it) }
+                        rebindWidgets()
+                    }
                 }
             }
 

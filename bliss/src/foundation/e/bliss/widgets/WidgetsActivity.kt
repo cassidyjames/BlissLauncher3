@@ -25,6 +25,7 @@ class WidgetsActivity : Activity(), OnActionClickListener {
     private lateinit var mAddedWidgetsAdapter: AddedWidgetsAdapter
     private lateinit var mAppWidgetManager: AppWidgetManager
     private lateinit var mAppWidgetHost: BlissAppWidgetHost
+    private lateinit var widgetsDbHelper: WidgetsDbHelper
 
     private val mCompositeDisposable = CompositeDisposable()
 
@@ -50,6 +51,7 @@ class WidgetsActivity : Activity(), OnActionClickListener {
 
         mAppWidgetManager = AppWidgetManager.getInstance(this)
         mAppWidgetHost = BlissAppWidgetHost(this)
+        widgetsDbHelper = WidgetsDbHelper.getInstance(this)
 
         val addedWidgets = findViewById<RecyclerView>(R.id.added_widgets_recycler_view)
         addedWidgets.apply {
@@ -76,6 +78,7 @@ class WidgetsActivity : Activity(), OnActionClickListener {
 
     override fun removeWidget(id: Int) {
         mAppWidgetHost.onAppWidgetRemoved(id)
+        widgetsDbHelper.delete(id)
         CoroutineScope(Dispatchers.Main).launch {
             WidgetContainer.WidgetFragment.eventFlow.emit(Unit)
         }
