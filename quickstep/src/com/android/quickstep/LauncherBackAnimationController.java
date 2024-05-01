@@ -38,6 +38,7 @@ import android.view.animation.Interpolator;
 import android.window.BackEvent;
 import android.window.BackMotionEvent;
 import android.window.BackProgressAnimator;
+import android.window.BackProgressAnimator.ProgressCallback;
 import android.window.IOnBackInvokedCallback;
 
 import com.android.launcher3.AbstractFloatingView;
@@ -145,13 +146,17 @@ public class LauncherBackAnimationController {
             public void onBackStarted(BackMotionEvent backEvent) {
                 handler.post(() -> {
                     startBack(backEvent);
-                    mProgressAnimator.onBackStarted(backEvent, event -> {
-                        mBackProgress = event.getProgress();
-                        // TODO: Update once the interpolation curve spec is finalized.
-                        mBackProgress =
-                                1 - (1 - mBackProgress) * (1 - mBackProgress) * (1
-                                        - mBackProgress);
-                        updateBackProgress(mBackProgress, event);
+                    mProgressAnimator.onBackStarted(backEvent, new ProgressCallback() {
+                        @Override
+                        public void onProgressUpdate(BackEvent event) {
+                            mBackProgress = event.getProgress();
+                            // TODO: Update once the interpolation curve spec is finalized.
+                            mBackProgress =
+                                    1 - (1 - mBackProgress) * (1 - mBackProgress) * (1
+                                            - mBackProgress);
+
+                            updateBackProgress(mBackProgress, event);
+                        }
                     });
                 });
             }
