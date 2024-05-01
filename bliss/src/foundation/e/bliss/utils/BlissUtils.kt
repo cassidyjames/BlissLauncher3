@@ -88,9 +88,9 @@ fun getUninstallTarget(launcher: Launcher, item: ItemInfo?): ComponentName? {
     }
 
     if (intent != null) {
-        val info: LauncherActivityInfo =
+        val info: LauncherActivityInfo? =
             launcher.getSystemService(LauncherApps::class.java).resolveActivity(intent, user)
-        if (info.applicationInfo.flags and ApplicationInfo.FLAG_SYSTEM == 0) {
+        if (info != null && info.applicationInfo.flags and ApplicationInfo.FLAG_SYSTEM == 0) {
             return info.componentName
         }
     }
