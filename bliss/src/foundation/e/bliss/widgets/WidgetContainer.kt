@@ -191,7 +191,7 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
                     opts.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, height)
                 }
                 val blacklistedComponents =
-                    context.resources.getStringArray(R.array.blacklisted_widget_options)
+                    mLauncher.resources.getStringArray(R.array.blacklisted_widget_options)
                 if (!blacklistedComponents.contains(info.provider.className)) {
                     widgetManager.updateAppWidgetOptions(it.appWidgetId, opts)
                 }
@@ -213,7 +213,17 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
         private val mAppMonitorCallback: LauncherAppMonitorCallback =
             object : LauncherAppMonitorCallback {
                 override fun onPackageRemoved(packageName: String?, user: UserHandle?) {
-                    rebindWidgets()
+                    if (!::widgetsDbHelper.isInitialized) {
+                        return
+                    }
+                    val widgets =
+                        widgetsDbHelper.getWidgets().filter {
+                            it.component.packageName == packageName
+                        }
+                    if (packageName != null && widgets.isNotEmpty()) {
+                        widgets.map { it.widgetId }.forEach { widgetsDbHelper.delete(it) }
+                        rebindWidgets()
+                    }
                 }
             }
 
@@ -440,7 +450,7 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
                         }
 
                         val blacklistedComponents =
-                            context.resources.getStringArray(R.array.blacklisted_widget_options)
+                            launcher.resources.getStringArray(R.array.blacklisted_widget_options)
                         if (!blacklistedComponents.contains(info.provider.className)) {
                             mWidgetManager.updateAppWidgetOptions(it.appWidgetId, opts)
                         }
