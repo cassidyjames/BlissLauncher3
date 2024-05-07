@@ -113,7 +113,7 @@ public abstract class StatefulActivity<STATE_TYPE extends BaseState<STATE_TYPE>>
         }
 
         if (state.hasFlag(FLAG_CLOSE_POPUPS)) {
-            AbstractFloatingView.closeAllOpenViewsExcept(this, !state.hasFlag(FLAG_NON_INTERACTIVE), AbstractFloatingView.TYPE_FOLDER);
+            AbstractFloatingView.closeAllOpenViews(this, !state.hasFlag(FLAG_NON_INTERACTIVE));
         }
     }
 

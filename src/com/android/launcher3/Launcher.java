@@ -1757,11 +1757,8 @@ public class Launcher extends StatefulActivity<LauncherState>
         if (isActionMain) {
             mAppMonitor.onReceiveHomeIntent();
             if (!internalStateHandled) {
-                Folder openFolder = Folder.getOpen(this);
                 // In all these cases, only animate if we're already on home
-                if (openFolder != null && alreadyOnHome) {
-                    closeOpenViews(isStarted());
-                }
+                closeOpenViews(isStarted());
 
                 if (!isInState(NORMAL)) {
                     // Only change state, if not already the same. This prevents cancelling any
