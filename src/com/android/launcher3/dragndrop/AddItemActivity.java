@@ -42,6 +42,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.DragShadowBuilder;
@@ -50,6 +51,7 @@ import android.view.View.OnTouchListener;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.android.launcher3.BaseActivity;
@@ -79,7 +81,9 @@ import com.android.launcher3.widget.WidgetManagerHelper;
 import java.util.Objects;
 import java.util.function.Supplier;
 
+import foundation.e.bliss.multimode.MultiModeController;
 import foundation.e.bliss.utils.BlissConstants;
+import foundation.e.bliss.widgets.WidgetContainer.WidgetFragment;
 
 /**
  * Activity to show pin widget dialog.
@@ -148,6 +152,11 @@ public class AddItemActivity extends BaseActivity
                 return;
             }
         } else {
+            if (MultiModeController.isSingleLayerMode()) {
+                ((Button) findViewById(R.id.add_to_workspace))
+                        .setText(getString(R.string.add_to_widget_Screen));
+                ((TextView)findViewById(R.id.widget_drag_instruction)).setVisibility(View.GONE);
+            }
             if (!setupWidget()) {
                 // TODO: show error toast?
                 finish();
@@ -158,6 +167,11 @@ public class AddItemActivity extends BaseActivity
                 R.id.widget_preview_container);
         previewContainer.setOnTouchListener(this);
         previewContainer.setOnLongClickListener(this);
+
+        if (MultiModeController.isSingleLayerMode()) {
+            previewContainer.setOnTouchListener(null);
+            previewContainer.setOnLongClickListener(null);
+        }
 
         // savedInstanceState is null when the activity is created the first time (i.e., avoids
         // duplicate logging during rotation)
@@ -335,8 +349,13 @@ public class AddItemActivity extends BaseActivity
             return;
         }
 
-        mPendingBindWidgetId = mAppWidgetHost.allocateAppWidgetId();
         AppWidgetProviderInfo widgetProviderInfo = mRequest.getAppWidgetProviderInfo(this);
+        if (MultiModeController.isSingleLayerMode() && widgetProviderInfo != null) {
+            WidgetFragment.onWidgetAdded(widgetProviderInfo.provider);
+            return;
+        }
+
+        mPendingBindWidgetId = mAppWidgetHost.allocateAppWidgetId();
         boolean success = mAppWidgetManager.bindAppWidgetIdIfAllowed(
                 mPendingBindWidgetId, widgetProviderInfo, mWidgetOptions);
         if (success) {
