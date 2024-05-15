@@ -87,6 +87,8 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Stack;
 
+import foundation.e.bliss.multimode.MultiModeController;
+
 public class CellLayout extends ViewGroup {
     private static final String TAG = "CellLayout";
     private static final boolean LOGD = false;
@@ -766,7 +768,10 @@ public class CellLayout extends ViewGroup {
     }
 
     public boolean acceptsWidget() {
-        return mContainerType == WORKSPACE;
+        if (MultiModeController.isSingleLayerMode()) {
+            return false;
+        }
+            return mContainerType == WORKSPACE;
     }
 
     /**

@@ -15,4 +15,5 @@
     <string name="widget_remove">Remove</string>
     <string name="remove_widgets">Remove Widgets</string>
     <string name="show_notification_count">Show notification count</string>
+    <string name="add_to_widget_Screen">Add to -1 screen</string>
 </resources>
