@@ -524,6 +524,11 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
                     defaultWidgets.add(widget.componentName)
                 }
             }
+
+            @JvmStatic
+            fun onWidgetAdded(componentName: ComponentName) {
+                defaultWidgets.add(componentName)
+            }
         }
     }
 }
