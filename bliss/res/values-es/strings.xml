@@ -20,5 +20,13 @@
     <string name="cancel">Cancelar</string>
     <string name="untitled_folder">Sin título</string>
     <string name="widget_add">Agregar</string>
-    <string name="widget_remove">Eliminar</string>
+    <string name="widget_remove">Remover</string>
+    <string name="maps">Navegación</string>
+    <string name="ok">OK</string>
+    <string name="uninstall_app">¿Deseas remover esta aplicación?</string>
+    <string name="max">Max</string>
+    <string name="min">Min</string>
+    <string name="remove_widgets">Remover widgets</string>
+    <string name="show_notification_count">Mostrar recuento de notificaciones</string>
+    <string name="widget_no_resize">No se puede redimensionar este widget</string>
 </resources>
