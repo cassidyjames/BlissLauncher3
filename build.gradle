@@ -1,36 +1,97 @@
-buildscript {
-    repositories {
-        mavenCentral()
-        google()
+import com.android.build.gradle.BasePlugin
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
+plugins {
+    alias libs.plugins.android.application
+    alias libs.plugins.android.library apply false
+    alias libs.plugins.kotlin
+    alias libs.plugins.google.protobuf
+}
+
+allprojects {
+    plugins.withType(BasePlugin).configureEach {
+        project.android {
+            compileSdk 33
+
+            defaultConfig {
+                minSdk 28
+                targetSdk 33
+                vectorDrawables.useSupportLibrary = true
+            }
+
+            compileOptions {
+                sourceCompatibility JavaVersion.VERSION_1_8
+                targetCompatibility JavaVersion.VERSION_1_8
+            }
+
+            lint {
+                abortOnError true
+                checkReleaseBuilds false
+            }
+        }
+
+        project.dependencies {
+            implementation libs.androidx.core
+        }
     }
-    dependencies {
-        classpath GRADLE_CLASS_PATH
-        classpath PROTOBUF_CLASS_PATH
+
+    tasks.withType(KotlinCompile).configureEach {
+        kotlinOptions {
+            jvmTarget = JavaVersion.VERSION_1_8
+        }
+    }
+
+    ext.addFrameworkJar = { String path ->
+        def frameworkJar = new File(rootProject.projectDir, 'prebuilts/' + path)
+        if (!frameworkJar.exists()) {
+            throw new IllegalArgumentException("Framework jar path doesn't exist")
+        }
+        gradle.projectsEvaluated {
+            tasks.withType(JavaCompile) {
+                options.bootstrapClasspath = files([frameworkJar] + (options.bootstrapClasspath.files as Iterable<File>))
+            }
+            tasks.withType(KotlinCompile) {
+                it.libraries.setFrom(files([frameworkJar] + it.libraries.getFrom()))
+            }
+        }
     }
 }
 
-final String ANDROID_TOP = "${rootDir}/../../.."
-final String FRAMEWORK_PREBUILTS_DIR = "${ANDROID_TOP}/prebuilts/framework_intermediates/"
-
-apply plugin: 'com.android.application'
-apply plugin: 'com.google.protobuf'
-
 android {
-    compileSdkVersion COMPILE_SDK
-    buildToolsVersion BUILD_TOOLS_VERSION
+    namespace "com.android.launcher3"
+    useLibrary "android.test.mock"
 
     defaultConfig {
         minSdkVersion 30
         targetSdkVersion 33
-        versionCode 1
-        versionName "1.0"
-
+        versionCode 300_00_20
+        versionName "3.0.0-alpha2"
+        buildConfigField "boolean", "IS_STUDIO_BUILD", "false"
+        buildConfigField "boolean", "QSB_ON_FIRST_SCREEN", "true"
+        buildConfigField "boolean", "IS_DEBUG_DEVICE", "false"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        vectorDrawables.useSupportLibrary = true
     }
+
+    signingConfigs {
+        debugConfig {
+            storeFile file("$rootDir/keystore/testkey.jks")
+            storePassword 'testkey'
+            keyAlias 'testkey'
+            keyPassword 'testkey'
+        }
+
+        platformConfig {
+            storeFile file("$rootDir/keystore/platform.jks")
+            storePassword 'platform'
+            keyAlias 'platform'
+            keyPassword 'platform'
+        }
+    }
+
     buildTypes {
         debug {
             minifyEnabled false
+            signingConfig signingConfigs.platformConfig
         }
     }
 
@@ -39,36 +100,41 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
-    // The flavor dimensions for build variants (e.g. aospWithQuickstep, aospWithoutQuickstep)
-    // See: https://developer.android.com/studio/build/build-variants#flavor-dimensions
-    flavorDimensions "app", "recents"
-
+    flavorDimensions.addAll("app", "recents")
     productFlavors {
         aosp {
             dimension "app"
             applicationId 'com.android.launcher3'
-            testApplicationId 'com.android.launcher3.tests'
         }
 
         l3go {
             dimension "app"
             applicationId 'com.android.launcher3'
-            testApplicationId 'com.android.launcher3.tests'
+        }
+
+        bliss {
+            dimension "app"
+            applicationId 'foundation.e.blisslauncher'
+            isDefault true
         }
 
         withQuickstep {
             dimension "recents"
-
-            minSdkVersion 28
+            minSdkVersion 33
         }
 
         withoutQuickstep {
             dimension "recents"
         }
+
+        configureEach {
+            resValue("string", "quickstep_component", "${applicationId}/com.android.launcher3.uioverrides.QuickstepLauncher")
+            resValue("string", "launcher_component", "${applicationId}/com.android.launcher3.Launcher")
+        }
     }
 
     // Disable release builds for now
-    android.variantFilter { variant ->
+    variantFilter { variant ->
         if (variant.buildType.name.endsWith('release')) {
             variant.setIgnore(true)
         }
@@ -77,21 +143,11 @@ android {
     sourceSets {
         main {
             res.srcDirs = ['res']
-            java.srcDirs = ['src', 'src_plugins']
+            java.srcDirs = ['src', 'tests/shared']
             manifest.srcFile 'AndroidManifest-common.xml'
             proto {
-                srcDirs = ['protos/', 'protos_overrides/']
+                srcDirs = ['protos/', 'quickstep/protos_overrides/']
             }
-        }
-
-        androidTest {
-            res.srcDirs = ['tests/res']
-            java.srcDirs = ['tests/src', 'tests/tapl']
-            manifest.srcFile "tests/AndroidManifest-common.xml"
-        }
-
-        androidTestDebug {
-            manifest.srcFile "tests/AndroidManifest.xml"
         }
 
         aosp {
@@ -120,6 +176,23 @@ android {
             manifest.srcFile "quickstep/AndroidManifest-launcher.xml"
         }
 
+        bliss {
+            java.srcDirs = ['src_flags', 'src_shortcuts_overrides', 'bliss/src']
+            res.srcDirs = ['bliss/res', "bliss/res_overrides"]
+            manifest.srcFile "bliss/AndroidManifest.xml"
+            assets {
+                srcDirs 'bliss/assets'
+            }
+        }
+
+        blissWithoutQuickstep {
+            manifest.srcFile "AndroidManifest.xml"
+        }
+
+        blissWithQuickstep {
+            manifest.srcFile "quickstep/AndroidManifest-launcher.xml"
+        }
+
         withoutQuickstep {
             java.srcDirs = ['src_ui_overrides']
         }
@@ -130,52 +203,62 @@ android {
             manifest.srcFile "quickstep/AndroidManifest.xml"
         }
     }
+
+    addFrameworkJar('framework-14.jar')
 }
 
-allprojects {
-    repositories {
-        maven { url "../../../prebuilts/sdk/current/androidx/m2repository" }
-        maven { url "../../../prebuilts/fullsdk-darwin/extras/android/m2repository" }
-        maven { url "../../../prebuilts/fullsdk-linux/extras/android/m2repository" }
-        mavenCentral()
-        google()
-    }
+tasks.register('unzipJar', Copy.class) {
+    from zipTree('prebuilts/classes.jar')
+    into("$buildDir/libs/classes")
+    include "**/*.class"
+    exclude "android/**"
+    exclude "androidx/**"
+    exclude "com/airbnb/**"
+    exclude "com/android/launcher3/**"
+    exclude "com/android/quickstep/**"
+    exclude "com/google/**"
+    exclude "kotlin/**"
+    exclude "kotlinx/**"
+    exclude "META-INF/**"
+    exclude "okio/**"
+    exclude "org/**"
+}
+
+tasks.register('makeReleaseJar', Jar.class) {
+    archiveName('Launcher3QuickStepLib.jar')
+    from("$buildDir/libs/classes")
+    destinationDir(file('prebuilts'))
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['libGoogleFeed.jar'])
+    api libs.airbnb.lottie
+    implementation libs.androidx.dynamicanimation
+    implementation libs.androidx.recyclerview
+    implementation libs.androidx.preference
+    implementation libs.google.protobuf.javalite
+    implementation libs.google.material
+    implementation libs.androidx.slice.view
+    implementation libs.reactivex.rxkotlin3
+    implementation libs.hoko.blur
+    implementation libs.elib
+    implementation libs.e.telemetry
+    implementation libs.timber
 
-    implementation "androidx.dynamicanimation:dynamicanimation:${ANDROID_X_VERSION}"
-    implementation "androidx.recyclerview:recyclerview:${ANDROID_X_VERSION}"
-    implementation "androidx.preference:preference:${ANDROID_X_VERSION}"
+    implementation libs.square.gson
+    implementation libs.square.logging
+    implementation libs.square.okhttp
+    implementation libs.square.retrofit
+
     implementation project(':IconLoader')
-    implementation project(':UiTestsLibLauncher')
-    withQuickstepImplementation project(':SharedLibWrapper')
 
-    // Recents lib dependency
-    withQuickstepImplementation fileTree(dir: "${FRAMEWORK_PREBUILTS_DIR}/quickstep/libs", include: 'sysui_shared.jar')
-
-    // Required for AOSP to compile. This is already included in the sysui_shared.jar
-    withoutQuickstepImplementation fileTree(dir: "${FRAMEWORK_PREBUILTS_DIR}/libs", include: 'plugin_core.jar')
-
-    testImplementation 'junit:junit:4.12'
-    testImplementation libs.mockitoInlineExtended
-    androidTestImplementation libs.mockitoInlineExtended
-    androidTestImplementation "org.mockito:mockito-core:1.9.5"
-    androidTestImplementation 'com.google.dexmaker:dexmaker:1.2'
-    androidTestImplementation 'com.google.dexmaker:dexmaker-mockito:1.2'
-    androidTestImplementation 'com.android.support.test:runner:1.0.0'
-    androidTestImplementation 'com.android.support.test:rules:1.0.0'
-    androidTestImplementation 'com.android.support.test.uiautomator:uiautomator-v18:2.1.2'
-    androidTestImplementation "androidx.annotation:annotation:${ANDROID_X_VERSION}"
-
-    api 'com.airbnb.android:lottie:3.3.0'
+    implementation fileTree(dir: "prebuilts", include: 'Launcher3QuickStepLib.jar')
+    implementation fileTree(dir: "prebuilts", include: 'libGoogleFeed.jar')
 }
 
 protobuf {
     // Configure the protoc executable
     protoc {
-        artifact = "com.google.protobuf:protoc:${protocVersion}${PROTO_ARCH_SUFFIX}"
+        artifact = "com.google.protobuf:protoc:3.21.12"
     }
     generateProtoTasks {
         all().each { task ->

@@ -1,0 +1,22 @@
+image: "registry.gitlab.e.foundation/e/os/docker-android-apps-cicd:latest"
+
+stages:
+  - build
+
+before_script:
+  - export GRADLE_USER_HOME=$(pwd)/.gradle
+  - chmod +x ./gradlew
+  - git submodule update --init --recursive
+
+cache:
+  key: ${CI_PROJECT_ID}
+  paths:
+    - .gradle/
+
+blissWithQuickstep:
+  stage: build
+  script:
+    - ./gradlew assembleblissWithQuickstepDebug
+  artifacts:
+    paths:
+      - build/outputs/apk

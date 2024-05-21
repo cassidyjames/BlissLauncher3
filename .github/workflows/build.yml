@@ -1,0 +1,91 @@
+name: Android CI
+
+on: workflow_dispatch
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  blissWithQuickstepDebug:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3.5.0
+        with:
+          fetch-depth: 0
+
+      - name: Fetch submodules
+        run: git submodule update --init --recursive
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3.11.0
+        with:
+          distribution: "zulu"
+          java-version: "11"
+          cache: "gradle"
+
+      - name: Build debug APK
+        uses: gradle/gradle-build-action@v2.4.2
+        with:
+          arguments: assembleblissWithQuickstepDebug
+          gradle-home-cache-cleanup: true
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: blissWithQuickstepDebug
+          path: build/outputs/apk/blissWithQuickstep/debug/*.apk
+
+  blissWithQuickstepRelease:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3.5.0
+        with:
+          fetch-depth: 0
+
+      - name: Fetch submodules
+        run: git submodule update --init --recursive
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3.11.0
+        with:
+          distribution: "zulu"
+          java-version: "11"
+          cache: "gradle"
+
+      - name: Build release APK
+        uses: gradle/gradle-build-action@v2.4.2
+        with:
+          arguments: assembleblissWithQuickstepRelease
+          gradle-home-cache-cleanup: true
+
+      - name: Upload release APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: blissWithQuickstepRelease
+          path: build/outputs/apk/blissWithQuickstep/release/*.apk
+
+  notifyTelegram:
+    needs: [blissWithQuickstepRelease]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download release APK
+        uses: actions/download-artifact@v3
+        with:
+          name: blissWithQuickstepRelease
+
+      - name: Set SHORT_SHA in ENV
+        run: echo "SHORT_SHA=${GITHUB_SHA:0:7}" >> $GITHUB_ENV
+
+      - name: Rename APK with SHA
+        run: mv BlissLauncher3-bliss-withQuickstep-release.apk BlissLauncher3-withQuickstep-release-${{ env.SHORT_SHA }}.apk
+
+      - name: Upload release APK to Telegram
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.CHAT_ID }}
+          token: ${{ secrets.BOT_TOKEN }}
+          message: " "
+          document: ${{ github.workspace }}/BlissLauncher3-withQuickstep-release-${{ env.SHORT_SHA }}.apk
