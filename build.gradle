@@ -36,12 +36,6 @@ allprojects {
         }
     }
 
-    tasks.withType(KotlinCompile).configureEach {
-        kotlinOptions {
-            jvmTarget = JavaVersion.VERSION_17
-        }
-    }
-
     ext {
         FRAMEWORK_PREBUILTS_DIR = "$rootDir/prebuilts/"
         daggerVersion = '2.51.1'
@@ -153,7 +147,7 @@ android {
     sourceSets {
         main {
             res.srcDirs = ['res', 'libs_systemui/animationlib/res', 'libs_systemui/iconloaderlib/res']
-            java.srcDirs = ['src', 'tests/shared']
+            java.srcDirs = ['src', 'tests/multivalentTests/shared']
             manifest.srcFile 'AndroidManifest-common.xml'
             proto {
                 srcDirs = ['protos/', 'quickstep/protos_overrides/']
@@ -214,6 +208,11 @@ android {
         }
     }
 
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
     addFrameworkJar('framework-14.jar')
 }
 
@@ -259,6 +258,7 @@ dependencies {
     implementation libs.square.logging
     implementation libs.square.okhttp
     implementation libs.square.retrofit
+    implementation(libs.androidx.window)
 
     implementation project(':IconLoader')
 

@@ -30,6 +30,13 @@
         <item name="android:textSize">28sp</item>
     </style>
 
+    <style name="Switch.Settingslib" parent="@android:style/Widget.Material.CompoundButton.Switch">
+        <item name="android:trackTint">#82000000</item>
+        <item name="android:thumbTint">@android:color/black</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="android:minWidth">48dp</item>
+    </style>
+
     <style name="TextAppearance.GestureTutorial.Subtitle"
         parent="TextAppearance.GestureTutorial">
         <item name="android:gravity">center</item>
