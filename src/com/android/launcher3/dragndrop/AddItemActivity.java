@@ -381,8 +381,12 @@ public class AddItemActivity extends BaseActivity
         }
 
         AppWidgetProviderInfo widgetProviderInfo = mRequest.getAppWidgetProviderInfo(this);
-        if (MultiModeController.isSingleLayerMode() && widgetProviderInfo!= null) {
+        if (MultiModeController.isSingleLayerMode() && widgetProviderInfo != null) {
             WidgetFragment.onWidgetAdded(widgetProviderInfo.provider);
+            logCommand(LAUNCHER_ADD_EXTERNAL_ITEM_PLACED_AUTOMATICALLY);
+            if (mSlideInView != null) {
+                mSlideInView.close(/* animate= */ true);
+            }
             return;
         }
 
