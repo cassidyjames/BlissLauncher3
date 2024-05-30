@@ -416,8 +416,7 @@ public class LauncherAccessibilityDelegate extends BaseAccessibilityDelegate<Lau
                         LauncherSettings.Favorites.CONTAINER_DESKTOP,
                         screenId, coordinates[0], coordinates[1]);
                 mContext.bindItems(Collections.singletonList(info), true, accessibility);
-            } else if (item instanceof FolderInfo) {
-                FolderInfo fi = (FolderInfo) item;
+            } else if (item instanceof FolderInfo fi) {
                 mContext.getModelWriter().addItemToDatabase(fi,
                         LauncherSettings.Favorites.CONTAINER_DESKTOP, screenId, coordinates[0],
                         coordinates[1]);

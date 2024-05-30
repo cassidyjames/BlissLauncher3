@@ -237,13 +237,6 @@ tasks.register('unzipJar', Copy.class) {
     exclude "org/**"
 }
 
-/*
-tasks.register('makeReleaseJar', Jar.class) {
-    archiveName('Launcher3QuickStepLib.jar')
-    from("$buildDir/libs/classes")
-    destinationDir(file('prebuilts'))
-}
-*/
 dependencies {
     api libs.airbnb.lottie
     implementation libs.androidx.dynamicanimation
