@@ -314,6 +314,7 @@ class TaskbarInsetsController(val context: TaskbarActivityContext) : LoggableTas
      *
      * @see ViewTreeObserver.InternalInsetsInfo.setTouchableInsets
      */
+    @OptIn(ExperimentalStdlibApi::class)
     fun updateInsetsTouchability(insetsInfo: ViewTreeObserver.InternalInsetsInfo) {
         insetsInfo.touchableRegion.setEmpty()
         // Always have nav buttons be touchable
