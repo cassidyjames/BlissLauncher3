@@ -16,6 +16,9 @@ dependencyResolutionManagement {
     }
 }
 
+include ':animationlib'
+project(':animationlib').projectDir = new File("$rootDir/libs_systemui", 'animationlib')
+
 include ':IconLoader'
 project(':IconLoader').projectDir = new File("$rootDir/libs_systemui", 'iconloaderlib')
 
