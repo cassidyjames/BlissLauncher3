@@ -46,7 +46,7 @@
             android:backgroundTint="?android:attr/textColorPrimary" />
 
         <Switch
-            style="@style/BaseIcon"
+            style="@style/Switch.Settingslib"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/taskbar_pinning_switch"
@@ -55,6 +55,7 @@
             android:gravity="start|center_vertical"
             android:textAlignment="viewStart"
             android:paddingStart="12dp"
+            android:fontFamily="source-sans-pro-semi-bold"
             android:layout_weight="1"
             android:lines="1"
             android:ellipsize="end"
