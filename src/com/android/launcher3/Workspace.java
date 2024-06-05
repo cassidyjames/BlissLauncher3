@@ -674,7 +674,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         if (insertIndex < 0) {
             insertIndex = mScreenOrder.size();
         }
-        insertNewWorkspaceScreen(screenId, insertIndex);
+        //insertNewWorkspaceScreen(screenId, insertIndex);
     }
 
     public void insertNewWorkspaceScreen(int screenId) {
@@ -683,7 +683,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
 
     public CellLayout insertNewWorkspaceScreen(int screenId, int insertIndex) {
         if (mWorkspaceScreens.containsKey(screenId)) {
-            //throw new RuntimeException("Screen id " + screenId + " already exists!");
+            throw new RuntimeException("Screen id " + screenId + " already exists!");
         }
 
         // Inflate the cell layout, but do not add it automatically so that we can get the newly
@@ -811,7 +811,8 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
             CellLayout screen = mWorkspaceScreens.get(screenId);
             if (screen == null || screen.getShortcutsAndWidgets().getChildCount() != 0
                     || screen.isDropPending()
-                    || (FeatureFlags.QSB_ON_FIRST_SCREEN && screenId == SECOND_SCREEN_ID)) {
+                    || (FeatureFlags.QSB_ON_FIRST_SCREEN && screenId == SECOND_SCREEN_ID)
+            ) {
                 // Final screen doesn't exist or it isn't empty or there's a pending drop or
                 // It is an empty page used when QSB is there
                 return;
