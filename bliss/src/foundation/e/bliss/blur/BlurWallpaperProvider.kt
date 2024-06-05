@@ -76,8 +76,8 @@ class BlurWallpaperProvider(val context: Context) {
             return
         }
 
-        val display = mWindowManager.defaultDisplay
-        display.getRealMetrics(mDisplayMetrics)
+        val display = mWindowManager?.defaultDisplay
+        display?.getRealMetrics(mDisplayMetrics)
         val width = mDisplayMetrics.widthPixels
         val height = mDisplayMetrics.heightPixels
 
@@ -93,22 +93,24 @@ class BlurWallpaperProvider(val context: Context) {
 
         var wallpaper =
             try {
-                drawableToBitmap(mWallpaperManager.drawable, true) as Bitmap
-            } catch (e: Exception) {
-                runOnMainThread {
-                    val msg = "Failed: ${e.message}"
-                    Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
-                    notifyWallpaperChanged()
-                }
-                return
+                drawableToBitmap(mWallpaperManager.drawable ?: throw NullPointerException("Drawable is null"), true) as Bitmap
+        } catch (e: Exception) {
+            runOnMainThread {
+                val msg = "Failed: ${e.message}"
+                Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
+                notifyWallpaperChanged()
             }
+            return
+        }
 
         wallpaper = scaleAndCropToScreenSize(wallpaper)
         mWallpaperWidth = wallpaper.width
 
         var offsetY = 0f
         if (wallpaper.height > height) {
-            offsetY = (wallpaper.height - display.height) * 0.5f
+            if (display != null) {
+                offsetY = (wallpaper.height - display.height) * 0.5f
+            }
             mListeners.forEach { it.onOffsetChanged(offsetY) }
         }
 
