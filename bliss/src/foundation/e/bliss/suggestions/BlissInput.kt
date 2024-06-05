@@ -65,11 +65,11 @@ class BlissInput(context: Context, attrs: AttributeSet) :
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-        mSearchInput = findViewById(R.id.search_input)
-        mAppsLayout = (parent as View).findViewById(R.id.used_apps_layout)
-        mIconGrid = mAppsLayout.findViewById(R.id.suggestedAppGrid)
-        mClearButton = (mSearchInput.parent as View).findViewById(R.id.clearSuggestions)
-        mSuggestionRv = mAppsLayout.findViewById(R.id.suggestionRecyclerView)
+        mSearchInput = findViewById(R.id.search_input)!!
+        mAppsLayout = (parent as View).findViewById(R.id.used_apps_layout)!!
+        mIconGrid = mAppsLayout.findViewById(R.id.suggestedAppGrid)!!
+        mClearButton = (mSearchInput.parent as View).findViewById(R.id.clearSuggestions)!!
+        mSuggestionRv = mAppsLayout.findViewById(R.id.suggestionRecyclerView)!!
 
         mSearchInput.apply {
             doOnTextChanged { _, _, _, _ -> timer?.cancel() }

@@ -29,7 +29,7 @@ class AutoCompleteAdapter(private val context: Context) :
     private var mQueryText: String? = null
 
     class AutoCompleteViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val mSuggestionTextView: TextView = itemView.findViewById(R.id.suggestionTextView)
+        val mSuggestionTextView: TextView? = itemView.findViewById(R.id.suggestionTextView)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AutoCompleteViewHolder {
@@ -55,9 +55,9 @@ class AutoCompleteAdapter(private val context: Context) :
                 queryTextPos =
                     lcSuggestion.indexOf(mQueryText!!, queryTextPos + mQueryText!!.length)
             }
-            holder.mSuggestionTextView.text = spannable
+            holder.mSuggestionTextView?.text = spannable
         } else {
-            holder.mSuggestionTextView.text = suggestion
+            holder.mSuggestionTextView?.text = suggestion
         }
         setFadeAnimation(holder.itemView)
     }

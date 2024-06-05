@@ -51,7 +51,7 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-        findViewById<Button>(R.id.manage_widgets).setOnClickListener {
+        findViewById<Button>(R.id.manage_widgets)?.setOnClickListener {
             WidgetsFullSheet.show(mLauncher, true, true)
         }
     }

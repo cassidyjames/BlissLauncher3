@@ -14,8 +14,8 @@ import android.view.inputmethod.InputMethodManager
 fun Context.toggleKeyboard(view: View, hasFocus: Boolean) {
     val inputMethodManager = getSystemService(InputMethodManager::class.java)
     if (hasFocus) {
-        inputMethodManager.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT)
+        inputMethodManager?.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT)
     } else {
-        inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
+        inputMethodManager?.hideSoftInputFromWindow(view.windowToken, 0)
     }
 }
