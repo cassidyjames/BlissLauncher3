@@ -146,6 +146,8 @@ import android.view.animation.OvershootInterpolator;
 import android.window.BackEvent;
 import android.window.OnBackAnimationCallback;
 
+
+import android.Manifest;
 import androidx.annotation.CallSuper;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -581,8 +583,8 @@ public class Launcher extends StatefulActivity<LauncherState>
         getSystemUiController().updateUiState(SystemUiController.UI_STATE_BASE_WINDOW,
                 Themes.getAttrBoolean(this, R.attr.isWorkspaceDarkText));
 
-        //requestPermissions(new String[]{Manifest.permission.MANAGE_EXTERNAL_STORAGE},
-        //        STORAGE_PERMISSION_REQUEST_CODE);
+        requestPermissions(new String[]{Manifest.permission.MANAGE_EXTERNAL_STORAGE},
+                STORAGE_PERMISSION_REQUEST_CODE);
 
         mOverlayManager = getDefaultOverlay();
         PluginManagerWrapper.INSTANCE.get(this).addPluginListener(this,

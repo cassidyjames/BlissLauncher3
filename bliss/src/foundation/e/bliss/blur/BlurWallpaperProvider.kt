@@ -76,8 +76,9 @@ class BlurWallpaperProvider(val context: Context) {
             return
         }
 
-        val display = mWindowManager?.defaultDisplay
-        display?.getRealMetrics(mDisplayMetrics)
+        val display = mWindowManager!!.defaultDisplay
+        if (display == null) return
+        display.getRealMetrics(mDisplayMetrics)
         val width = mDisplayMetrics.widthPixels
         val height = mDisplayMetrics.heightPixels
 
@@ -108,9 +109,7 @@ class BlurWallpaperProvider(val context: Context) {
 
         var offsetY = 0f
         if (wallpaper.height > height) {
-            if (display != null) {
-                offsetY = (wallpaper.height - display.height) * 0.5f
-            }
+            offsetY = (wallpaper.height - display.height) * 0.5f
             mListeners.forEach { it.onOffsetChanged(offsetY) }
         }
 

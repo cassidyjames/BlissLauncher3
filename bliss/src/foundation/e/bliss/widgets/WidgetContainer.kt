@@ -140,7 +140,7 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
         private fun configureWidget(widgetId: Int) {
             val widgetInfo =
                 LauncherAppWidgetProviderInfo.fromProviderInfo(
-                    context,
+                    Launcher.getLauncher(context),
                     mWidgetManager.getAppWidgetInfo(widgetId)
                 )
 
@@ -158,7 +158,7 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
         private fun addView(widgetId: Int) {
             val info =
                 LauncherAppWidgetProviderInfo.fromProviderInfo(
-                    context,
+                    Launcher.getLauncher(context),
                     mWidgetManager.getAppWidgetInfo(widgetId)
                 )
 
