@@ -203,8 +203,6 @@ public class ModelDbController {
         if (tableExists(mOpenHelper.getWritableDatabase(), table)) {
             count = db.update(table, values, selection, selectionArgs);
         }
-
-        int count = db.update(table, values, selection, selectionArgs);
         return count;
     }
 
