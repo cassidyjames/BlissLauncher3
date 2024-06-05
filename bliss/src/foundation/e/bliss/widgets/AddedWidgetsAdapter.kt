@@ -69,9 +69,9 @@ class AddedWidgetsAdapter(private val mContext: Context, private val mDensity: I
         var actionBtn: ImageView
 
         init {
-            icon = itemView.findViewById(R.id.widget_icon)
-            label = itemView.findViewById(R.id.widget_label)
-            actionBtn = itemView.findViewById(R.id.action_image_view)
+            icon = itemView.findViewById(R.id.widget_icon)!!
+            label = itemView.findViewById(R.id.widget_label)!!
+            actionBtn = itemView.findViewById(R.id.action_image_view)!!
         }
     }
 

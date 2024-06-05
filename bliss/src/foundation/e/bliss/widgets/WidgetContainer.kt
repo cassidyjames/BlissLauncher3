@@ -74,13 +74,13 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
             WidgetsFullSheet.show(mLauncher, true, true)
         }
 
-        findViewById<Button>(R.id.remove_widgets).setOnClickListener {
+        findViewById<Button>(R.id.remove_widgets)!!.setOnClickListener {
             val intent =
                 Intent(context, WidgetsActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             context.startActivity(intent)
         }
 
-        mRemoveWidgetLayout = findViewById(R.id.remove_widget_parent)
+        mRemoveWidgetLayout = findViewById(R.id.remove_widget_parent)!!
         mWrapper =
             findViewWithTag<LinearLayout?>("wrapper_children").apply {
                 addOnLayoutChangeListener(layoutListener)

@@ -53,10 +53,10 @@ class WidgetsActivity : Activity(), OnActionClickListener {
 
         val addedWidgets = findViewById<RecyclerView>(R.id.added_widgets_recycler_view)
         addedWidgets.apply {
-            addedWidgets.layoutManager = LinearLayoutManager(this@WidgetsActivity)
-            addedWidgets.setHasFixedSize(false)
-            addedWidgets.isNestedScrollingEnabled = false
-            addedWidgets.addItemDecoration(
+            addedWidgets?.layoutManager = LinearLayoutManager(this@WidgetsActivity)
+            addedWidgets?.setHasFixedSize(false)
+            addedWidgets?.isNestedScrollingEnabled = false
+            addedWidgets?.addItemDecoration(
                 DividerItemDecoration(this@WidgetsActivity, DividerItemDecoration.VERTICAL)
             )
         }
@@ -65,7 +65,7 @@ class WidgetsActivity : Activity(), OnActionClickListener {
         windowManager.defaultDisplay.getMetrics(metrics)
 
         mAddedWidgetsAdapter = AddedWidgetsAdapter(this, metrics.densityDpi)
-        addedWidgets.adapter = mAddedWidgetsAdapter
+        addedWidgets?.adapter = mAddedWidgetsAdapter
         refreshRecyclerView()
     }
 
