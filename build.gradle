@@ -167,14 +167,14 @@ android {
     buildTypes {
         debug {
             minifyEnabled false
-            signingConfig signingConfigs.platformConfig
+            signingConfig signingConfigs.debugConfig
         }
 
         release {
             minifyEnabled true
             shrinkResources true
             proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
-            signingConfig = signingConfigs.platformConfig
+            signingConfig = signingConfigs.debugConfig
         }
 
     }
@@ -193,7 +193,7 @@ android {
 
         bliss {
             dimension "app"
-            applicationId 'foundation.e.blisslauncher'
+            applicationId 'com.android.launcher3'
             isDefault true
         }
 
