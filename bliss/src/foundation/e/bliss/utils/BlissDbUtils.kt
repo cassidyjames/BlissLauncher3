@@ -54,8 +54,8 @@ object BlissDbUtils {
         val currentDbName = InvariantDeviceProfile.INSTANCE[context].dbFile
         val rowCount = InvariantDeviceProfile.INSTANCE[context].numRows
         val columnCount = InvariantDeviceProfile.INSTANCE[context].numColumns
-        val numFolderRows = InvariantDeviceProfile.INSTANCE[context].numFolderRows
-        val numFolderColumns = InvariantDeviceProfile.INSTANCE[context].numFolderColumns
+        val numFolderRows = InvariantDeviceProfile.INSTANCE[context].numFolderRows[0]
+        val numFolderColumns = InvariantDeviceProfile.INSTANCE[context].numFolderColumns[0]
 
         // Init database helper classes
         val userSerialProvider =
@@ -186,9 +186,9 @@ object BlissDbUtils {
                 if (item.isInFolder) {
                     // folder is 3x3 for 4x5, 4x4 for 5x5 and so on depending on columnSize grid
                     // size
-                   // val (y, x) = getGridPosition(item.cell, numFolderRows, numFolderColumns)
-                   // values.put("cellX", x)
-                  //  values.put("cellY", y)
+                    val (y, x) = getGridPosition(item.cell, numFolderRows, numFolderColumns)
+                    values.put("cellX", x)
+                    values.put("cellY", y)
                     if (item.isPwa) {
                         // Pwa inside folder has rank of 1 as per launcher3
                         values.put("rank", 1)
