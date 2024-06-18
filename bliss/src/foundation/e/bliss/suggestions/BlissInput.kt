@@ -65,6 +65,8 @@ class BlissInput(context: Context, attrs: AttributeSet) :
     private lateinit var mSuggestionRv: RecyclerView
     private var timer: Timer? = null
 
+    private var previousAppsList: List<AppInfo> = emptyList()
+
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         mSearchInput = findViewById(R.id.search_input)!!
@@ -193,17 +195,27 @@ class BlissInput(context: Context, attrs: AttributeSet) :
             }
     }
 
-    private fun loadSuggestions() {
-        val appsList = mAppsStore.apps.toList()
+    private fun loadSuggestions(forcedLoad: Boolean = true) {
+        val currentAppsList = mAppsStore.apps.toList()
+        if (currentAppsList == previousAppsList && !forcedLoad) {
+            // No changes in the app list, so return
+            return
+        }
 
-        Logger.i(TAG, "Apps List Size ${appsList.size}")
+        // Update previousAppsList with the current list
+        previousAppsList = currentAppsList
+
+        Logger.i(TAG, "Apps List Size ${currentAppsList.size}")
 
         mIconGrid.removeAllViews()
-        if (appsList.isNotEmpty()) {
+        if (currentAppsList.isNotEmpty()) {
             val usageStats = appUsageStats.usageStats
+
             if (usageStats.isNotEmpty()) {
                 usageStats
-                    .mapNotNull { pkg -> appsList.find { it.targetPackage == pkg.packageName } }
+                    .mapNotNull { pkg ->
+                        currentAppsList.find { it.targetPackage == pkg.packageName }
+                    }
                     .take(idp.numColumns)
                     .forEachIndexed { index, it -> mIconGrid.addView(createAppView(it), index) }
             }
@@ -242,7 +254,9 @@ class BlissInput(context: Context, attrs: AttributeSet) :
         }
     }
 
-    override fun onAppsUpdated() = loadSuggestions()
+    override fun onAppsUpdated() {
+        loadSuggestions(false)
+    }
 
     override fun onBackKey(): Boolean {
         val launcher = LauncherAppMonitor.getInstanceNoCreate().launcher
