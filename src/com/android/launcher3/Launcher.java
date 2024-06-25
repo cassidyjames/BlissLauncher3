@@ -584,10 +584,10 @@ public class Launcher extends StatefulActivity<LauncherState>
         setTitle(R.string.home_screen);
         mStartupLatencyLogger.logEnd(LAUNCHER_LATENCY_STARTUP_ACTIVITY_ON_CREATE);
 
-        if (com.android.launcher3.Flags.enableTwoPaneLauncherSettings()) {
-            RuleController.getInstance(this).setRules(
-                    RuleController.parseRules(this, R.xml.split_configuration));
-        }
+        //if (com.android.launcher3.Flags.enableTwoPaneLauncherSettings()) {
+        //    RuleController.getInstance(this).setRules(
+        //            RuleController.parseRules(this, R.xml.split_configuration));
+        //}
     }
 
     protected ModelCallbacks createModelCallbacks() {
