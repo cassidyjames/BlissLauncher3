@@ -31,6 +31,7 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.util.DisplayMetrics;
+import android.view.Display;
 import android.view.Surface;
 
 import com.android.launcher3.CellLayout.ContainerType;
@@ -39,7 +40,6 @@ import com.android.launcher3.config.FeatureFlags;
 import com.android.launcher3.graphics.IconShape;
 import com.android.launcher3.icons.DotRenderer;
 import com.android.launcher3.icons.GraphicsUtils;
-import com.android.launcher3.icons.IconNormalizer;
 import com.android.launcher3.uioverrides.ApiWrapper;
 import com.android.launcher3.util.DisplayController;
 import com.android.launcher3.util.DisplayController.Info;
@@ -51,6 +51,7 @@ import foundation.e.bliss.multimode.MultiModeController;
 import lineageos.providers.LineageSettings;
 
 import java.io.PrintWriter;
+import java.lang.reflect.Method;
 
 @SuppressLint("NewApi")
 public class DeviceProfile {
@@ -952,10 +953,10 @@ public class DeviceProfile {
             SysUINavigationMode.Mode mode = SysUINavigationMode.getMode(context);
 
             int bottomPadding;
-            if (mode == SysUINavigationMode.Mode.NO_BUTTON) {
+            if (mode == SysUINavigationMode.Mode.NO_BUTTON || noNavigationBar()) {
                 bottomPadding = verticalPadding;
                 if (LineageSettings.System.getInt(context.getContentResolver(),
-                        LineageSettings.System.NAVIGATION_BAR_HINT, 0) != 1) {
+                        LineageSettings.System.NAVIGATION_BAR_HINT, 0) != 1 || noNavigationBar()) {
                     bottomPadding -= hotseatBarTopPaddingPx / 2;
                     verticalPadding += hotseatBarTopPaddingPx + (hotseatBarTopPaddingPx / 2);
                 }
@@ -973,6 +974,19 @@ public class DeviceProfile {
             );
         }
         return mHotseatPadding;
+    }
+
+    public static boolean noNavigationBar() {
+        boolean hasNavigationBar = true;
+        try {
+            Class<?> windowManagerGlobalClass = Class.forName("android.view.WindowManagerGlobal");
+            Method getWindowManagerServiceMethod = windowManagerGlobalClass.getDeclaredMethod("getWindowManagerService");
+            Object iWindowManager = getWindowManagerServiceMethod.invoke(null);
+            Class<?> iWindowManagerClass = Class.forName("android.view.IWindowManager");
+            Method hasNavigationBarMethod = iWindowManagerClass.getDeclaredMethod("hasNavigationBar", int.class);
+            hasNavigationBar = (boolean) hasNavigationBarMethod.invoke(iWindowManager, Display.DEFAULT_DISPLAY);
+        } catch (Exception ignored) {}
+        return !hasNavigationBar;
     }
 
     /**
