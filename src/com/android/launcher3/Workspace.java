@@ -61,6 +61,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowInsets;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
 import android.view.animation.Animation;
@@ -404,13 +405,28 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
 
         // Set insets for page indicator
         Rect padding = grid.workspacePadding;
+
+        // Horizontally center the indicator unconditionally
+        lp.leftMargin = lp.rightMargin = 0;
+        lp.gravity = Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
         if (grid.isVerticalBarLayout()) {
-            lp.leftMargin = padding.left + grid.workspaceCellPaddingXPx;
-            lp.rightMargin = padding.right + grid.workspaceCellPaddingXPx;
-            lp.bottomMargin = padding.bottom;
+            // Adjust right/left margin based on orientation
+            if (grid.isSeascape()) {
+                lp.rightMargin = padding.right;
+            } else {
+                lp.leftMargin = padding.left;
+            }
+
+            // Get "safe" drawable inset to not overlap gesture pill
+            int safeBottomInset;
+            WindowInsets rootInsets = mLauncher.getWindow().getDecorView().getRootWindowInsets();
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+                safeBottomInset = rootInsets.getInsetsIgnoringVisibility(WindowInsets.Type.systemBars()).bottom;
+            } else {
+                safeBottomInset = rootInsets.getStableInsetBottom();
+            }
+            lp.bottomMargin = safeBottomInset;
         } else {
-            lp.leftMargin = lp.rightMargin = 0;
-            lp.gravity = Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
             lp.bottomMargin = grid.hotseatBarSizePx;
         }
         mPageIndicator.setLayoutParams(lp);
