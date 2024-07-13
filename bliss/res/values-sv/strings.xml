@@ -29,4 +29,5 @@
     <string name="widget_no_resize">Det går inte att ändra storleken på denna gränssnittskomponent</string>
     <string name="remove_widgets">Ta bort gränssnittskomponent</string>
     <string name="show_notification_count">Visa antal aviseringar</string>
+    <string name="add_to_widget_Screen">Lägg till på -1 skärm</string>
 </resources>
