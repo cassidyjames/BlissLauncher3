@@ -288,8 +288,6 @@ public class SettingsActivity extends FragmentActivity
                     if (info.isTablet(info.realBounds)) {
                         // Launcher supports rotation by default. No need to show this setting.
                         return false;
-                    } else {
-                        preference.setVisible(false);
                     }
                     // Initialize the UI once
                     preference.setDefaultValue(RotationHelper.getAllowRotationDefaultValue(info));
