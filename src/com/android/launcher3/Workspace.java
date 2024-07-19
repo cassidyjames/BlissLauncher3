@@ -1366,10 +1366,10 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         }
     }
 
+    @SuppressLint("NewApi")
     private void firstPageItemHideHotseat() {
         final int index = mScreenOrder.indexOf(FIRST_SCREEN_ID);
-        final int scrollDelta = getScrollX() - getScrollForPage(index) -
-                getLayoutTransitionOffsetForPage(index);
+        final int scrollDelta = getScrollX() - getScrollForPage(index);
         float scrollRange = getScrollForPage(index + 1) - getScrollForPage(index);
 
         if (scrollRange == 0)
@@ -1380,12 +1380,25 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         if (progress < 0)
             return;
 
-        int dockHeight = getHotseat().getHeight() + getPageIndicator().getHeight();
+        boolean isVerticalBar = mLauncher.getDeviceProfile().isVerticalBarLayout();
+        // Dock translation in vertical-bar does not depend on indicator and vice versa
+        int dockHeight = getHotseat().getHeight() + (isVerticalBar ? 0 : getPageIndicator().getHeight());
         float dockTranslationY = progress * dockHeight;
 
         getHotseat().setForcedTranslationY(dockTranslationY);
-        ((PageIndicatorDots) getPageIndicator()).setForcedTranslationY(dockTranslationY);
-
+        if (isVerticalBar) {
+            // Initialize with safe height to completely hide indicator (2 * indicator height)
+            int safeBottomInset = getPageIndicator().getHeight();
+            WindowInsets rootInsets = mLauncher.getWindow().getDecorView().getRootWindowInsets();
+            // rootInsets may be null in case launcher restarts and view hasn't yet been inflated
+            if (rootInsets != null) {
+                safeBottomInset = rootInsets.getInsetsIgnoringVisibility(WindowInsets.Type.systemBars()).bottom;
+            }
+            float pageIndicatorTranslationY = progress * (getPageIndicator().getHeight() + safeBottomInset);
+            ((PageIndicatorDots) getPageIndicator()).setForcedTranslationY(pageIndicatorTranslationY);
+        } else {
+            ((PageIndicatorDots) getPageIndicator()).setForcedTranslationY(dockTranslationY);
+        }
         mLauncher.mBlurLayer.setAlpha(progress);
     }
 
