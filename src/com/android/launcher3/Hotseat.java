@@ -19,6 +19,7 @@ package com.android.launcher3;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Rect;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -197,6 +198,11 @@ public class Hotseat extends CellLayout implements Insettable, OffsetParent {
         int bottom = b - t - dp.getQsbOffsetY();
         int top = bottom - dp.hotseatQsbHeight;
         mQsb.layout(left, top, right, bottom);
+
+        // Setting name is hardcoded here to prevent recompilation of
+        // framework jar for studio build
+        Settings.Secure.putInt(getContext().getContentResolver(),
+                "launcher_dock_width", mActivity.getDeviceProfile().isVerticalBarLayout() ? getWidth() : 0);
     }
 
     /**
