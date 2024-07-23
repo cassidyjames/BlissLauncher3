@@ -232,6 +232,13 @@ tasks.register('unzipJar', Copy.class) {
     exclude "META-INF/**"
     exclude "okio/**"
     exclude "org/**"
+    exclude "_COROUTINE/**"
+}
+
+tasks.register('makeReleaseJar', Jar.class) {
+    archiveFileName = 'Launcher3QuickStepLib.jar'
+    from("$buildDir/libs/classes")
+    destinationDirectory = file('prebuilts')
 }
 
 dependencies {
