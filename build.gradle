@@ -165,6 +165,14 @@ android {
             minifyEnabled false
             signingConfig signingConfigs.platformConfig
         }
+
+        release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.debugConfig
+        }
+
     }
 
     flavorDimensions.addAll("app", "recents")
@@ -197,13 +205,6 @@ android {
         configureEach {
             resValue("string", "quickstep_component", "${applicationId}/com.android.launcher3.uioverrides.QuickstepLauncher")
             resValue("string", "launcher_component", "${applicationId}/com.android.launcher3.Launcher")
-        }
-    }
-
-    // Disable release builds for now
-    variantFilter { variant ->
-        if (variant.buildType.name.endsWith('release')) {
-            variant.setIgnore(true)
         }
     }
 
