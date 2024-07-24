@@ -1,5 +1,28 @@
-include ':IconLoader'
-project(':IconLoader').projectDir = new File(rootDir, 'iconloaderlib')
+pluginManagement {
+    repositories {
+        google()
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
 
-include ':SharedLibWrapper'
-project(':SharedLibWrapper').projectDir = new File(rootDir, 'SharedLibWrapper')
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
+    repositories {
+        google()
+        mavenCentral()
+        maven { url "https://gitlab.e.foundation/api/v4/projects/1391/packages/maven" }
+        maven { url "https://gitlab.e.foundation/api/v4/projects/1272/packages/maven" }
+    }
+}
+
+include ':animationlib'
+project(':animationlib').projectDir = new File("$rootDir/libs_systemui", 'animationlib')
+
+include ':IconLoader'
+project(':IconLoader').projectDir = new File("$rootDir/libs_systemui", 'iconloaderlib')
+
+include ':SearchUiLib'
+project(':SearchUiLib').projectDir = new File("$rootDir/libs_systemui", 'searchuilib')
+
+rootProject.name = "BlissLauncher3"
