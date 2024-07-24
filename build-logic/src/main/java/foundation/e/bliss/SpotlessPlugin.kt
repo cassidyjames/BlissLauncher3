@@ -1,5 +1,5 @@
 /*
- * Copyright © MURENA SAS 2023.
+ * Copyright © MURENA SAS 2024.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
  * which accompanies this distribution, and is available at
@@ -19,7 +19,7 @@ import org.gradle.kotlin.dsl.getByType
 class SpotlessPlugin : Plugin<Project> {
 
     override fun apply(project: Project) {
-        val licenseFile = File("${project.rootDir}/bliss/LICENSE.txt")
+        val licenseFile = File("${project.rootDir}/bliss/HEADER")
 
         project.pluginManager.apply(SpotlessPlugin::class)
         project.extensions.getByType<SpotlessExtension>().run {
