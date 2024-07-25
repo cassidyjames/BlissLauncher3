@@ -1381,13 +1381,13 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
             return;
 
         boolean isVerticalBar = mLauncher.getDeviceProfile().isVerticalBarLayout();
-        // Dock translation in vertical-bar does not depend on indicator and vice versa
-        int dockHeight = getHotseat().getHeight() + (isVerticalBar ? 0 : getPageIndicator().getHeight());
-        float dockTranslationY = progress * dockHeight;
-
-        getHotseat().setForcedTranslationY(dockTranslationY);
         if (isVerticalBar) {
-            // Initialize with safe height to completely hide indicator (2 * indicator height)
+            int dockWidth = getHotseat().getWidth();
+            float dockTranslationX = (mLauncher.getDeviceProfile().isSeascape() ? -1 : 1) *
+                    progress * dockWidth;
+            getHotseat().setForcedTranslationXY(dockTranslationX, 0);
+
+            // Initialize with safe height to completely hide indicator
             int safeBottomInset = getPageIndicator().getHeight();
             WindowInsets rootInsets = mLauncher.getWindow().getDecorView().getRootWindowInsets();
             // rootInsets may be null in case launcher restarts and view hasn't yet been inflated
@@ -1397,6 +1397,9 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
             float pageIndicatorTranslationY = progress * (getPageIndicator().getHeight() + safeBottomInset);
             ((PageIndicatorDots) getPageIndicator()).setForcedTranslationY(pageIndicatorTranslationY);
         } else {
+            int dockHeight = getHotseat().getHeight() + getPageIndicator().getHeight();
+            float dockTranslationY = progress * dockHeight;
+            getHotseat().setForcedTranslationXY(0, dockTranslationY);
             ((PageIndicatorDots) getPageIndicator()).setForcedTranslationY(dockTranslationY);
         }
         mLauncher.mBlurLayer.setAlpha(progress);
@@ -1492,14 +1495,19 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
             if (currentPage == FIRST_SCREEN_ID) {
                 Hotseat hotseat = getHotseat();
                 int height = hotseat.getHeight() + getPageIndicator().getHeight();
-                if (hotseat.getTranslationY() >= 0) {
-                    hotseat.setForcedTranslationY(height);
+                boolean isVerticalBar = mLauncher.getDeviceProfile().isVerticalBarLayout();
+                if (isVerticalBar) {
+                    boolean isSeascape = mLauncher.getDeviceProfile().isSeascape();
+                    hotseat.setForcedTranslationXY((isSeascape ? -1 : 1) * hotseat.getWidth(), 0);
+                } else {
+                    hotseat.setForcedTranslationXY(0, hotseat.getHeight());
                 }
 
                 PageIndicatorDots pageIndicatorDots = (PageIndicatorDots) getPageIndicator();
                 if (pageIndicatorDots.getTranslationY() >= 0) {
                     pageIndicatorDots.setForcedTranslationY(height);
                 }
+
 
                 mLauncher.mBlurLayer.setAlpha(1);
                 getWindowInsetsController().hide(WindowInsetsCompat.Type.statusBars());

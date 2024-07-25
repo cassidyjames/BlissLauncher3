@@ -234,7 +234,9 @@ public class Hotseat extends CellLayout implements Insettable, OffsetParent {
         return mWorkspace;
     }
 
-    public void setForcedTranslationY(float translationY){
+    // To reduce notifyOffsetChanged() calls
+    public void setForcedTranslationXY(float translationX, float translationY){
+        super.setTranslationX(translationX);
         super.setTranslationY(translationY);
         offsetParentDelegate.notifyOffsetChanged();
     }
