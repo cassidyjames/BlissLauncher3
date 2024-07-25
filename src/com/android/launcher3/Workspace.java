@@ -1381,6 +1381,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
             return;
 
         boolean isVerticalBar = mLauncher.getDeviceProfile().isVerticalBarLayout();
+        getHotseat().setBlurAlpha((int) ((1 - (progress * 2)) * 255));
         if (isVerticalBar) {
             int dockWidth = getHotseat().getWidth();
             float dockTranslationX = (mLauncher.getDeviceProfile().isSeascape() ? -1 : 1) *
@@ -1390,6 +1391,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
             // Initialize with safe height to completely hide indicator
             int safeBottomInset = getPageIndicator().getHeight();
             WindowInsets rootInsets = mLauncher.getWindow().getDecorView().getRootWindowInsets();
+
             // rootInsets may be null in case launcher restarts and view hasn't yet been inflated
             if (rootInsets != null) {
                 safeBottomInset = rootInsets.getInsetsIgnoringVisibility(WindowInsets.Type.systemBars()).bottom;

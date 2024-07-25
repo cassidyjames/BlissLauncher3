@@ -154,6 +154,15 @@ public class Hotseat extends CellLayout implements Insettable, OffsetParent {
         super.onDraw(canvas);
     }
 
+    public void setBlurAlpha(int alpha) {
+        if (alpha > 255) {
+            alpha = 255;
+        } else if (alpha < 0) {
+            alpha = 0;
+        }
+        mBlurDelegate.setBlurAlpha(alpha);
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         // See comment in #onInterceptTouchEvent
