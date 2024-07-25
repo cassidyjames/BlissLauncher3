@@ -3304,10 +3304,10 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
                         (vacantCell[1] == lastCellOccupied[1] && vacantCell[0] < lastCellOccupied[0])) &&
                 (vacantCell[0] != -1 && vacantCell[1] != -1) &&
                 !cellLayout.isOccupied(vacantCell[0], vacantCell[1])) {
-            postDelayed(() -> {
+            post(() -> {
                 cellLayout.reArrangeIcons(lastCellOccupied[0], lastCellOccupied[1]);
                 needCellCleanup(cellLayout);
-            }, PreviewItemManager.INITIAL_ITEM_ANIMATION_DURATION);
+            });
         }
     }
 
