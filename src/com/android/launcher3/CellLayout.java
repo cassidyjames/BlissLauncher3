@@ -114,7 +114,8 @@ public class CellLayout extends ViewGroup {
     // These are temporary variables to prevent having to allocate a new object just to
     // return an (x, y) value from helper functions. Do NOT use them to maintain other state.
     @Thunk final int[] mTmpPoint = new int[2];
-    @Thunk final int[] mTempLocation = new int[2];
+    @Thunk
+    public final int[] mTempLocation = new int[2];
 
     @Thunk final Rect mTempOnDrawCellToRect = new Rect();
     final PointF mTmpPointF = new PointF();
