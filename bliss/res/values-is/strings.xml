@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright Murena SAS 2024
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  --><resources>
+    <string name="maps">Landakort</string>
+    <string name="suggestions">TILLÖGUR</string>
+    <string name="edit">Breyta</string>
+    <string name="min">Lágm</string>
+    <string name="uninstall_app">Viltu taka út þetta forrit?</string>
+    <string name="widget_add">Bæta við</string>
+    <string name="ok">Í lagi</string>
+    <string name="widget_remove">Fjarlægja</string>
+    <string name="cancel">Hætta við</string>
+    <string name="search">Leita</string>
+    <string name="max">Hám</string>
+    <string name="untitled_folder">Ónefnt</string>
+    <string name="widget_no_resize">Get ekki breytt stærð þessa viðmótshluta</string>
+    <string name="remove_widgets">Fjarlægja viðmótshluta</string>
+    <string name="show_notification_count">Birta fjölda tilkynninga</string>
+    <string name="add_to_widget_Screen">Bæta við skjá -1</string>
+</resources>

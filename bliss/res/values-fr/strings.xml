@@ -13,22 +13,19 @@
   ~
   ~ You should have received a copy of the GNU General Public License
   ~  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-  -->
-<resources>
-    <string name="edit">Edit</string>
-    <string name="search">Search</string>
+  --><resources>
+    <string name="edit">Modifier</string>
+    <string name="search">Rechercher</string>
+    <string name="cancel">Annuler</string>
+    <string name="untitled_folder">Sans titre</string>
     <string name="suggestions">SUGGESTIONS</string>
-    <string name="maps">Maps</string>
     <string name="ok">OK</string>
-    <string name="cancel">Cancel</string>
-    <string name="uninstall_app">Do you want to uninstall this app?</string>
-    <string name="untitled_folder">Untitled</string>
+    <string name="uninstall_app">Voulez-vous désinstaller cette application ?</string>
     <string name="max">Max</string>
     <string name="min">Min</string>
-    <string name="widget_no_resize">Cannot resize this widget</string>
-    <string name="widget_add">Add</string>
-    <string name="widget_remove">Remove</string>
-    <string name="remove_widgets">Remove Widgets</string>
-    <string name="show_notification_count">Show notification count</string>
-    <string name="add_to_widget_Screen">Add to -1 screen</string>
+    <string name="widget_add">Ajouter</string>
+    <string name="widget_remove">Enlever</string>
+    <string name="widget_no_resize">Ce widget ne peut pas être redimensionné</string>
+    <string name="remove_widgets">Suppression de widgets</string>
+    <string name="show_notification_count">Afficher le nombre de notifications</string>
 </resources>

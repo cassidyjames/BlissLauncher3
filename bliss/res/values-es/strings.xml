@@ -13,22 +13,20 @@
   ~
   ~ You should have received a copy of the GNU General Public License
   ~  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-  -->
-<resources>
-    <string name="edit">Edit</string>
-    <string name="search">Search</string>
-    <string name="suggestions">SUGGESTIONS</string>
-    <string name="maps">Maps</string>
+  --><resources>
+    <string name="edit">Editar</string>
+    <string name="search">Búsqueda</string>
+    <string name="suggestions">Sugerencias</string>
+    <string name="cancel">Cancelar</string>
+    <string name="untitled_folder">Sin título</string>
+    <string name="widget_add">Agregar</string>
+    <string name="widget_remove">Remover</string>
+    <string name="maps">Navegación</string>
     <string name="ok">OK</string>
-    <string name="cancel">Cancel</string>
-    <string name="uninstall_app">Do you want to uninstall this app?</string>
-    <string name="untitled_folder">Untitled</string>
+    <string name="uninstall_app">¿Deseas remover esta aplicación?</string>
     <string name="max">Max</string>
     <string name="min">Min</string>
-    <string name="widget_no_resize">Cannot resize this widget</string>
-    <string name="widget_add">Add</string>
-    <string name="widget_remove">Remove</string>
-    <string name="remove_widgets">Remove Widgets</string>
-    <string name="show_notification_count">Show notification count</string>
-    <string name="add_to_widget_Screen">Add to -1 screen</string>
+    <string name="remove_widgets">Remover widgets</string>
+    <string name="show_notification_count">Mostrar recuento de notificaciones</string>
+    <string name="widget_no_resize">No se puede redimensionar este widget</string>
 </resources>
