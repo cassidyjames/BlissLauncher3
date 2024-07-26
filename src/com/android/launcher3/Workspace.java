@@ -2805,12 +2805,12 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
             // dragging to the left / right, respectively.
             if (((pageIndex < nextPage) && !mIsRtl) || (pageIndex > nextPage && mIsRtl)) {
                 touchX = Math.min(d.x, centerX);
-                if (MultiModeController.isSingleLayerMode()) {
+                if (FeatureFlags.SHOW_HOME_GARDENING.get()) {
                     touchX -= iconOffset;
                 }
             } else {
                 touchX = Math.max(d.x, centerX);
-                if (MultiModeController.isSingleLayerMode()) {
+                if (FeatureFlags.SHOW_HOME_GARDENING.get()) {
                     touchX += iconOffset;
                 }
             }

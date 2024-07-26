@@ -453,6 +453,18 @@ public final class FeatureFlags {
                 com.android.wm.shell.Flags.enableSplitContextual();
     }
 
+    public static final class SHOW_HOME_GARDENING {
+        public static boolean get() {
+            if (MultiModeController.isSingleLayerMode()) {
+                return  true;
+            } else {
+                return getDebugFlag(270395183,
+                        "SHOW_HOME_GARDENING", DISABLED,
+                        "Show the new home gardening mode").get();
+            }
+        }
+    }
+
     public static final BooleanFlag ENABLE_TRACKPAD_GESTURE = getDebugFlag(271010401,
             "ENABLE_TRACKPAD_GESTURE", ENABLED, "Enables trackpad gesture.");
 
