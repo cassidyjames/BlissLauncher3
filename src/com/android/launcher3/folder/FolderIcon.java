@@ -663,12 +663,15 @@ public class FolderIcon extends FrameLayout implements FolderListener, IconLabel
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         if (MultiModeController.isSingleLayerMode()) {
-            Paint.FontMetrics fm = mFolderName.getPaint().getFontMetrics();
-            int cellHeightPx = mFolderName.getIconSize() + mFolderName.getCompoundDrawablePadding() +
-                    (int) Math.ceil(fm.bottom - fm.top);
-            int height = MeasureSpec.getSize(heightMeasureSpec);
-            setPadding(getPaddingLeft(), (height - cellHeightPx) / 2, getPaddingRight(),
-                    getPaddingBottom());
+            boolean shouldCenterIcon = mActivity.getDeviceProfile().iconCenterVertically;
+            if (shouldCenterIcon) {
+                int iconSize = mActivity.getDeviceProfile().iconSizePx;
+                Paint.FontMetrics fm = mFolderName.getPaint().getFontMetrics();
+                int cellHeightPx = iconSize + mFolderName.getCompoundDrawablePadding()
+                        + (int) Math.ceil(fm.bottom - fm.top);
+                setPadding(getPaddingLeft(), (MeasureSpec.getSize(heightMeasureSpec)
+                        - cellHeightPx) / 2, getPaddingRight(), getPaddingBottom());
+            }
         }
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
