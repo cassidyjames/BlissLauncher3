@@ -107,7 +107,6 @@ public class StatusBarTouchController implements TouchController {
                 setWindowSlippery(true);
                 return true;
             }
-            mDownEvents.clear();
             mIsTrackpadReverseScroll = !mLauncher.isNaturalScrollingEnabled()
                     && isTrackpadScroll(ev);
         } else if (ev.getActionMasked() == MotionEvent.ACTION_POINTER_DOWN) {
