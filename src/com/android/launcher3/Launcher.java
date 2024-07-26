@@ -704,7 +704,7 @@ public class Launcher extends StatefulActivity<LauncherState>
 
         // #4 Cancel Wobble
         if (getWorkspace().isWobbling()) {
-            return (OnBackAnimationCallback) getWorkspace();
+            getWorkspace().wobbleLayouts(false);
         }
 
         // #5 state handler
