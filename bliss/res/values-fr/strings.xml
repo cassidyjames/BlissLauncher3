@@ -25,4 +25,7 @@
     <string name="widget_remove">Enlever</string>
     <string name="suggestions">SUGGESTIONS</string>
     <string name="show_notification_count">Afficher le nombre de notifications</string>
+    <string name="max">Max</string>
+    <string name="min">Min</string>
+    <string name="ok">OK</string>
 </resources>
