@@ -27,6 +27,7 @@ import static com.android.launcher3.config.FeatureFlags.ENABLE_MULTI_DISPLAY_PAR
 import static com.android.launcher3.folder.ClippedFolderIconLayoutRule.ICON_OVERLAP_FACTOR;
 import static com.android.launcher3.icons.GraphicsUtils.getShapePath;
 import static com.android.launcher3.testing.shared.ResourceUtils.INVALID_RESOURCE_HANDLE;
+import static com.android.launcher3.testing.shared.ResourceUtils.NAVBAR_HEIGHT;
 import static com.android.launcher3.testing.shared.ResourceUtils.pxFromDp;
 import static com.android.launcher3.testing.shared.ResourceUtils.roundPxValueFromFloat;
 
@@ -54,6 +55,7 @@ import com.android.launcher3.graphics.IconShape;
 import com.android.launcher3.icons.DotRenderer;
 import com.android.launcher3.icons.IconNormalizer;
 import com.android.launcher3.model.data.ItemInfo;
+import com.android.launcher3.testing.shared.ResourceUtils;
 import com.android.launcher3.uioverrides.ApiWrapper;
 import com.android.launcher3.util.DisplayController;
 import com.android.launcher3.util.DisplayController.Info;
@@ -280,7 +282,7 @@ public class DeviceProfile {
 
     // DragController
     public int flingToDeleteThresholdVelocity;
-    private final Context context;
+    private Context context;
 
     private final static boolean FORCE_SHOW_LABELS = false;
 
@@ -514,6 +516,7 @@ public class DeviceProfile {
                 res.getDimensionPixelSize(R.dimen.dynamic_grid_hotseat_side_padding);
         // Add a bit of space between nav bar and hotseat in vertical bar layout.
         hotseatBarSidePaddingStartPx = isVerticalBarLayout() ? workspacePageIndicatorHeight : 0;
+        this.context = context;
         updateHotseatSizes(pxFromDp(inv.iconSize[INDEX_DEFAULT], mMetrics));
         if (areNavButtonsInline && !isPhone) {
             inlineNavButtonsEndSpacingPx =
@@ -684,6 +687,9 @@ public class DeviceProfile {
                     + hotseatQsbSpace
                     + hotseatQsbVisualHeight
                     + hotseatBarBottomSpacePx;
+        }
+        if (isPhoneUpsideDown()) {
+            hotseatBarSizePx += getNavbarHeight();
         }
     }
 
@@ -1459,12 +1465,16 @@ public class DeviceProfile {
     private int getHotseatBarBottomPadding() {
         WindowManagerProxy wm = WindowManagerProxy.newInstance(context);
         boolean isFullyGesture = wm.getNavigationMode(context) == NavigationMode.NO_BUTTON;
-
         if (isTaskbarPresent) { // QSB on top or inline
             return hotseatBarBottomSpacePx - (Math.abs(hotseatCellHeightPx - iconSizePx) / 2);
         } else {
             int size = hotseatBarSizePx - hotseatCellHeightPx;
-            return isFullyGesture ? size / 4 : Math.round(size / 1.5f);
+            int navPadding = 0;
+            if (isPhoneUpsideDown()) {
+                navPadding = Math.round(getNavbarHeight() / (isFullyGesture ? 2f : 4f));
+            }
+            return (isFullyGesture ? size / 4 : Math.round(size / 1.5f))
+                    + navPadding;
         }
     }
 
@@ -1562,6 +1572,17 @@ public class DeviceProfile {
             }
         }
         return false;
+    }
+
+    private int getNavbarHeight() {
+        if (context == null) return 0;
+        return ResourceUtils.getDimenByName(NAVBAR_HEIGHT, context.getResources(), 0);
+    }
+
+    private boolean isPhoneUpsideDown() {
+        boolean isUpsideDown = DisplayController.INSTANCE.get(context)
+                .getInfo().rotation == Surface.ROTATION_180;
+        return isPhone && isUpsideDown;
     }
 
     public boolean isSeascape() {
