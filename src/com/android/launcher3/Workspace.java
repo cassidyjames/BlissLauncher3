@@ -48,7 +48,6 @@ import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Message;
@@ -67,8 +66,6 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.RelativeLayout;
-import android.widget.ScrollView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -93,7 +90,6 @@ import com.android.launcher3.dragndrop.SpringLoadedDragController;
 import com.android.launcher3.folder.Folder;
 import com.android.launcher3.folder.FolderIcon;
 import com.android.launcher3.folder.PreviewBackground;
-import com.android.launcher3.folder.PreviewItemManager;
 import com.android.launcher3.graphics.DragPreviewProvider;
 import com.android.launcher3.icons.BitmapRenderer;
 import com.android.launcher3.icons.FastBitmapDrawable;
@@ -125,7 +121,6 @@ import com.android.launcher3.util.RunnableList;
 import com.android.launcher3.util.Thunk;
 import com.android.launcher3.util.WallpaperOffsetInterpolator;
 import com.android.launcher3.util.window.WindowManagerProxy;
-import com.android.launcher3.views.FloatingIconView;
 import com.android.launcher3.widget.LauncherAppWidgetHostView;
 import com.android.launcher3.widget.LauncherWidgetHolder;
 import com.android.launcher3.widget.LauncherWidgetHolder.ProviderChangedListener;
@@ -316,6 +311,9 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
     private Animation mReverseWobbleAnimation;
 
     private Alarm wobbleExpireAlarm = new Alarm();
+
+    private int mOrientation;
+
     public static final int WOBBLE_EXPIRATION_TIMEOUT = 25000;
 
     /**
@@ -339,6 +337,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         super(context, attrs, defStyle);
 
         mLauncher = Launcher.getLauncher(context);
+        setOrientation(mLauncher);
         mStateTransitionAnimation = new WorkspaceStateTransitionAnimation(mLauncher, this);
         mWallpaperManager = WallpaperManager.getInstance(context);
         mAllAppsIconSize = mLauncher.getDeviceProfile().allAppsIconSizePx;
@@ -444,10 +443,10 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
     private void updateCellLayoutPadding() {
         DeviceProfile grid = mLauncher.getDeviceProfile();
         Rect padding = grid.cellLayoutPaddingPx;
-        int orientation = WindowManagerProxy.INSTANCE.get(mLauncher).getRotation(mLauncher);
-        int hotseatLeftCorrection = (grid.isVerticalBarLayout() && orientation == Surface.ROTATION_270)
+        setOrientation(mLauncher);
+        int hotseatLeftCorrection = (grid.isVerticalBarLayout() && mOrientation == Surface.ROTATION_270)
                 ? grid.hotseatBarSizePx : 0;
-        int hotseatRightCorrection = (grid.isVerticalBarLayout() && orientation == Surface.ROTATION_90)
+        int hotseatRightCorrection = (grid.isVerticalBarLayout() && mOrientation == Surface.ROTATION_90)
                 ? grid.hotseatBarSizePx : 0;
 
         mWorkspaceScreens.forEach(s -> {
@@ -467,6 +466,16 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
             }
             s.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
         });
+    }
+
+    private void setOrientation(Context context) {
+        int newOrientation = WindowManagerProxy.INSTANCE.get(context).getRotation(context);
+        if (newOrientation != mOrientation) {
+            mOrientation = newOrientation;
+            if (isWobbling) {
+                wobbleLayouts(false);
+            }
+        }
     }
 
     private void updateWorkspaceWidgetsSizes() {
