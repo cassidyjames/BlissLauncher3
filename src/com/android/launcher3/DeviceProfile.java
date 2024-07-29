@@ -28,6 +28,7 @@ import static com.android.launcher3.folder.ClippedFolderIconLayoutRule.ICON_OVER
 import static com.android.launcher3.icons.GraphicsUtils.getShapePath;
 import static com.android.launcher3.testing.shared.ResourceUtils.INVALID_RESOURCE_HANDLE;
 import static com.android.launcher3.testing.shared.ResourceUtils.NAVBAR_BOTTOM_GESTURE_SIZE;
+import static com.android.launcher3.testing.shared.ResourceUtils.NAVBAR_HEIGHT;
 import static com.android.launcher3.testing.shared.ResourceUtils.pxFromDp;
 import static com.android.launcher3.testing.shared.ResourceUtils.roundPxValueFromFloat;
 
@@ -1601,6 +1602,15 @@ public class DeviceProfile {
                 context.getContentResolver(), LineageSettings.System.NAVIGATION_BAR_HINT, 0) != 1;
         if (!noHint) return 0;
         return ResourceUtils.getDimenByName(NAVBAR_BOTTOM_GESTURE_SIZE, context.getResources(), 0);
+    }
+
+    public int getExtraStatusBarPadding() {
+        boolean isFullyGesture = mInfo.navigationMode == NavigationMode.NO_BUTTON;
+        if (!isFullyGesture) {
+            return ResourceUtils.getDimenByName(NAVBAR_HEIGHT, context.getResources(), 0);
+        }
+        // Fully gesture is always at the bottom
+        return 0;
     }
 
     private String pxToDpStr(String name, float value) {
