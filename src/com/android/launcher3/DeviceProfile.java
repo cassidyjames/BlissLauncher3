@@ -1425,13 +1425,19 @@ public class DeviceProfile {
             float hotseatCellWidth = (float) widthPx / numShownHotseatIcons;
             int hotseatAdjustment = Math.round((workspaceCellWidth - hotseatCellWidth) / 2);
             int hotseatIconMargin = Math.abs(hotseatCellHeightPx - iconSizePx);
+            // Values obtained by manual validation, independent of dpi and display scale
+            double marginScaleFactor = mInfo.navigationMode == NavigationMode.NO_BUTTON
+                    ? 3.25
+                    : 2.75;
             hotseatBarPadding.set(
                     hotseatAdjustment + workspacePadding.left + cellLayoutPaddingPx.left
                             + mInsets.left,
                     0,
                     hotseatAdjustment + workspacePadding.right + cellLayoutPaddingPx.right
                             + mInsets.right,
-                    getHotseatBarBottomPadding() - (2 * hotseatIconMargin)
+                    getHotseatBarBottomPadding()
+                            - (int) (marginScaleFactor * hotseatIconMargin)
+
             );
         }
         return hotseatBarPadding;
