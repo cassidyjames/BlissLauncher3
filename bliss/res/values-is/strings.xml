@@ -29,5 +29,5 @@
     <string name="widget_no_resize">Get ekki breytt stærð þessa viðmótshluta</string>
     <string name="remove_widgets">Fjarlægja viðmótshluta</string>
     <string name="show_notification_count">Birta fjölda tilkynninga</string>
-    <string name="add_to_widget_Screen">Bæta við skjá -1</string>
+    <string name="add_to_widget_Screen">Bæta á skjá -1</string>
 </resources>
