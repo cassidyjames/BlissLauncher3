@@ -1425,9 +1425,12 @@ public class DeviceProfile {
             float hotseatCellWidth = (float) widthPx / numShownHotseatIcons;
             int hotseatAdjustment = Math.round((workspaceCellWidth - hotseatCellWidth) / 2);
             int hotseatIconMargin = Math.abs(hotseatCellHeightPx - iconSizePx);
+            boolean isFullyGesture = mInfo.navigationMode == NavigationMode.NO_BUTTON;
+            boolean noHint = isFullyGesture && LineageSettings.System.getInt(
+                    context.getContentResolver(), LineageSettings.System.NAVIGATION_BAR_HINT, 0) != 1;
             // Values obtained by manual validation, independent of dpi and display scale
-            double marginScaleFactor = mInfo.navigationMode == NavigationMode.NO_BUTTON
-                    ? 3.25
+            double marginScaleFactor = isFullyGesture
+                    ? (noHint ? 2.5 : 3.25)
                     : 2.75;
             hotseatBarPadding.set(
                     hotseatAdjustment + workspacePadding.left + cellLayoutPaddingPx.left
@@ -1602,7 +1605,7 @@ public class DeviceProfile {
     }
 
     private int getDeductibleGestureHeight() {
-        if (context == null) return 0;
+        if (isVerticalBarLayout() || context == null) return 0;
         boolean isFullyGesture = mInfo.navigationMode == NavigationMode.NO_BUTTON;
         boolean noHint = isFullyGesture && LineageSettings.System.getInt(
                 context.getContentResolver(), LineageSettings.System.NAVIGATION_BAR_HINT, 0) != 1;
