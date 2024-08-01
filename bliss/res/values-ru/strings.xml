@@ -13,11 +13,21 @@
   ~
   ~ You should have received a copy of the GNU General Public License
   ~  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-  -->
-<resources>
+  --><resources>
     <string name="edit">Редактировать</string>
     <string name="search">Поиск</string>
     <string name="suggestions">Предложения</string>
     <string name="cancel">Отмена</string>
     <string name="untitled_folder">Без названия</string>
+    <string name="ok">ОК</string>
+    <string name="uninstall_app">Вы хотите удалить это приложение?</string>
+    <string name="max">Макс</string>
+    <string name="min">Мин</string>
+    <string name="widget_no_resize">Невозможно изменить размер этого виджета</string>
+    <string name="widget_add">Добавить</string>
+    <string name="widget_remove">Удалить</string>
+    <string name="remove_widgets">Удалить виджеты</string>
+    <string name="add_to_widget_Screen">Добавить на -1 экран</string>
+    <string name="show_notification_count">Показать количество уведомлений</string>
+    <string name="maps">Карты</string>
 </resources>
