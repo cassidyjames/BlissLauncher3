@@ -29,4 +29,5 @@
     <string name="widget_no_resize">Dieses Widget kann nicht in der Größe verändert werden</string>
     <string name="remove_widgets">Widgets entfernen</string>
     <string name="show_notification_count">Benachrichtigungszähler anzeigen</string>
+    <string name="add_to_widget_Screen">Zum -1 Bildschirm hinzufügen</string>
 </resources>
