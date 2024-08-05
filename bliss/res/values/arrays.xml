@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="blacklisted_apps">
+        <item>org.sufficientlysecure.keychain</item>
+        <item>com.google.android.gms</item>
+        <item>foundation.e.pdfviewer</item>
+        <item>com.android.stk</item>
+        <item>foundation.e.blissweather</item>
+    </array>
+
+    <!-- Key | Value string array to force alias -->
+    <string-array name="aliased_apps">
+        <item>com.generalmagic.magicearth</item> <item>@string/maps</item>
+    </string-array>
+
+    <string-array name="blacklisted_widget_options">
+        <item>org.chromium.chrome.browser.quickactionsearchwidget.QuickActionSearchWidgetProvider$QuickActionSearchWidgetProviderDino</item>
+    </string-array>
+</resources>

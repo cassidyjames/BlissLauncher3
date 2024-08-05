@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="derived_app_name" translatable="false">BlissLauncher</string>
+    <string name="launcher_activity_logic_class" translatable="false">foundation.e.bliss.LauncherActivityCachingLogic</string>
+
+    <string-array name="filtered_components">
+        <item>@string/quickstep_component</item>
+        <item>@string/launcher_component</item>
+    </string-array>
+
+    <bool name="default_single_mode">true</bool>
+
+    <integer name="grid_folder_icon_rows">3</integer>
+    <integer name="grid_folder_icon_columns">3</integer>
+    <integer name="grid_folder_app_icon_size_percentage">22</integer>
+</resources>

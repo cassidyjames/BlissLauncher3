@@ -30,6 +30,7 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.view.MotionEvent;
 import android.view.RemoteAnimationTarget;
+import android.view.View;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
@@ -303,6 +304,9 @@ public final class LauncherActivityInterface extends
             om.hideOverlay(false /* animate */);
         } else {
             om.hideOverlay(150);
+        }
+        if (launcher.swipeSearchContainer.getVisibility() == View.VISIBLE) {
+            launcher.hideSwipeSearchContainer();
         }
     }
 

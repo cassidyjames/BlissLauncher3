@@ -23,6 +23,7 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.Gravity;
@@ -32,19 +33,31 @@ import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import com.android.launcher3.folder.Folder;
 
 import com.android.launcher3.util.HorizontalInsettableView;
 import com.android.launcher3.util.MultiTranslateDelegate;
 import com.android.launcher3.views.ActivityContext;
 
+import androidx.annotation.NonNull;
+
+import foundation.e.bliss.blur.BlurViewDelegate;
+import foundation.e.bliss.blur.BlurWallpaperProvider;
+import foundation.e.bliss.blur.OffsetParent;
+import foundation.e.bliss.folder.GridFolder;
+
 /**
  * View class that represents the bottom row of the home screen.
  */
-public class Hotseat extends CellLayout implements Insettable {
+public class Hotseat extends CellLayout implements Insettable, OffsetParent {
 
     // Ratio of empty space, qsb should take up to appear visually centered.
     public static final float QSB_CENTER_FACTOR = .325f;
     private static final int BUBBLE_BAR_ADJUSTMENT_ANIMATION_DURATION_MS = 250;
+
+    private final OffsetParent.OffsetParentDelegate offsetParentDelegate =
+            new OffsetParent.OffsetParentDelegate();
+    public final BlurViewDelegate mBlurDelegate;
 
     @ViewDebug.ExportedProperty(category = "launcher")
     private boolean mHasVerticalHotseat;
@@ -52,6 +65,7 @@ public class Hotseat extends CellLayout implements Insettable {
     private boolean mSendTouchToWorkspace;
 
     private final View mQsb;
+    public boolean drawBlur;
 
     public Hotseat(Context context) {
         this(context, null);
@@ -65,6 +79,9 @@ public class Hotseat extends CellLayout implements Insettable {
         super(context, attrs, defStyle);
 
         mQsb = LayoutInflater.from(context).inflate(R.layout.search_container_hotseat, this, false);
+        mBlurDelegate = new BlurViewDelegate(this, BlurWallpaperProvider.blurConfigDock, attrs);
+        drawBlur = true;
+        setWillNotDraw(false);
         addView(mQsb);
     }
 
@@ -224,6 +241,14 @@ public class Hotseat extends CellLayout implements Insettable {
     }
 
     @Override
+    protected void onDraw(Canvas canvas) {
+        if (mBlurDelegate != null && drawBlur) {
+            mBlurDelegate.draw(canvas);
+        }
+        super.onDraw(canvas);
+    }
+
+    @Override
     public boolean onTouchEvent(MotionEvent event) {
         // See comment in #onInterceptTouchEvent
         if (mSendTouchToWorkspace) {
@@ -294,4 +319,61 @@ public class Hotseat extends CellLayout implements Insettable {
         return mQsb;
     }
 
+    public Workspace<?> getWorkspace() {
+        return mWorkspace;
+    }
+
+    public void setForcedTranslationY(float translationY){
+        super.setTranslationY(translationY);
+        offsetParentDelegate.notifyOffsetChanged();
+    }
+
+    @Override
+    public float getOffsetX() {
+        return getTranslationX();
+    }
+
+    @Override
+    public float getOffsetY() {
+        return getTranslationY();
+    }
+
+    @Override
+    public void setTranslationX(float translationX) {
+        super.setTranslationX(translationX);
+        offsetParentDelegate.notifyOffsetChanged();
+    }
+
+    @Override
+    public void setTranslationY(float translationY) {
+        offsetParentDelegate.notifyOffsetChanged();
+    }
+
+    @Override
+    public boolean getNeedWallpaperScroll() {
+        return true;
+    }
+
+    @Override
+    public void addOnOffsetChangeListener(@NonNull OnOffsetChangeListener listener) {
+        offsetParentDelegate.addOnOffsetChangeListener(listener);
+    }
+
+    @Override
+    public void removeOnOffsetChangeListener(@NonNull OnOffsetChangeListener listener) {
+        offsetParentDelegate.removeOnOffsetChangeListener(listener);
+    }
+
+    @Override
+    public void setAlpha(float alpha) {
+        Folder folder = Folder.getOpen(mActivity);
+        if (folder instanceof GridFolder) {
+            GridFolder gridFolder = (GridFolder) folder;
+            if (gridFolder.isAnimating()) {
+                super.setAlpha(alpha);
+            }
+        } else {
+            super.setAlpha(alpha);
+        }
+    }
 }

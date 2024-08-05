@@ -33,6 +33,7 @@ import com.android.launcher3.states.RotationHelper
 import com.android.launcher3.util.DisplayController
 import com.android.launcher3.util.MainThreadInitializedObject
 import com.android.launcher3.util.Themes
+import foundation.e.bliss.preferences.BlissPrefs
 
 /**
  * Use same context for shared preferences, so that we use a single cached instance
@@ -440,6 +441,19 @@ class LauncherPrefs(private val encryptedContext: Context) {
         @JvmField
         val WIDGETS_EDUCATION_TIP_SEEN = backedUpItem("launcher.widgets_education_tip_seen", false)
 
+        @JvmField
+        val IS_NOTIF_COUNT_ENABLED = ConstantItem(BlissPrefs.PREF_NOTIF_COUNT,
+            isBackedUp = true,
+            defaultValue = true,
+            encryptionType = EncryptionType.DEVICE_PROTECTED)
+
+        @JvmField
+        val IS_SINGLE_LAYER_ENABLED = ConstantItem(BlissPrefs.PREF_SINGLE_LAYER_MODE,
+            isBackedUp = true,
+            defaultValue = true,
+            encryptionType = EncryptionType.DEVICE_PROTECTED)
+
+        @VisibleForTesting
         @JvmStatic
         fun <T> backedUpItem(
             sharedPrefKey: String,

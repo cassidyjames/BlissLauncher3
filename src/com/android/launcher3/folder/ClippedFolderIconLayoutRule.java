@@ -17,11 +17,11 @@ public class ClippedFolderIconLayoutRule {
 
     private float[] mTmpPoint = new float[2];
 
-    private float mAvailableSpace;
+    public float mAvailableSpace;
     private float mRadius;
     private float mIconSize;
-    private boolean mIsRtl;
-    private float mBaselineIconScale;
+    public boolean mIsRtl;
+    public float mBaselineIconScale;
 
     public void init(int availableSpace, float intrinsicIconSize, boolean rtl) {
         mAvailableSpace = availableSpace;
@@ -140,5 +140,9 @@ public class ClippedFolderIconLayoutRule {
 
     public float getIconSize() {
         return mIconSize;
+    }
+
+    public int getMaxNumItemsInPreview() {
+        return  MAX_NUM_ITEMS_IN_PREVIEW;
     }
 }

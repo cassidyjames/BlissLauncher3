@@ -21,7 +21,7 @@ import static com.android.launcher3.Flags.enableLauncherBrMetricsFixed;
 import static com.android.launcher3.LauncherPrefs.IS_FIRST_LOAD_AFTER_RESTORE;
 import static com.android.launcher3.LauncherPrefs.SHOULD_SHOW_SMARTSPACE;
 import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APP_PAIR;
-import static com.android.launcher3.LauncherSettings.Favorites.TABLE_NAME;
+import static com.android.launcher3.LauncherSettings.Favorites.getFavoritesTableName;
 import static com.android.launcher3.config.FeatureFlags.ENABLE_SMARTSPACE_REMOVAL;
 import static com.android.launcher3.config.FeatureFlags.SMARTSPACE_AS_A_WIDGET;
 import static com.android.launcher3.model.BgDataModel.Callbacks.FLAG_HAS_SHORTCUT_PERMISSION;
@@ -107,6 +107,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
+
+import foundation.e.bliss.LauncherAppMonitor;
 
 /**
  * Runnable for the thread that loads the contents of the launcher:
@@ -260,6 +262,8 @@ public class LoaderTask implements Runnable {
             } finally {
                 Trace.endSection();
             }
+            LauncherAppMonitor.getInstanceNoCreate()
+                    .onLoadAllAppsEnd(new ArrayList<>(mBgAllAppsList.data));
             logASplit("loadAllApps");
 
             if (FeatureFlags.CHANGE_MODEL_DELEGATE_LOADING_ORDER.get()) {
@@ -394,7 +398,7 @@ public class LoaderTask implements Runnable {
             mModelDelegate.markActive();
             logASplit("workspaceDelegateItems");
         }
-        mBgDataModel.isFirstPagePinnedItemEnabled = FeatureFlags.QSB_ON_FIRST_SCREEN
+        mBgDataModel.isFirstPagePinnedItemEnabled = FeatureFlags.QSB_ON_FIRST_SCREEN.get()
                 && (!ENABLE_SMARTSPACE_REMOVAL.get() || LauncherPrefs.getPrefs(
                 mApp.getContext()).getBoolean(SMARTSPACE_ON_HOME_SCREEN, true));
     }
@@ -431,7 +435,7 @@ public class LoaderTask implements Runnable {
 
             mShortcutKeyToPinnedShortcuts = new HashMap<>();
             final LoaderCursor c = new LoaderCursor(
-                    dbController.query(TABLE_NAME, null, selection, null, null),
+                    dbController.query(getFavoritesTableName(), null, selection, null, null),
                     mApp, mUserManagerState, mIsRestoreFromBackup ? restoreEventLogger : null);
             final Bundle extras = c.getExtras();
             mDbName = extras == null ? null : extras.getString(ModelDbController.EXTRA_DB_NAME);

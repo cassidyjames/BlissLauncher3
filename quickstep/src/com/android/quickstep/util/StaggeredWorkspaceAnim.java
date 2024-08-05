@@ -77,7 +77,7 @@ public class StaggeredWorkspaceAnim {
 
     public StaggeredWorkspaceAnim(Launcher launcher, float velocity, boolean animateOverviewScrim,
             @Nullable View ignoredView) {
-        this(launcher, velocity, animateOverviewScrim, ignoredView, true);
+        this(launcher, velocity, animateOverviewScrim, ignoredView, false);
     }
 
     public StaggeredWorkspaceAnim(Launcher launcher, float velocity, boolean animateOverviewScrim,

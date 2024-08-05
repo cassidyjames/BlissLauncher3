@@ -40,17 +40,17 @@ public class GridBackupTable {
     }
 
     /**
-     * Creates a new table and populates with copy of Favorites.TABLE_NAME
+     * Creates a new table and populates with copy of Favorites.getFavoritesTableName()
      */
     public void createCustomBackupTable(String tableName) {
         long profileId = UserCache.INSTANCE.get(mContext).getSerialNumberForUser(
                 Process.myUserHandle());
-        copyTable(mDb, Favorites.TABLE_NAME, tableName, profileId);
+        copyTable(mDb, Favorites.getFavoritesTableName(), tableName, profileId);
     }
 
     /**
      *
-     * Restores the contents of a custom table to Favorites.TABLE_NAME
+     * Restores the contents of a custom table to Favorites.getFavoritesTableName()
      */
 
     public void restoreFromCustomBackupTable(String tableName, boolean dropAfterUse) {
@@ -59,7 +59,7 @@ public class GridBackupTable {
         }
         long userSerial = UserCache.INSTANCE.get(mContext).getSerialNumberForUser(
                 Process.myUserHandle());
-        copyTable(mDb, tableName, Favorites.TABLE_NAME, userSerial);
+        copyTable(mDb, tableName, Favorites.getFavoritesTableName(), userSerial);
         if (dropAfterUse) {
             dropTable(mDb, tableName);
         }
@@ -73,3 +73,4 @@ public class GridBackupTable {
         db.execSQL("INSERT INTO " + to + " SELECT * FROM " + from);
     }
 }
+

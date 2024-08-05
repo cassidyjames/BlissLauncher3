@@ -62,6 +62,8 @@ import com.android.launcher3.util.Themes;
 import com.android.launcher3.util.TraceHelper;
 import com.android.launcher3.widget.custom.CustomWidgetManager;
 
+import foundation.e.bliss.LauncherAppMonitor;
+
 public class LauncherAppState implements SafeCloseable {
 
     public static final String ACTION_FORCE_ROLOAD = "force-reload-launcher";
@@ -73,6 +75,7 @@ public class LauncherAppState implements SafeCloseable {
     private final Context mContext;
     private final LauncherModel mModel;
     private final LauncherIconProvider mIconProvider;
+    private final LauncherAppMonitor mAppMonitor;
     private final IconCache mIconCache;
     private final InvariantDeviceProfile mInvariantDeviceProfile;
     private boolean mIsSafeModeEnabled;
@@ -174,6 +177,7 @@ public class LauncherAppState implements SafeCloseable {
         onNotificationSettingsChanged(settingsCache.getValue(NOTIFICATION_BADGING_URI));
         mOnTerminateCallback.add(() ->
                 settingsCache.unregister(NOTIFICATION_BADGING_URI, notificationLister));
+        mAppMonitor.onAppCreated(mContext);
         // Register an observer to notify Launcher about Private Space settings toggle.
         registerPrivateSpaceHideWhenLockListener(settingsCache);
     }
@@ -181,6 +185,7 @@ public class LauncherAppState implements SafeCloseable {
     public LauncherAppState(Context context, @Nullable String iconCacheFileName) {
         mContext = context;
 
+        mAppMonitor = LauncherAppMonitor.getInstanceNoCreate();
         mInvariantDeviceProfile = InvariantDeviceProfile.INSTANCE.get(context);
         mIconProvider = new LauncherIconProvider(context);
         mIconCache = new IconCache(mContext, mInvariantDeviceProfile,

@@ -58,15 +58,10 @@
         launcher:logIdOn="615"
         launcher:logIdOff="616" />
 
-    <SwitchPreference
-        android:defaultValue="true"
-        android:key="pref_enable_minus_one"
-        android:summary="@string/pref_show_google_now_summary"
-        android:title="@string/title_show_google_app" />
-
     <Preference
         android:key="pref_trust_apps"
-        android:title="@string/trust_apps_manager_name" />
+        android:title="@string/trust_apps_manager_name"
+        launcher:isPreferenceVisible="false" />
 
     <androidx.preference.PreferenceScreen
         android:key="pref_suggestions"
@@ -82,12 +77,14 @@
         android:title="@string/pref_themed_icons_title"
         android:summary="@string/pref_themed_icons_summary"
         android:defaultValue="false"
+        launcher:isPreferenceVisible="false"
         android:persistent="true" />
 
     <SwitchPreference
         android:key="pref_desktop_show_labels"
         android:title="@string/desktop_show_labels"
         android:defaultValue="true"
+        launcher:isPreferenceVisible="false"
         android:persistent="true" />
 
     <SwitchPreference
@@ -96,4 +93,16 @@
         android:defaultValue="true"
         android:persistent="true" />
 
+    <SwitchPreference
+        android:defaultValue="@bool/default_single_mode"
+        android:key="pref_single_layer"
+        android:persistent="true"
+        android:title="Enable single layer mode"
+        launcher:isPreferenceVisible="false" />
+
+    <SwitchPreference
+        android:defaultValue="true"
+        android:key="pref_notif_count"
+        android:persistent="true"
+        android:title="@string/show_notification_count" />
 </androidx.preference.PreferenceScreen>

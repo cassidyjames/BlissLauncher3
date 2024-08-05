@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright Murena SAS 2024
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  --><resources>
+    <string name="edit">Bewerken</string>
+    <string name="search">Zoeken</string>
+    <string name="suggestions">Suggesties</string>
+    <string name="cancel">Annuleren</string>
+    <string name="untitled_folder">Geen titel</string>
+    <string name="ok">OK</string>
+    <string name="uninstall_app">Wil je deze app de-installeren?</string>
+    <string name="max">Max</string>
+    <string name="min">Min</string>
+    <string name="widget_no_resize">Kan de grootte van deze widgets niet wijzigen</string>
+    <string name="widget_add">Toevoegen</string>
+    <string name="maps">Kaarten</string>
+    <string name="widget_remove">Verwijderen</string>
+    <string name="remove_widgets">Widgets verwijderen</string>
+    <string name="show_notification_count">Teller voor meldingen weergeven</string>
+</resources>

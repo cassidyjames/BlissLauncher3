@@ -1,0 +1,41 @@
+[versions]
+agp = "8.2.0"
+gradle = "7.3.1"
+kotlin = "1.9.0"
+#noinspection GradleDependency
+spotless = "6.13.0"
+org-jetbrains-kotlin-jvm = "1.9.0"
+window = "1.3.0"
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+android-library = { id = "com.android.library", version.ref = "agp" }
+kotlin = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+google-protobuf = "com.google.protobuf:0.9.1"
+org-jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "org-jetbrains-kotlin-jvm" }
+
+[libraries]
+#noinspection GradleDependency
+androidx-core = "androidx.core:core-ktx:1.12.0"
+androidx-appcompat = "androidx.appcompat:appcompat:1.7.0-rc01"
+androidx-dynamicanimation = "androidx.dynamicanimation:dynamicanimation:1.0.0"
+androidx-recyclerview = "androidx.recyclerview:recyclerview:1.3.1"
+androidx-preference = "androidx.preference:preference-ktx:1.2.0"
+androidx-slice-view = "androidx.slice:slice-view:1.0.0"
+
+airbnb-lottie = "com.airbnb.android:lottie:6.0.1"
+androidx-window = { module = "androidx.window:window", version.ref = "window" }
+build-spotless = { module = "com.diffplug.spotless:spotless-plugin-gradle", version.ref = "spotless" }
+e-telemetry = "foundation.e.lib:telemetry:0.0.10-alpha"
+timber = "com.jakewharton.timber:timber:5.0.1"
+elib = "foundation.e:elib:0.0.1-alpha11"
+#noinspection GradleDependency
+google-material = "com.google.android.material:material:1.6.1"
+google-protobuf-javalite = "com.google.protobuf:protobuf-javalite:3.21.1"
+hoko-blur = "io.github.hokofly:hoko-blur:1.4.0"
+reactivex-rxkotlin3 = "io.reactivex.rxjava3:rxkotlin:3.0.1"
+
+square-retrofit = "com.squareup.retrofit2:retrofit:2.9.0"
+square-okhttp = "com.squareup.okhttp3:okhttp:4.11.0"
+square-gson = "com.squareup.retrofit2:converter-gson:2.9.0"
+square-logging = "com.squareup.okhttp3:logging-interceptor:4.11.0"

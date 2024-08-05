@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="grid_folder_content_padding">12dp</dimen>
+    <dimen name="grid_folder_footer_height">32dp</dimen>
+    <dimen name="widget_page_inset_padding">10dp</dimen>
+    <dimen name="widget_page_all_padding">4dp</dimen>
+    <dimen name="widget_page_top_bottom_padding">6dp</dimen>
+    <dimen name="default_widget_corner_radius">15dp</dimen>
+</resources>

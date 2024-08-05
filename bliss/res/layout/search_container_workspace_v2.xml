@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<foundation.e.bliss.widgets.WidgetContainer xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@id/search_container_workspace"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="0dp">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:animateLayoutChanges="true"
+        android:isScrollContainer="true"
+        android:nestedScrollingEnabled="true"
+        android:orientation="vertical"
+        android:overScrollMode="always"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:id="@+id/widget_linear_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:paddingTop="50dp"
+            android:orientation="vertical">
+
+            <include layout="@layout/search_bar" />
+
+            <include
+                android:id="@+id/used_apps_layout"
+                layout="@layout/layout_used_apps" />
+
+            <fragment
+                android:name="foundation.e.bliss.widgets.WidgetContainer$WidgetFragment"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:tag="qsb_view"
+                tools:ignore="FragmentTagUsage" />
+
+            <LinearLayout
+                android:id="@+id/manage_widget_parent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:orientation="horizontal">
+
+                <foundation.e.bliss.blur.BlurLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:layout_marginBottom="12dp"
+                    android:layout_weight="1"
+                    app:blurCornerRadius="20dp">
+
+                    <Button
+                        android:id="@+id/manage_widgets"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/btn_rounded_corner"
+                        android:fontFamily="sans-serif-medium"
+                        android:minWidth="0dp"
+                        android:minHeight="0dp"
+                        android:paddingHorizontal="24dp"
+                        android:paddingVertical="6dp"
+                        android:stateListAnimator="@null"
+                        android:text="@string/widget_add"
+                        android:textAllCaps="false"
+                        android:textColor="@color/white" />
+                </foundation.e.bliss.blur.BlurLayout>
+
+                <Space
+                    android:layout_width="6dp"
+                    android:layout_height="6dp" />
+
+                <foundation.e.bliss.blur.BlurLayout
+                    android:id="@+id/remove_widget_parent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:layout_marginBottom="12dp"
+                    android:layout_weight="1"
+                    app:blurCornerRadius="20dp">
+
+                    <Button
+                        android:id="@+id/remove_widgets"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/btn_rounded_corner"
+                        android:fontFamily="sans-serif-medium"
+                        android:minWidth="0dp"
+                        android:minHeight="0dp"
+                        android:paddingHorizontal="24dp"
+                        android:paddingVertical="6dp"
+                        android:stateListAnimator="@null"
+                        android:text="@string/widget_remove"
+                        android:textAllCaps="false"
+                        android:textColor="@color/white" />
+                </foundation.e.bliss.blur.BlurLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+
+    <RelativeLayout
+        android:layout_marginBottom="@dimen/widget_page_inset_padding"
+        android:id="@+id/widget_resizer_container"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_gravity="bottom"
+        android:background="@android:color/black"
+        android:clickable="true"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/min_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:text="@string/min"
+            android:textColor="@color/white" />
+
+        <SeekBar
+            android:id="@+id/widget_resizer_seekbar"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_toStartOf="@id/max_label"
+            android:layout_toEndOf="@id/min_label"
+            android:progressTint="@color/white"
+            android:thumbTint="@color/white" />
+
+        <TextView
+            android:id="@+id/max_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:text="@string/max"
+            android:textColor="@color/white" />
+    </RelativeLayout>
+</foundation.e.bliss.widgets.WidgetContainer>

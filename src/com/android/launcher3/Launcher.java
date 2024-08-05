@@ -101,9 +101,13 @@ import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.ItemInfoMatcher.forFolderMatch;
 import static com.android.launcher3.util.SettingsCache.TOUCHPAD_NATURAL_SCROLLING;
 
+import static foundation.e.bliss.widgets.BlissAppWidgetHost.REQUEST_CONFIGURE_APPWIDGET;
 import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -150,7 +154,11 @@ import android.view.WindowInsets;
 import android.view.WindowInsetsAnimation;
 import android.view.WindowManager.LayoutParams;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.animation.LinearInterpolator;
 import android.view.animation.OvershootInterpolator;
+import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
+import android.widget.SeekBar;
 import android.window.BackEvent;
 import android.window.OnBackAnimationCallback;
 
@@ -218,6 +226,7 @@ import com.android.launcher3.statemanager.StateManager.StateHandler;
 import com.android.launcher3.statemanager.StatefulActivity;
 import com.android.launcher3.states.RotationHelper;
 import com.android.launcher3.testing.TestLogging;
+import com.android.launcher3.testing.shared.ResourceUtils;
 import com.android.launcher3.testing.shared.TestProtocol;
 import com.android.launcher3.touch.AllAppsSwipeController;
 import com.android.launcher3.touch.ItemLongClickListener;
@@ -278,6 +287,17 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+
+import foundation.e.bliss.LauncherAppMonitor;
+import foundation.e.bliss.blur.BlurBackgroundView;
+import foundation.e.bliss.blur.BlurWallpaperProvider;
+import foundation.e.bliss.multimode.MultiModeController;
+import foundation.e.bliss.utils.Logger;
+import foundation.e.bliss.widgets.RoundedWidgetView;
+import foundation.e.bliss.widgets.WidgetContainer;
+import foundation.e.bliss.widgets.WidgetsDbHelper;
+import foundation.e.lib.telemetry.Telemetry;
+import timber.log.Timber;
 
 /**
  * Default launcher application.
@@ -401,6 +421,12 @@ public class Launcher extends StatefulActivity<LauncherState>
     private StartupLatencyLogger mStartupLatencyLogger;
     private CellPosMapper mCellPosMapper = CellPosMapper.DEFAULT;
 
+    private LauncherAppMonitor mAppMonitor;
+    public BlurBackgroundView mBlurLayer;
+    public FrameLayout swipeSearchContainer;
+    private AnimatorSet currentAnimator;
+    private RoundedWidgetView activeRoundedWidgetView;
+
     private final CannedAnimationCoordinator mAnimationCoordinator =
             new CannedAnimationCoordinator(this);
 
@@ -419,6 +445,16 @@ public class Launcher extends StatefulActivity<LauncherState>
     @Override
     @TargetApi(Build.VERSION_CODES.S)
     protected void onCreate(Bundle savedInstanceState) {
+        Logger.plant();
+
+        if (!BuildConfig.DEBUG) {
+            try {
+                Telemetry.init(BuildConfig.SENTRY_DSN, getApplication(), true);
+            } catch (Exception e) {
+                Logger.e(TAG, "Failed to initialize Sentry");
+            }
+        }
+
         mStartupLatencyLogger = createStartupLatencyLogger(
                 sIsNewProcess
                         ? LockedUserState.get(this).isUserUnlockedAtLauncherStartup()
@@ -460,7 +496,7 @@ public class Launcher extends StatefulActivity<LauncherState>
                     .build());
         }
 
-        if (Utilities.IS_DEBUG_DEVICE && FeatureFlags.NOTIFY_CRASHES.get()) {
+        if (FeatureFlags.NOTIFY_CRASHES.get()) {
             final String notificationChannelId = "com.android.launcher3.Debug";
             final String notificationChannelName = "Debug";
             final String notificationTag = "Debug";
@@ -474,20 +510,25 @@ public class Launcher extends StatefulActivity<LauncherState>
             Thread.currentThread().setUncaughtExceptionHandler((thread, throwable) -> {
                 String stackTrace = Log.getStackTraceString(throwable);
 
-                Intent shareIntent = new Intent(Intent.ACTION_SEND);
-                shareIntent.setType("text/plain");
-                shareIntent.putExtra(Intent.EXTRA_TEXT, stackTrace);
-                shareIntent = Intent.createChooser(shareIntent, null);
-                PendingIntent sharePendingIntent = PendingIntent.getActivity(
-                        this, 0, shareIntent, FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE);
+                if (Utilities.IS_DEBUG_DEVICE) {
+                    Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                    shareIntent.setType("text/plain");
+                    shareIntent.putExtra(Intent.EXTRA_TEXT, stackTrace);
+                    shareIntent = Intent.createChooser(shareIntent, null);
+                    PendingIntent sharePendingIntent = PendingIntent.getActivity(
+                            this, 0, shareIntent, FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE);
 
-                Notification notification = new Notification.Builder(this, notificationChannelId)
-                        .setSmallIcon(android.R.drawable.ic_menu_close_clear_cancel)
-                        .setContentTitle("Launcher crash detected!")
-                        .setStyle(new Notification.BigTextStyle().bigText(stackTrace))
-                        .addAction(android.R.drawable.ic_menu_share, "Share", sharePendingIntent)
-                        .build();
-                notificationManager.notify(notificationTag, notificationId, notification);
+                    Notification notification = new Notification.Builder(this, notificationChannelId)
+                            .setSmallIcon(android.R.drawable.ic_menu_close_clear_cancel)
+                            .setContentTitle("Launcher crash detected!")
+                            .setStyle(new Notification.BigTextStyle().bigText(stackTrace))
+                            .addAction(android.R.drawable.ic_menu_share, "Share", sharePendingIntent)
+                            .build();
+
+                    notificationManager.notify(notificationTag, notificationId, notification);
+                } else {
+                    Timber.tag(TAG).e(throwable);
+                }
 
                 Thread.UncaughtExceptionHandler defaultUncaughtExceptionHandler =
                         Thread.getDefaultUncaughtExceptionHandler();
@@ -497,11 +538,15 @@ public class Launcher extends StatefulActivity<LauncherState>
             });
         }
 
+        mAppMonitor = LauncherAppMonitor.getInstance(this);
+        mAppMonitor.onLauncherPreCreate(this);
+
         super.onCreate(savedInstanceState);
 
         LauncherAppState app = LauncherAppState.getInstance(this);
         mModel = app.getModel();
 
+        BlurWallpaperProvider.Companion.getInstance(this);
         mRotationHelper = new RotationHelper(this);
         InvariantDeviceProfile idp = app.getInvariantDeviceProfile();
         initDeviceProfile(idp);
@@ -578,10 +623,16 @@ public class Launcher extends StatefulActivity<LauncherState>
                 LauncherOverlayPlugin.class, false /* allowedMultiple */);
 
         mRotationHelper.initialize();
+        mAppMonitor.onLauncherCreated();
+        mBlurLayer = findViewById(R.id.blur_layer);
+        mBlurLayer.setAlpha(0f);
+        swipeSearchContainer = findViewById(R.id.swipe_search_container);
+        swipeSearchContainer.setTranslationY(-1000);
         TraceHelper.INSTANCE.endSection();
 
         getWindow().setSoftInputMode(LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
         setTitle(R.string.home_screen);
+        getWindow().setNavigationBarColor(getWindow().getNavigationBarColor() | 0x26000000);
         mStartupLatencyLogger.logEnd(LAUNCHER_LATENCY_STARTUP_ACTIVITY_ON_CREATE);
 
         if (com.android.launcher3.Flags.enableTwoPaneLauncherSettings()) {
@@ -651,14 +702,22 @@ public class Launcher extends StatefulActivity<LauncherState>
             return topView;
         }
 
-        // #4 Custom back handlers
+        // #4 Cancel Wobble
+        if (getWorkspace().isWobbling()) {
+            getWorkspace().wobbleLayouts(false);
+        }
+
+        // #5 state handler
         for (BackPressHandler handler : mBackPressedHandlers) {
             if (handler.canHandleBack()) {
                 return handler;
             }
         }
 
-        // #5 state handler
+        // #5 Close widget resize mode
+        hideWidgetResizeContainer();
+
+        // #6 state handler
         return new OnBackAnimationCallback() {
             @Override
             public void onBackInvoked() {
@@ -985,6 +1044,12 @@ public class Launcher extends StatefulActivity<LauncherState>
     public void onActivityResult(
             final int requestCode, final int resultCode, final Intent data) {
         mPendingActivityRequestCode = -1;
+        if (requestCode == REQUEST_CONFIGURE_APPWIDGET) {
+            WidgetContainer.WidgetFragment widgetFragment = (WidgetContainer.WidgetFragment) getFragmentManager().findFragmentByTag("qsb_view");
+            widgetFragment.onActivityResult(requestCode, resultCode, data);
+            mPendingActivityRequestCode = -1;
+            return;
+        }
         handleActivityResult(requestCode, resultCode, data);
     }
 
@@ -1062,11 +1127,13 @@ public class Launcher extends StatefulActivity<LauncherState>
         FloatingIconView.resetIconLoadResult();
         AccessibilityManagerCompat.sendTestProtocolEventToTest(
                 this, LAUNCHER_ACTIVITY_STOPPED_MESSAGE);
+        mAppMonitor.onLauncherStop();
     }
 
     @Override
     protected void onStart() {
         TraceHelper.INSTANCE.beginSection(ON_START_EVT);
+        mAppMonitor.onLauncherStart();
         super.onStart();
         if (!mDeferOverlayCallbacks) {
             mOverlayManager.onActivityStarted();
@@ -1191,7 +1258,8 @@ public class Launcher extends StatefulActivity<LauncherState>
             mWorkspace.setClipChildren(false);
         }
         // When multiple pages are visible, show persistent page indicator
-        mWorkspace.getPageIndicator().setShouldAutoHide(!state.hasFlag(FLAG_MULTI_PAGE));
+        mWorkspace.getPageIndicator().setShouldAutoHide(!MultiModeController.isSingleLayerMode()
+                || !state.hasFlag(FLAG_MULTI_PAGE));
 
         mPrevLauncherState = mStateManager.getCurrentStableState();
         if (mPrevLauncherState != state && ALL_APPS.equals(state)
@@ -1259,6 +1327,7 @@ public class Launcher extends StatefulActivity<LauncherState>
 
     @Override
     protected void onResume() {
+        mAppMonitor.onLauncherPreResume();
         TraceHelper.INSTANCE.beginSection(ON_RESUME_EVT);
         super.onResume();
 
@@ -1269,6 +1338,7 @@ public class Launcher extends StatefulActivity<LauncherState>
         }
 
         DragView.removeAllViews(this);
+        mAppMonitor.onLauncherResumed();
         TraceHelper.INSTANCE.endSection();
     }
 
@@ -1277,6 +1347,7 @@ public class Launcher extends StatefulActivity<LauncherState>
         // Ensure that items added to Launcher are queued until Launcher returns
         ItemInstallQueue.INSTANCE.get(this).pauseModelPush(FLAG_ACTIVITY_PAUSED);
 
+        mAppMonitor.onLauncherPrePause();
         super.onPause();
         mDragController.cancelDrag();
         mLastTouchUpTime = -1;
@@ -1286,6 +1357,8 @@ public class Launcher extends StatefulActivity<LauncherState>
             mOverlayManager.onActivityPaused();
         }
         mAppWidgetHolder.setActivityResumed(false);
+        mAppMonitor.onLauncherPaused();
+        hideWidgetResizeContainer();
     }
 
     /**
@@ -1599,6 +1672,7 @@ public class Launcher extends StatefulActivity<LauncherState>
         boolean internalStateHandled = ACTIVITY_TRACKER.handleNewIntent(this);
 
         if (isActionMain) {
+            mAppMonitor.onReceiveHomeIntent();
             if (!internalStateHandled) {
                 // In all these cases, only animate if we're already on home
                 AbstractFloatingView.closeAllOpenViewsExcept(
@@ -1624,6 +1698,9 @@ public class Launcher extends StatefulActivity<LauncherState>
                 handleSplitAnimationGoingToHome(LAUNCHER_SPLIT_SELECTION_EXIT_HOME);
             }
             mOverlayManager.hideOverlay(isStarted() && !isForceInvisible());
+            if (swipeSearchContainer.getVisibility() == View.VISIBLE) {
+                hideSwipeSearchContainer();
+            }
             handleGestureContract(intent);
         } else if (Intent.ACTION_ALL_APPS.equals(intent.getAction())) {
             showAllAppsFromIntent(alreadyOnHome);
@@ -1756,6 +1833,7 @@ public class Launcher extends StatefulActivity<LauncherState>
         // changes while launcher is still loading.
         getRootView().getViewTreeObserver().removeOnPreDrawListener(mOnInitialBindListener);
         mOverlayManager.onActivityDestroyed();
+        mAppMonitor.onLauncherDestroy(this);
     }
 
     public LauncherAccessibilityDelegate getAccessibilityDelegate() {
@@ -1917,6 +1995,9 @@ public class Launcher extends StatefulActivity<LauncherState>
     public FolderIcon addFolder(CellLayout layout, int container, final int screenId, int cellX,
             int cellY) {
         final FolderInfo folderInfo = new FolderInfo();
+        if (MultiModeController.isSingleLayerMode()) {
+            folderInfo.setTitle(this.getString(R.string.untitled_folder), getModelWriter());
+        }
 
         // Update the model
         getModelWriter().addItemToDatabase(folderInfo, container, screenId, cellX, cellY);
@@ -2223,7 +2304,7 @@ public class Launcher extends StatefulActivity<LauncherState>
                     Object tag = cl.getChildAt(presenterPos.cellX, presenterPos.cellY).getTag();
                     String desc = "Collision while binding workspace item: " + item
                             + ". Collides with " + tag;
-                    if (FeatureFlags.IS_STUDIO_BUILD) {
+                    if (FeatureFlags.IS_STUDIO_BUILD && tag != null) {
                         throw (new RuntimeException(desc));
                     } else {
                         getModelWriter().deleteItemFromDatabase(item, desc);
@@ -2348,6 +2429,7 @@ public class Launcher extends StatefulActivity<LauncherState>
      * Implementation of the method from LauncherModel.Callbacks.
      */
     public void finishBindingItems(IntSet pagesBoundFirst) {
+        mAppMonitor.onLauncherWorkspaceBindingFinish();
         mModelCallbacks.finishBindingItems(pagesBoundFirst);
     }
 
@@ -2381,6 +2463,10 @@ public class Launcher extends StatefulActivity<LauncherState>
                         && info.getTargetComponent() != null
                         && TextUtils.equals(info.getTargetComponent().getPackageName(),
                         packageName);
+
+        if (mWorkspace.getDestinationPage() == 0) {
+            return null;
+        }
 
         if (supportsAllAppsState && isInState(LauncherState.ALL_APPS)) {
             AllAppsRecyclerView activeRecyclerView = mAppsView.getActiveRecyclerView();
@@ -2511,6 +2597,7 @@ public class Launcher extends StatefulActivity<LauncherState>
     @UiThread
     public void bindAllApplications(AppInfo[] apps, int flags,
             Map<PackageUserKey, Integer> packageUserKeytoUidMap) {
+        mAppMonitor.onLauncherAllAppBindingFinish(apps);
         mModelCallbacks.bindAllApplications(apps, flags, packageUserKeytoUidMap);
         if (Utilities.ATLEAST_S) {
             Trace.endAsyncSection(DISPLAY_ALL_APPS_TRACE_METHOD_NAME,
@@ -2641,6 +2728,7 @@ public class Launcher extends StatefulActivity<LauncherState>
 
         mModel.dumpState(prefix, fd, writer, args);
         mOverlayManager.dump(prefix, writer);
+        mAppMonitor.dump(prefix, fd, writer, args);
     }
 
     /**
@@ -2694,6 +2782,8 @@ public class Launcher extends StatefulActivity<LauncherState>
      * Shows the default options popup
      */
     public void showDefaultOptions(float x, float y) {
+        if (MultiModeController.isSingleLayerMode()) return;
+
         OptionsPopupView.show(this, getPopupTarget(x, y), OptionsPopupView.getOptions(this),
                 false);
     }
@@ -2850,6 +2940,224 @@ public class Launcher extends StatefulActivity<LauncherState>
      */
     public boolean areFreeformTasksVisible() {
         return false; // Base launcher does not track freeform tasks
+    }
+
+    public void toggleSwipeSearchState() {
+        if (swipeSearchContainer.getVisibility() == View.VISIBLE) {
+            hideSwipeSearchContainer();
+        } else if (!getWorkspace().isWobbling() && Folder.getOpen(this) == null) {
+            showSwipeSearchContainer();
+        }
+    }
+
+    private void showSwipeSearchContainer() {
+        if (currentAnimator != null) {
+            currentAnimator.cancel();
+        }
+        AnimatorSet set = new AnimatorSet();
+        set.play(ObjectAnimator.ofFloat(swipeSearchContainer, View.TRANSLATION_Y, 0))
+                .with(ObjectAnimator.ofFloat(mBlurLayer, View.ALPHA, 1f))
+                .with(ObjectAnimator.ofFloat(mWorkspace, View.ALPHA, 0f))
+                .with(ObjectAnimator.ofFloat(mWorkspace.mPageIndicator, View.ALPHA, 0f))
+                .with(ObjectAnimator.ofFloat(mHotseat, View.ALPHA, 0f));
+        set.setDuration(300);
+        set.setInterpolator(new LinearInterpolator());
+        set.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                swipeSearchContainer.setVisibility(View.VISIBLE);
+                super.onAnimationStart(animation);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                currentAnimator = null;
+                swipeSearchContainer.setVisibility(View.GONE);
+                mWorkspace.setVisibility(View.VISIBLE);
+                mHotseat.setVisibility(View.VISIBLE);
+                mWorkspace.mPageIndicator.setVisibility(View.VISIBLE);
+                mBlurLayer.setAlpha(0f);
+                super.onAnimationCancel(animation);
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                currentAnimator = null;
+                mWorkspace.setVisibility(View.GONE);
+                mHotseat.setVisibility(View.GONE);
+                mWorkspace.mPageIndicator.setVisibility(View.GONE);
+                super.onAnimationEnd(animation);
+            }
+        });
+        set.start();
+        currentAnimator = set;
+    }
+
+    public void hideSwipeSearchContainer() {
+        if (currentAnimator != null) {
+            currentAnimator.cancel();
+        }
+        AnimatorSet set = new AnimatorSet();
+        set.play(ObjectAnimator.ofFloat(swipeSearchContainer, View.TRANSLATION_Y, -swipeSearchContainer.getHeight()))
+                .with(ObjectAnimator.ofFloat(mWorkspace, View.ALPHA, 1f))
+                .with(ObjectAnimator.ofFloat(mWorkspace.mPageIndicator, View.ALPHA, 1f))
+                .with(ObjectAnimator.ofFloat(mHotseat, View.ALPHA, 1f))
+                .with(ObjectAnimator.ofFloat(mBlurLayer, View.ALPHA, 0f));
+        set.setDuration(300);
+        set.setInterpolator(new LinearInterpolator());
+        set.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                mWorkspace.setVisibility(View.VISIBLE);
+                mHotseat.setVisibility(View.VISIBLE);
+                mWorkspace.mPageIndicator.setVisibility(View.VISIBLE);
+                super.onAnimationStart(animation);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                currentAnimator = null;
+                swipeSearchContainer.setVisibility(View.VISIBLE);
+                mBlurLayer.setAlpha(1f);
+                mWorkspace.setVisibility(View.GONE);
+                mHotseat.setVisibility(View.GONE);
+                mWorkspace.mPageIndicator.setVisibility(View.GONE);
+                super.onAnimationCancel(animation);
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                currentAnimator = null;
+                swipeSearchContainer.setVisibility(View.GONE);
+                mBlurLayer.setAlpha(0f);
+                super.onAnimationEnd(animation);
+            }
+        });
+        set.start();
+        currentAnimator = set;
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    public void showWidgetResizeContainer(RoundedWidgetView roundedWidgetView) {
+        RelativeLayout widgetResizeContainer = mWorkspace.getFirstPagePinnedItem()
+                .findViewById(R.id.widget_resizer_container);
+
+        if (widgetResizeContainer.getVisibility() != View.VISIBLE) {
+            activeRoundedWidgetView = roundedWidgetView;
+            SeekBar seekBar = widgetResizeContainer.findViewById(R.id.widget_resizer_seekbar);
+            if (currentAnimator != null) {
+                currentAnimator.cancel();
+            }
+
+            seekBar.setOnTouchListener((v, event) -> {
+                seekBar.getParent().requestDisallowInterceptTouchEvent(true);
+                return false;
+            });
+
+            AnimatorSet set = new AnimatorSet();
+            set.play(ObjectAnimator.ofFloat(widgetResizeContainer, View.TRANSLATION_Y,
+                    ResourceUtils.pxFromDp(48, getResources().getDisplayMetrics()), 0));
+            set.setDuration(200);
+            set.setInterpolator(new LinearInterpolator());
+            set.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    super.onAnimationStart(animation);
+                    widgetResizeContainer.setVisibility(View.VISIBLE);
+                }
+
+                @Override
+                public void onAnimationCancel(Animator animation) {
+                    super.onAnimationCancel(animation);
+                    currentAnimator = null;
+                    widgetResizeContainer.setVisibility(View.GONE);
+                    roundedWidgetView.removeBorder();
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    super.onAnimationEnd(animation);
+                    currentAnimator = null;
+                    prepareWidgetResizeSeekBar(seekBar);
+                    roundedWidgetView.addBorder();
+                }
+            });
+            set.start();
+            currentAnimator = set;
+        }
+    }
+
+    private void prepareWidgetResizeSeekBar(SeekBar seekBar) {
+        int minHeight = activeRoundedWidgetView.getAppWidgetInfo().minResizeHeight;
+        int maxHeight = mDeviceProfile.availableHeightPx * 3 / 4;
+        int normalisedDifference = (maxHeight - minHeight) / 100;
+        int defaultHeight = activeRoundedWidgetView.getHeight();
+        int currentProgress = (defaultHeight - minHeight) * 100 / (maxHeight - minHeight);
+
+        seekBar.setMax(100);
+        seekBar.setProgress(currentProgress);
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                int newHeight = minHeight + (normalisedDifference * progress);
+                activeRoundedWidgetView.setHeight(newHeight);
+                activeRoundedWidgetView.requestLayout();
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                int newHeight = minHeight + (normalisedDifference * seekBar.getProgress());
+                if (getWorkspace().getFirstPagePinnedItem() instanceof WidgetContainer) {
+                    ((WidgetContainer) getWorkspace().getFirstPagePinnedItem()).updateWidgets();
+                }
+                Logger.d("Launcher.WidgetResize", "newHeight: " + newHeight);
+                WidgetsDbHelper.getInstance(getApplicationContext())
+                        .updateHeight(activeRoundedWidgetView.getAppWidgetId(), newHeight);
+            }
+        });
+    }
+
+    public void hideWidgetResizeContainer() {
+        RelativeLayout widgetResizeContainer = mWorkspace.getFirstPagePinnedItem().findViewById(R.id.widget_resizer_container);
+        if (widgetResizeContainer.getVisibility() == View.VISIBLE) {
+            if (currentAnimator != null) {
+                currentAnimator.cancel();
+            }
+            AnimatorSet set = new AnimatorSet();
+            set.play(ObjectAnimator.ofFloat(widgetResizeContainer, View.TRANSLATION_Y,
+                    ResourceUtils.pxFromDp(48, getResources().getDisplayMetrics())));
+            set.setDuration(200);
+            set.setInterpolator(new LinearInterpolator());
+            set.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    super.onAnimationStart(animation);
+                    ((SeekBar) mWorkspace.getFirstPagePinnedItem().findViewById(R.id.widget_resizer_seekbar))
+                            .setOnSeekBarChangeListener(null);
+                }
+
+                @Override
+                public void onAnimationCancel(Animator animation) {
+                    super.onAnimationCancel(animation);
+                    currentAnimator = null;
+                    widgetResizeContainer.setVisibility(View.VISIBLE);
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    super.onAnimationEnd(animation);
+                    currentAnimator = null;
+                    widgetResizeContainer.setVisibility(View.GONE);
+                    activeRoundedWidgetView.removeBorder();
+                }
+            });
+            set.start();
+            currentAnimator = set;
+        }
     }
 
     // Getters and Setters

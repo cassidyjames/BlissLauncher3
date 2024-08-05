@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright Murena SAS 2024
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  --><resources>
+    <string name="edit">Editar</string>
+    <string name="search">Búsqueda</string>
+    <string name="suggestions">Sugerencias</string>
+    <string name="cancel">Cancelar</string>
+    <string name="untitled_folder">Sin título</string>
+    <string name="widget_add">Agregar</string>
+    <string name="widget_remove">Remover</string>
+    <string name="maps">Navegación</string>
+    <string name="ok">OK</string>
+    <string name="uninstall_app">¿Deseas remover esta aplicación?</string>
+    <string name="max">Max</string>
+    <string name="min">Min</string>
+    <string name="remove_widgets">Remover widgets</string>
+    <string name="show_notification_count">Mostrar recuento de notificaciones</string>
+    <string name="widget_no_resize">No se puede redimensionar este widget</string>
+</resources>

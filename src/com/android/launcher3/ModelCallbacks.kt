@@ -125,7 +125,7 @@ class ModelCallbacks(private var launcher: Launcher) : BgDataModel.Callbacks {
         val currentPage =
             if (pagesBoundFirst != null && !pagesBoundFirst.isEmpty)
                 launcher.workspace.getPageIndexForScreenId(pagesBoundFirst.array[0])
-            else PagedView.INVALID_PAGE
+            else Workspace.DEFAULT_PAGE
         // When undoing the removal of the last item on a page, return to that page.
         // Since we are just resetting the current page without user interaction,
         // override the previous page so we don't log the page switch.
@@ -313,7 +313,7 @@ class ModelCallbacks(private var launcher: Launcher) : BgDataModel.Callbacks {
         )
         val firstScreenPosition = 0
         if (
-            (FeatureFlags.QSB_ON_FIRST_SCREEN &&
+            (FeatureFlags.QSB_ON_FIRST_SCREEN.get() &&
                 isFirstPagePinnedItemEnabled &&
                 !shouldShowFirstPageWidget()) &&
                 orderedScreenIds.indexOf(FIRST_SCREEN_ID) != firstScreenPosition
@@ -321,7 +321,7 @@ class ModelCallbacks(private var launcher: Launcher) : BgDataModel.Callbacks {
             orderedScreenIds.removeValue(FIRST_SCREEN_ID)
             orderedScreenIds.add(firstScreenPosition, FIRST_SCREEN_ID)
         } else if (
-            (!FeatureFlags.QSB_ON_FIRST_SCREEN && !isFirstPagePinnedItemEnabled ||
+            (!FeatureFlags.QSB_ON_FIRST_SCREEN.get() && !isFirstPagePinnedItemEnabled ||
                 shouldShowFirstPageWidget()) && orderedScreenIds.isEmpty
         ) {
             // If there are no screens, we need to have an empty screen
@@ -378,10 +378,11 @@ class ModelCallbacks(private var launcher: Launcher) : BgDataModel.Callbacks {
         }
         orderedScreenIds
             .filterNot { screenId ->
-                FeatureFlags.QSB_ON_FIRST_SCREEN &&
+                FeatureFlags.QSB_ON_FIRST_SCREEN.get() &&
                     isFirstPagePinnedItemEnabled &&
                     !FeatureFlags.shouldShowFirstPageWidget() &&
-                    screenId == WorkspaceLayoutManager.FIRST_SCREEN_ID
+                        (screenId == WorkspaceLayoutManager.FIRST_SCREEN_ID ||
+                                screenId == WorkspaceLayoutManager.SECOND_SCREEN_ID)
             }
             .forEach { screenId ->
                 launcher.workspace.insertNewWorkspaceScreenBeforeEmptyScreen(screenId)

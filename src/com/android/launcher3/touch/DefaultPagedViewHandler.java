@@ -23,6 +23,7 @@ import android.view.VelocityTracker;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 
+import com.android.launcher3.PagedView;
 import com.android.launcher3.Utilities;
 
 public class DefaultPagedViewHandler implements PagedOrientationHandler {
@@ -113,12 +114,17 @@ public class DefaultPagedViewHandler implements PagedOrientationHandler {
     }
 
     @Override
-    public ChildBounds getChildBounds(View child, int childStart, int pageCenter,
-            boolean layoutChild) {
+    public ChildBounds getChildBounds(View child, int childStart, int pageCenter, boolean layoutChild, PagedView.LayoutParams lp, int offsetY) {
         final int childWidth = child.getMeasuredWidth();
         final int childRight = childStart + childWidth;
         final int childHeight = child.getMeasuredHeight();
-        final int childTop = pageCenter - childHeight / 2;
+        final int childTop;
+        if (lp != null && lp.isFullScreenPage) {
+            childTop = offsetY;
+        } else {
+            childTop = pageCenter - childHeight / 2;
+        }
+
         if (layoutChild) {
             child.layout(childStart, childTop, childRight, childTop + childHeight);
         }

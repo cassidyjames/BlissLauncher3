@@ -232,7 +232,7 @@ public class ItemInstallQueue {
         MODEL_EXECUTOR.post(this::flushQueueInBackground);
     }
 
-    private static class PendingInstallShortcutInfo extends ItemInfo {
+    public static class PendingInstallShortcutInfo extends ItemInfo {
 
         final Intent intent;
 

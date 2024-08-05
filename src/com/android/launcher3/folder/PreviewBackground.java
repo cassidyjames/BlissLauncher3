@@ -45,12 +45,16 @@ import android.view.animation.Interpolator;
 
 import androidx.annotation.VisibleForTesting;
 
+import androidx.core.content.ContextCompat;
+
 import com.android.launcher3.CellLayout;
 import com.android.launcher3.DeviceProfile;
 import com.android.launcher3.R;
 import com.android.launcher3.celllayout.DelegatedCellDrawing;
 import com.android.launcher3.util.Themes;
 import com.android.launcher3.views.ActivityContext;
+
+import foundation.e.bliss.multimode.MultiModeController;
 
 /**
  * This object represents a FolderIcon preview background. It stores drawing / measurement
@@ -168,6 +172,10 @@ public class PreviewBackground extends DelegatedCellDrawing {
         mStrokeColor = ta.getColor(R.styleable.FolderIconPreview_folderIconBorderColor, 0);
         mBgColor = ta.getColor(R.styleable.FolderIconPreview_folderPreviewColor, 0);
         ta.recycle();
+
+        if (MultiModeController.isSingleLayerMode()) {
+            mBgColor = ContextCompat.getColor(context, R.color.gridFolderPreview);
+        }
 
         DeviceProfile grid = activity.getDeviceProfile();
         previewSize = grid.folderIconSizePx;

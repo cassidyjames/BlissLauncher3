@@ -107,7 +107,7 @@ public class ContentWriter {
     public int commit() {
         if (mCommitParams != null) {
             return mCommitParams.mDbController.update(
-                    Favorites.TABLE_NAME, getValues(mContext),
+                    Favorites.getFavoritesTableName(), getValues(mContext),
                     mCommitParams.mWhere, mCommitParams.mSelectionArgs);
         }
         return 0;

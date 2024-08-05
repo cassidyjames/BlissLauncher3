@@ -78,6 +78,8 @@ import com.airbnb.lottie.LottieAnimationView;
 import java.net.URISyntaxException;
 import java.util.Map;
 
+import foundation.e.bliss.multimode.MultiModeController;
+
 /**
  * A page shows after SUW flow to hint users to swipe up from the bottom of the screen to go home
  * for the gestural system navigation.
@@ -202,7 +204,7 @@ public class AllSetActivity extends Activity {
     }
 
     private void startBackgroundAnimation(boolean forTablet) {
-        if (!Utilities.ATLEAST_S || mVibrator == null) {
+        if (!Utilities.ATLEAST_S || mVibrator == null || MultiModeController.isSingleLayerMode()) {
             return;
         }
         boolean supportsThud = mVibrator.areAllPrimitivesSupported(

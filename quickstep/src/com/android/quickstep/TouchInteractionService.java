@@ -145,6 +145,8 @@ import java.lang.ref.WeakReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import foundation.e.bliss.LauncherAppMonitor;
+
 /**
  * Service connected by system-UI for handling touch interaction.
  */
@@ -500,6 +502,7 @@ public class TouchInteractionService extends Service {
         mRotationTouchHelper = mDeviceState.getRotationTouchHelper();
         mInputConsumer = InputConsumerController.getRecentsAnimationInputConsumer();
         BootAwarePreloader.start(this);
+        LauncherAppMonitor.getInstance(this);
 
         // Call runOnUserUnlocked() before any other callbacks to ensure everything is initialized.
         LockedUserState.get(this).runOnUserUnlocked(this::onUserUnlocked);

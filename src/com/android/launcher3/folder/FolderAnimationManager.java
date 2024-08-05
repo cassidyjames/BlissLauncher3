@@ -20,7 +20,6 @@ import static android.view.View.ALPHA;
 
 import static com.android.launcher3.BubbleTextView.TEXT_ALPHA_PROPERTY;
 import static com.android.launcher3.LauncherAnimUtils.SCALE_PROPERTY;
-import static com.android.launcher3.folder.ClippedFolderIconLayoutRule.MAX_NUM_ITEMS_IN_PREVIEW;
 import static com.android.launcher3.graphics.IconShape.getShape;
 
 import android.animation.Animator;
@@ -36,6 +35,8 @@ import android.util.Property;
 import android.view.View;
 import android.view.animation.AnimationUtils;
 
+import androidx.core.content.ContextCompat;
+
 import com.android.launcher3.BubbleTextView;
 import com.android.launcher3.CellLayout;
 import com.android.launcher3.DeviceProfile;
@@ -48,6 +49,8 @@ import com.android.launcher3.util.Themes;
 import com.android.launcher3.views.BaseDragLayer;
 
 import java.util.List;
+
+import foundation.e.bliss.multimode.MultiModeController;
 
 /**
  * Manages the opening and closing animations for a {@link Folder}.
@@ -156,10 +159,14 @@ public class FolderAnimationManager {
         mFolder.mFooter.setPivotX(0);
         mFolder.mFooter.setPivotY(0);
 
+        mFolder.updateFolderOnAnimate(mIsOpening);
+        int unusedOffsetY = (int) (mFolder.getUnusedOffsetYOnAnimate(mIsOpening) * initialScale);
+
+
         // We want to create a small X offset for the preview items, so that they follow their
         // expected path to their final locations. ie. an icon should not move right, if it's final
         // location is to its left. This value is arbitrarily defined.
-        int previewItemOffsetX = (int) (previewSize / 2);
+        int previewItemOffsetX = MultiModeController.isSingleLayerMode() ?  0: (int) (previewSize / 2);
         if (Utilities.isRtl(mContext.getResources())) {
             previewItemOffsetX = (int) (lp.width * initialScale - initialSize - previewItemOffsetX);
         }
@@ -174,11 +181,16 @@ public class FolderAnimationManager {
                 + Math.round(mPreviewBackground.getOffsetY() * scaleRelativeToDragLayer)
                 - paddingOffsetY;
         final float xDistance = initialX - lp.x;
-        final float yDistance = initialY - lp.y;
+        final float yDistance = initialY - lp.y - unusedOffsetY;
 
         // Set up the Folder background.
-        final int initialColor = Themes.getAttrColor(mContext, R.attr.folderPreviewColor);
-        final int finalColor = Themes.getAttrColor(mContext, R.attr.folderBackgroundColor);
+        int initialColor = Themes.getAttrColor(mContext, R.attr.folderPreviewColor);
+        int finalColor = Themes.getAttrColor(mContext, R.attr.folderBackgroundColor);
+
+        if (MultiModeController.isSingleLayerMode()) {
+            initialColor = ContextCompat.getColor(mContext, R.color.gridFolderPreview);
+            finalColor = ContextCompat.getColor(mContext, R.color.gridFolderBackground);
+        }
 
         mFolderBackground.mutate();
         mFolderBackground.setColor(mIsOpening ? initialColor : finalColor);
@@ -233,13 +245,16 @@ public class FolderAnimationManager {
 
         // Create reveal animator for the folder background
         play(a, getShape().createRevealAnimator(
-                mFolder, startRect, endRect, finalRadius, !mIsOpening));
+                mFolder.getAnimateObject(), startRect, endRect, finalRadius, !mIsOpening));
+
+        int column = MultiModeController.isSingleLayerMode() ? 3 : 2;
+        int row = MultiModeController.isSingleLayerMode() ? 3 : 2;
 
         // Create reveal animator for the folder content (capture the top 4 icons 2x2)
         int width = mDeviceProfile.folderCellLayoutBorderSpacePx.x
-                + mDeviceProfile.folderCellWidthPx * 2;
+                + mDeviceProfile.folderCellWidthPx * row;
         int height = mDeviceProfile.folderCellLayoutBorderSpacePx.y
-                + mDeviceProfile.folderCellHeightPx * 2;
+                + mDeviceProfile.folderCellHeightPx * column;
         int page = mIsOpening ? mContent.getCurrentPage() : mContent.getDestinationPage();
         int left = mContent.getPaddingLeft() + page * lp.width;
         Rect contentStart = new Rect(left, 0, left + width, height);
@@ -355,7 +370,7 @@ public class FolderAnimationManager {
                 isOnFirstPage ? 0 : mFolder.mContent.getCurrentPage());
         final int numItemsInPreview = itemsInPreview.size();
         final int numItemsInFirstPagePreview = isOnFirstPage
-                ? numItemsInPreview : MAX_NUM_ITEMS_IN_PREVIEW;
+                ? numItemsInPreview : mFolderIcon.getLayoutRule().getMaxNumItemsInPreview();
 
         TimeInterpolator previewItemInterpolator = getPreviewItemInterpolator();
 
@@ -406,7 +421,7 @@ public class FolderAnimationManager {
             scaleAnimator.setInterpolator(previewItemInterpolator);
             play(animatorSet, scaleAnimator);
 
-            if (mFolder.getItemCount() > MAX_NUM_ITEMS_IN_PREVIEW) {
+            if (mFolder.getItemCount() > mFolderIcon.getLayoutRule().getMaxNumItemsInPreview()) {
                 // These delays allows the preview items to move as part of the Folder's motion,
                 // and its only necessary for large folders because of differing interpolators.
                 int delay = mIsOpening ? mDelay : mDelay * 2;
@@ -456,7 +471,7 @@ public class FolderAnimationManager {
     }
 
     private boolean isLargeFolder() {
-        return mFolder.getItemCount() > MAX_NUM_ITEMS_IN_PREVIEW;
+        return mFolder.getItemCount() > mFolderIcon.getLayoutRule().getMaxNumItemsInPreview();
     }
 
     private TimeInterpolator getPreviewItemInterpolator() {

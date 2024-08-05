@@ -33,11 +33,11 @@
         android:layout_marginStart="@dimen/desktop_mode_floating_app_select_margin"
         android:drawablePadding="@dimen/desktop_mode_floating_app_select_text_margin"
         android:drawableStart="@drawable/ic_desktop"
-        android:drawableTint="?androidprv:attr/materialColorOnPrimaryContainer"
+        android:drawableTint="?attr/materialColorOnPrimaryContainer"
         android:fontFamily="google-sans-medium"
         android:gravity="center_vertical"
         android:text="@string/desktop_select_app_toast"
-        android:textColor="?androidprv:attr/materialColorOnPrimaryContainer"
+        android:textColor="?attr/materialColorOnPrimaryContainer"
         android:textSize="@dimen/desktop_mode_floating_app_select_text_size" />
 
     <Button
@@ -50,7 +50,7 @@
         android:fontFamily="google-sans-medium"
         android:text="@string/desktop_button_close_app_toast"
         android:textAllCaps="false"
-        android:textColor="?androidprv:attr/materialColorPrimary"
+        android:textColor="?attr/materialColorPrimary"
         android:textSize="@dimen/desktop_mode_floating_app_select_text_size" />
 
 </com.android.quickstep.views.DesktopAppSelectView>

@@ -40,6 +40,7 @@ import android.content.res.TypedArray;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.util.DisplayMetrics;
 import android.util.SparseArray;
 import android.view.Surface;
@@ -51,6 +52,7 @@ import androidx.core.content.res.ResourcesCompat;
 import com.android.launcher3.CellLayout.ContainerType;
 import com.android.launcher3.DevicePaddings.DevicePadding;
 import com.android.launcher3.config.FeatureFlags;
+import com.android.launcher3.graphics.IconShape;
 import com.android.launcher3.icons.DotRenderer;
 import com.android.launcher3.icons.IconNormalizer;
 import com.android.launcher3.model.data.ItemInfo;
@@ -67,9 +69,13 @@ import com.android.launcher3.util.CellContentDimensions;
 import com.android.launcher3.util.DisplayController;
 import com.android.launcher3.util.DisplayController.Info;
 import com.android.launcher3.util.IconSizeSteps;
+import com.android.launcher3.util.NavigationMode;
 import com.android.launcher3.util.ResourceHelper;
+import com.android.launcher3.util.Themes;
 import com.android.launcher3.util.WindowBounds;
+import com.android.launcher3.util.window.WindowManagerProxy;
 
+import foundation.e.bliss.multimode.MultiModeController;
 import lineageos.providers.LineageSettings;
 
 import java.io.PrintWriter;
@@ -316,14 +322,15 @@ public class DeviceProfile {
     public final boolean isTransientTaskbar;
     // DragController
     public int flingToDeleteThresholdVelocity;
+    private final Context context;
 
     /** TODO: Once we fully migrate to staged split, remove "isMultiWindowMode" */
     DeviceProfile(Context context, InvariantDeviceProfile inv, Info info, WindowBounds windowBounds,
-            SparseArray<DotRenderer> dotRendererCache, boolean isMultiWindowMode,
-            boolean transposeLayoutWithOrientation, boolean isMultiDisplay, boolean isGestureMode,
-            @NonNull final ViewScaleProvider viewScaleProvider,
-            @NonNull final Consumer<DeviceProfile> dimensionOverrideProvider,
-            boolean isTransientTaskbar) {
+                  SparseArray<DotRenderer> dotRendererCache, boolean isMultiWindowMode,
+                  boolean transposeLayoutWithOrientation, boolean isMultiDisplay, boolean isGestureMode,
+                  @NonNull final ViewScaleProvider viewScaleProvider,
+                  @NonNull final Consumer<DeviceProfile> dimensionOverrideProvider,
+                  boolean isTransientTaskbar) {
 
         this.inv = inv;
         this.isLandscape = windowBounds.isLandscape();
@@ -446,7 +453,10 @@ public class DeviceProfile {
                 // When depth is 0, wallpaper zoom is set to maxWallpaperScale.
                 // When depth is 1, wallpaper zoom is set to 1.
                 // For depth to achieve zoom set to maxWallpaperScale * workspaceContentScale:
-                float maxWallpaperScale = res.getFloat(R.dimen.config_wallpaperMaxScale);
+                float maxWallpaperScale = Resources.getSystem().getFloat(Resources.getSystem().getIdentifier(
+                        /* name= */ "config_wallpaperMaxScale",
+                        /* defType= */ "dimen",
+                        /* defPackage= */ "android"));
                 bottomSheetDepth = Utilities.mapToRange(maxWallpaperScale * workspaceContentScale,
                         maxWallpaperScale, 1f, 0f, 1f, LINEAR);
             }
@@ -775,17 +785,30 @@ public class DeviceProfile {
 
         dimensionOverrideProvider.accept(this);
 
+        // Check if notification dots should show the notification count
+        boolean showNotificationCount = MultiModeController.isNotifCountEnabled();
+
+        // Load the default font to use on notification dots
+        Typeface typeface = null;
+        if (showNotificationCount) {
+            typeface = Typeface.create(Themes.getDefaultBodyFont(context), Typeface.NORMAL);
+        }
+
         // This is done last, after iconSizePx is calculated above.
-        mDotRendererWorkSpace = createDotRenderer(context, iconSizePx, dotRendererCache);
-        mDotRendererAllApps = createDotRenderer(context, allAppsIconSizePx, dotRendererCache);
+        mDotRendererWorkSpace = createDotRenderer(context, iconSizePx, dotRendererCache, showNotificationCount, typeface);
+        mDotRendererAllApps = createDotRenderer(context, allAppsIconSizePx, dotRendererCache, showNotificationCount, typeface);
+        this.context = context;
     }
 
     private static DotRenderer createDotRenderer(
-            @NonNull Context context, int size, @NonNull SparseArray<DotRenderer> cache) {
-        DotRenderer renderer = cache.get(size);
+            @NonNull Context context, int size, @NonNull SparseArray<DotRenderer> cache,
+            boolean showNotificationCount, Typeface typeface) {
+        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+        int dotSize = (int) (size / (metrics.density / 4));
+        DotRenderer renderer = cache.get(dotSize);
         if (renderer == null) {
-            renderer = new DotRenderer(size, getShapePath(context, DEFAULT_DOT_SIZE),
-                    DEFAULT_DOT_SIZE);
+            renderer = new DotRenderer(dotSize, getShapePath(context, DEFAULT_DOT_SIZE),
+                    DEFAULT_DOT_SIZE, showNotificationCount, typeface);
             cache.put(size, renderer);
         }
         return renderer;
@@ -1246,7 +1269,8 @@ public class DeviceProfile {
         updateHotseatSizes(iconSizePx);
 
         // Folder icon
-        folderIconSizePx = IconNormalizer.getNormalizedCircleSize(iconSizePx);
+        int visibleIcon = (int) Math.ceil(iconSizePx * IconShape.getNormalizationScale());
+        folderIconSizePx = visibleIcon;
         folderIconOffsetYPx = (iconSizePx - folderIconSizePx) / 2;
 
         // Update widget padding:
@@ -1809,13 +1833,20 @@ public class DeviceProfile {
             float workspaceCellWidth = (float) widthPx / inv.numColumns;
             float hotseatCellWidth = (float) widthPx / numShownHotseatIcons;
             int hotseatAdjustment = Math.round((workspaceCellWidth - hotseatCellWidth) / 2);
+
+            WindowManagerProxy wm = WindowManagerProxy.newInstance(context);
+            boolean isFullyGesture = wm.getNavigationMode(context) == NavigationMode.NO_BUTTON;
+            boolean noHint = isFullyGesture && LineageSettings.System.getInt(
+                    context.getContentResolver(), LineageSettings.System.NAVIGATION_BAR_HINT, 0) != 1;
+
             hotseatBarPadding.set(
                     hotseatAdjustment + workspacePadding.left + cellLayoutPaddingPx.left
                             + mInsets.left,
-                    0,
+                    noHint ? (hotseatBarSizePx - hotseatCellHeightPx) / 2 : 0,
                     hotseatAdjustment + workspacePadding.right + cellLayoutPaddingPx.right
                             + mInsets.right,
-                    getHotseatBarBottomPadding());
+                    noHint ? getHotseatBarBottomPadding() - (getHotseatBarBottomPadding() / 2)
+                            : getHotseatBarBottomPadding());
         }
         return hotseatBarPadding;
     }
@@ -1884,10 +1915,14 @@ public class DeviceProfile {
      * Returns the number of pixels the hotseat is translated from the bottom of the screen.
      */
     private int getHotseatBarBottomPadding() {
+        WindowManagerProxy wm = WindowManagerProxy.newInstance(context);
+        boolean isFullyGesture = wm.getNavigationMode(context) == NavigationMode.NO_BUTTON;
+
         if (isTaskbarPresent) { // QSB on top or inline
             return hotseatBarBottomSpacePx - (Math.abs(hotseatCellHeightPx - iconSizePx) / 2);
         } else {
-            return hotseatBarSizePx - hotseatCellHeightPx;
+            int size = hotseatBarSizePx - hotseatCellHeightPx;
+            return isFullyGesture ? size / 4 : Math.round(size / 1.5f);
         }
     }
 

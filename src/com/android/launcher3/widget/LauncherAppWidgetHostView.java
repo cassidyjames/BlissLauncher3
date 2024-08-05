@@ -264,10 +264,14 @@ public class LauncherAppWidgetHostView extends BaseLauncherAppWidgetHostView
     public AppWidgetProviderInfo getAppWidgetInfo() {
         AppWidgetProviderInfo info = super.getAppWidgetInfo();
         if (info != null && !(info instanceof LauncherAppWidgetProviderInfo)) {
-            throw new IllegalStateException("Launcher widget must have"
-                    + " LauncherAppWidgetProviderInfo");
+            // Lets not crash instead convert the info and use
+            info = LauncherAppWidgetProviderInfo.fromProviderInfo(getContext(), info);
         }
         return info;
+    }
+
+    public AppWidgetProviderInfo getProviderInfo() {
+        return super.getAppWidgetInfo();
     }
 
     @Override

@@ -18,7 +18,6 @@ package com.android.launcher3.folder;
 
 import static com.android.launcher3.folder.ClippedFolderIconLayoutRule.ENTER_INDEX;
 import static com.android.launcher3.folder.ClippedFolderIconLayoutRule.EXIT_INDEX;
-import static com.android.launcher3.folder.ClippedFolderIconLayoutRule.MAX_NUM_ITEMS_IN_PREVIEW;
 import static com.android.launcher3.folder.FolderIcon.DROP_IN_ANIMATION_DURATION;
 import static com.android.launcher3.graphics.PreloadIconDrawable.newPendingIcon;
 import static com.android.launcher3.icons.BitmapInfo.FLAG_THEMED;
@@ -34,6 +33,7 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.util.FloatProperty;
+import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -96,7 +96,7 @@ public class PreviewItemManager {
     private float mCurrentPageItemsTransX = 0;
     private boolean mShouldSlideInFirstPage;
 
-    static final int INITIAL_ITEM_ANIMATION_DURATION = 350;
+    public static final int INITIAL_ITEM_ANIMATION_DURATION = 350;
     private static final int FINAL_ITEM_ANIMATION_DURATION = 200;
 
     private static final int SLIDE_IN_FIRST_PAGE_ANIMATION_DURATION_DELAY = 100;
@@ -148,7 +148,7 @@ public class PreviewItemManager {
 
             mIcon.mBackground.setup(mIcon.getContext(), mIcon.mActivity, mIcon, mTotalWidth,
                     mIcon.getPaddingTop());
-            mIcon.mPreviewLayoutRule.init(mIcon.mBackground.previewSize, mIntrinsicIconSize,
+            mIcon.getLayoutRule().init(mIcon.mBackground.previewSize, mIntrinsicIconSize,
                     Utilities.isRtl(mIcon.getResources()));
 
             updatePreviewItems(false);
@@ -162,7 +162,7 @@ public class PreviewItemManager {
         if (index == -1) {
             return getFinalIconParams(params);
         }
-        return mIcon.mPreviewLayoutRule.computePreviewItemDrawingParams(index, curNumItems, params);
+        return mIcon.getLayoutRule().computePreviewItemDrawingParams(index, curNumItems, params);
     }
 
     private PreviewItemDrawingParams getFinalIconParams(PreviewItemDrawingParams params) {
@@ -248,7 +248,7 @@ public class PreviewItemManager {
         // If there are more params than visible in the preview, they are used for enter/exit
         // animation purposes and they were added to the front of the list.
         // To index the params properly, we need to skip these params.
-        index = index + Math.max(mFirstPageParams.size() - MAX_NUM_ITEMS_IN_PREVIEW, 0);
+        index = index + Math.max(mFirstPageParams.size() - mIcon.getLayoutRule().getMaxNumItemsInPreview(), 0);
 
         PreviewItemDrawingParams params = index < mFirstPageParams.size() ?
                 mFirstPageParams.get(index) : null;
@@ -268,7 +268,8 @@ public class PreviewItemManager {
             params.add(new PreviewItemDrawingParams(0, 0, 0));
         }
 
-        int numItemsInFirstPagePreview = page == 0 ? items.size() : MAX_NUM_ITEMS_IN_PREVIEW;
+        int numItemsInFirstPagePreview = page == 0 ?
+                items.size() : mIcon.getLayoutRule().getMaxNumItemsInPreview();
         for (int i = 0; i < params.size(); i++) {
             PreviewItemDrawingParams p = params.get(i);
             setDrawable(p, items.get(i));

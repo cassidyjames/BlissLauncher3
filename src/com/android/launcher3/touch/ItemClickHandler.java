@@ -48,6 +48,7 @@ import com.android.launcher3.LauncherSettings;
 import com.android.launcher3.R;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.apppairs.AppPairIcon;
+import com.android.launcher3.Workspace;
 import com.android.launcher3.folder.Folder;
 import com.android.launcher3.folder.FolderIcon;
 import com.android.launcher3.lineage.trust.db.TrustDatabaseHelper;
@@ -79,6 +80,8 @@ import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
+import foundation.e.bliss.folder.GridFolder;
+
 /**
  * Class for handling clicks on workspace and all-apps items
  */
@@ -91,25 +94,42 @@ public class ItemClickHandler {
      */
     public static final OnClickListener INSTANCE = ItemClickHandler::onClick;
 
-    private static void onClick(View v) {
+    public static void onClick(View v) {
         // Make sure that rogue clicks don't get through while allapps is launching, or after the
         // view has detached (it's possible for this to happen if the view is removed mid touch).
         if (v.getWindowToken() == null) return;
 
         Launcher launcher = Launcher.getLauncher(v.getContext());
+        final Workspace<?> workspace = launcher.getWorkspace();
         if (!launcher.getWorkspace().isFinishedSwitchingState()) return;
+
+        if (v instanceof BubbleTextView && launcher.getWorkspace().isWobbling()) {
+            if (((BubbleTextView) v).tryToHandleUninstallClick(launcher)) {
+                return;
+            }
+        }
 
         Object tag = v.getTag();
         if (tag instanceof WorkspaceItemInfo) {
-            onClickAppShortcut(v, (WorkspaceItemInfo) tag, launcher);
-        } else if (tag instanceof FolderInfo) {
-            if (v instanceof FolderIcon) {
-                onClickFolderIcon(v);
-            } else if (v instanceof AppPairIcon) {
-                onClickAppPairIcon(v);
+            Folder folder = Folder.getOpen(launcher);
+            if (folder instanceof GridFolder && ((GridFolder) folder).isFolderWobbling()) {
+                ((GridFolder) folder).wobbleFolder(false);
+                workspace.wobbleLayouts(false);
+            } else if (workspace.isWobbling()) {
+                workspace.wobbleLayouts(false);
+            } else {
+                onClickAppShortcut(v, (WorkspaceItemInfo) tag, launcher);
             }
+        } else if (tag instanceof FolderInfo) {
+                onClickFolderIcon(v);
+        } else if(tag instanceof AppPairIcon) {
+                onClickAppPairIcon(v);
         } else if (tag instanceof AppInfo) {
-            startAppShortcutOrInfoActivity(v, (AppInfo) tag, launcher);
+            if (workspace.isWobbling()) {
+                workspace.wobbleLayouts(false);
+            } else {
+                startAppShortcutOrInfoActivity(v, (AppInfo) tag, launcher);
+            }
         } else if (tag instanceof LauncherAppWidgetInfo) {
             if (v instanceof PendingAppWidgetHostView) {
                 onClickPendingWidget((PendingAppWidgetHostView) v, launcher);

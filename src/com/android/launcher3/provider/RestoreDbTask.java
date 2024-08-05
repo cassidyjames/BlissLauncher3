@@ -199,7 +199,7 @@ public class RestoreDbTask {
         if (enableLauncherBrMetricsFixed()) {
             reportUnrestoredProfiles(db, where, profileIds, restoreEventLogger);
         }
-        int itemsDeletedCount = db.delete(Favorites.TABLE_NAME, where, profileIds);
+        int itemsDeletedCount = db.delete(Favorites.getFavoritesTableName(), where, profileIds);
         FileLog.d(TAG, itemsDeletedCount + " total items from unrestored user(s) were deleted");
 
         // Mark all items as restored.
@@ -207,14 +207,14 @@ public class RestoreDbTask {
         ContentValues values = new ContentValues();
         values.put(Favorites.RESTORED, WorkspaceItemInfo.FLAG_RESTORED_ICON
                 | (keepAllIcons ? WorkspaceItemInfo.FLAG_RESTORE_STARTED : 0));
-        db.update(Favorites.TABLE_NAME, values, null, null);
+        db.update(Favorites.getFavoritesTableName(), values, null, null);
 
         // Mark widgets with appropriate restore flag.
         values.put(Favorites.RESTORED,  LauncherAppWidgetInfo.FLAG_ID_NOT_VALID
                 | LauncherAppWidgetInfo.FLAG_PROVIDER_NOT_READY
                 | LauncherAppWidgetInfo.FLAG_UI_NOT_READY
                 | (keepAllIcons ? LauncherAppWidgetInfo.FLAG_RESTORE_STARTED : 0));
-        db.update(Favorites.TABLE_NAME, values, "itemType = ?",
+        db.update(Favorites.getFavoritesTableName(), values, "itemType = ?",
                 new String[]{Integer.toString(Favorites.ITEM_TYPE_APPWIDGET)});
 
         // Migrate ids. To avoid any overlap, we initially move conflicting ids to a temp
@@ -264,14 +264,14 @@ public class RestoreDbTask {
      */
     protected void removeScreenIdGaps(SQLiteDatabase db) {
         FileLog.d(TAG, "Removing gaps between screenIds");
-        IntArray distinctScreens = LauncherDbUtils.queryIntArray(true, db, Favorites.TABLE_NAME,
+        IntArray distinctScreens = LauncherDbUtils.queryIntArray(true, db, Favorites.getFavoritesTableName(),
                 Favorites.SCREEN, Favorites.CONTAINER + " = " + Favorites.CONTAINER_DESKTOP, null,
                 Favorites.SCREEN);
         if (distinctScreens.isEmpty()) {
             return;
         }
 
-        StringBuilder sql = new StringBuilder("UPDATE ").append(Favorites.TABLE_NAME)
+        StringBuilder sql = new StringBuilder("UPDATE ").append(Favorites.getFavoritesTableName())
                 .append(" SET ").append(Favorites.SCREEN).append(" =\nCASE\n");
         int screenId = distinctScreens.contains(0) ? 0 : 1;
         for (int i = 0; i < distinctScreens.size(); i++) {
@@ -291,7 +291,7 @@ public class RestoreDbTask {
         // Update existing entries.
         ContentValues values = new ContentValues();
         values.put(Favorites.PROFILE_ID, newProfileId);
-        db.update(Favorites.TABLE_NAME, values, "profileId = ?",
+        db.update(Favorites.getFavoritesTableName(), values, "profileId = ?",
                 new String[]{Long.toString(oldProfileId)});
     }
 
@@ -300,9 +300,9 @@ public class RestoreDbTask {
      * Changes the default value for the column.
      */
     protected void changeDefaultColumn(SQLiteDatabase db, long newProfileId) {
-        db.execSQL("ALTER TABLE favorites RENAME TO favorites_old;");
+        db.execSQL("ALTER TABLE " + Favorites.getFavoritesTableName() + " RENAME TO favorites_old;");
         Favorites.addTableToDb(db, newProfileId, false);
-        db.execSQL("INSERT INTO favorites SELECT * FROM favorites_old;");
+        db.execSQL("INSERT INTO " + Favorites.getFavoritesTableName() + " SELECT * FROM favorites_old;");
         dropTable(db, "favorites_old");
     }
 
@@ -311,7 +311,7 @@ public class RestoreDbTask {
      */
     private LongSparseArray<Long> getManagedProfileIds(SQLiteDatabase db, long defaultProfileId) {
         LongSparseArray<Long> ids = new LongSparseArray<>();
-        try (Cursor c = db.rawQuery("SELECT profileId from favorites WHERE profileId != ? "
+        try (Cursor c = db.rawQuery("SELECT profileId from " + Favorites.getFavoritesTableName() + " WHERE profileId != ? "
                 + "GROUP BY profileId", new String[] {Long.toString(defaultProfileId)})) {
             while (c.moveToNext()) {
                 ids.put(c.getLong(c.getColumnIndex(Favorites.PROFILE_ID)), null);
@@ -445,7 +445,7 @@ public class RestoreDbTask {
                 FileLog.e(TAG, "restoreAppWidgetIds: remapping failed since the widget is not in"
                         + " the database anymore");
                 try (Cursor cursor = controller.getDb().query(
-                        Favorites.TABLE_NAME,
+                        Favorites.getFavoritesTableName(),
                         new String[]{Favorites.APPWIDGET_ID},
                         "appWidgetId=?", new String[]{oldWidgetId}, null, null, null)) {
                     if (!cursor.moveToFirst()) {
@@ -470,7 +470,7 @@ public class RestoreDbTask {
     }
 
     private static void logDatabaseWidgetInfo(ModelDbController controller) {
-        try (Cursor cursor = controller.getDb().query(Favorites.TABLE_NAME,
+        try (Cursor cursor = controller.getDb().query(Favorites.getFavoritesTableName(),
                 new String[]{Favorites.APPWIDGET_ID, Favorites.RESTORED, Favorites.PROFILE_ID},
                 Favorites.APPWIDGET_ID + "!=" + LauncherAppWidgetInfo.NO_ID, null,
                 null, null, null)) {
@@ -521,7 +521,7 @@ public class RestoreDbTask {
             return;
         }
 
-        try (Cursor c = db.query(Favorites.TABLE_NAME,
+        try (Cursor c = db.query(Favorites.getFavoritesTableName(),
                 new String[]{Favorites._ID, Favorites.INTENT},
                 String.format("%s=? AND %s=? AND ( %s )", Favorites.ITEM_TYPE, Favorites.PROFILE_ID,
                         getTelephonyIntentSQLLiteSelection(activityOverrides.keySet())),
@@ -538,7 +538,7 @@ public class RestoreDbTask {
                     values.put(Favorites.PROFILE_ID,
                             controller.getSerialNumberForUser(override.getUser()));
                     values.put(Favorites.INTENT, AppInfo.makeLaunchIntent(override).toUri(0));
-                    db.update(Favorites.TABLE_NAME, values, String.format("%s=?", Favorites._ID),
+                    db.update(Favorites.getFavoritesTableName(), values, String.format("%s=?", Favorites._ID),
                             new String[]{String.valueOf(c.getInt(idIndex))});
                 }
             }
@@ -566,7 +566,7 @@ public class RestoreDbTask {
     public static void logFavoritesTable(SQLiteDatabase database, @NonNull String logHeader,
             String where, String[] profileIds) {
         try (Cursor cursor = database.query(
-                /* table */ Favorites.TABLE_NAME,
+                /* table */ Favorites.getFavoritesTableName(),
                 /* columns */ DB_COLUMNS_TO_LOG,
                 /* selection */ where,
                 /* selection args */ profileIds,
@@ -607,7 +607,7 @@ public class RestoreDbTask {
      */
     private void reportUnrestoredProfiles(SQLiteDatabase database, String where,
             String[] profileIds, LauncherRestoreEventLogger restoreEventLogger) {
-        final String query = "SELECT itemType, COUNT(*) AS count FROM favorites WHERE "
+        final String query = "SELECT itemType, COUNT(*) AS count FROM " + Favorites.getFavoritesTableName() + " WHERE "
                 + where + " GROUP BY itemType";
         try (Cursor cursor = database.rawQuery(query, profileIds)) {
             if (cursor.moveToFirst()) {

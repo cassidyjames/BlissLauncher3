@@ -45,9 +45,13 @@ import android.view.animation.OvershootInterpolator;
 import androidx.annotation.Nullable;
 
 import com.android.launcher3.Insettable;
+import com.android.launcher3.Launcher;
 import com.android.launcher3.R;
 import com.android.launcher3.Utilities;
+import com.android.launcher3.folder.Folder;
 import com.android.launcher3.util.Themes;
+
+import foundation.e.bliss.multimode.MultiModeController;
 
 /**
  * {@link PageIndicator} which shows dots per page. The active page is shown with the current
@@ -184,6 +188,10 @@ public class PageIndicatorDots extends View implements Insettable, PageIndicator
             currentScroll = totalScroll - currentScroll;
         }
 
+        if (currentScroll == 0) {
+            return;
+        }
+
         mTotalScroll = totalScroll;
 
         int scrollPerPage = totalScroll / (mNumPages - 1);
@@ -229,8 +237,22 @@ public class PageIndicatorDots extends View implements Insettable, PageIndicator
     }
 
     private void hideAfterDelay() {
+        if (MultiModeController.isSingleLayerMode()) return;
         mDelayedPaginationFadeHandler.removeCallbacksAndMessages(null);
         mDelayedPaginationFadeHandler.postDelayed(mHidePaginationRunnable, PAGINATION_FADE_DELAY);
+    }
+
+
+    @Override
+    public void setAlpha(float alpha) {
+        Launcher launcher = Launcher.getLauncher(getContext());
+        if (launcher.getWorkspace().getPageIndicator() == this) {
+            if (Folder.getOpen(launcher) == null) {
+                super.setAlpha(alpha);
+            }
+        } else {
+            super.setAlpha(alpha);
+        }
     }
 
     private void animatePaginationToAlpha(int alpha) {
@@ -492,6 +514,14 @@ public class PageIndicatorDots extends View implements Insettable, PageIndicator
                 );
             }
         }
+    }
+
+    @Override
+    public void setTranslationY(float translationY) {
+    }
+
+    public void  setForcedTranslationY(float translationY) {
+        super.setTranslationY(translationY);
     }
 
     /**

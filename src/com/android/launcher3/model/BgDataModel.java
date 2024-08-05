@@ -17,7 +17,6 @@ package com.android.launcher3.model;
 
 import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_GET_KEY_FIELDS_ONLY;
 
-import static com.android.launcher3.BuildConfig.QSB_ON_FIRST_SCREEN;
 import static com.android.launcher3.config.FeatureFlags.ENABLE_SMARTSPACE_REMOVAL;
 import static com.android.launcher3.config.FeatureFlags.shouldShowFirstPageWidget;
 import static com.android.launcher3.model.WidgetsModel.GO_DISABLE_WIDGETS;
@@ -39,8 +38,8 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.launcher3.BuildConfig;
 import com.android.launcher3.LauncherSettings;
-import com.android.launcher3.LauncherSettings.Favorites;
 import com.android.launcher3.Workspace;
 import com.android.launcher3.config.FeatureFlags;
 import com.android.launcher3.model.data.AppInfo;
@@ -76,6 +75,8 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import foundation.e.bliss.utils.BlissDbUtils;
 
 /**
  * All the data stored in-memory and managed by the LauncherModel
@@ -135,7 +136,7 @@ public class BgDataModel {
      * Load id for which the callbacks were successfully bound
      */
     public int lastLoadId = -1;
-    public boolean isFirstPagePinnedItemEnabled = QSB_ON_FIRST_SCREEN
+    public boolean isFirstPagePinnedItemEnabled = BuildConfig.QSB_ON_FIRST_SCREEN
             && !ENABLE_SMARTSPACE_REMOVAL.get();
 
     /**
@@ -160,7 +161,7 @@ public class BgDataModel {
                 screenSet.add(item.screenId);
             }
         }
-        if ((FeatureFlags.QSB_ON_FIRST_SCREEN
+        if ((FeatureFlags.QSB_ON_FIRST_SCREEN.get()
                 && !shouldShowFirstPageWidget())
                 || screenSet.isEmpty()) {
             screenSet.add(Workspace.FIRST_SCREEN_ID);
@@ -321,14 +322,12 @@ public class BgDataModel {
                         mapping(ShortcutInfo::getId, Collectors.toSet())));
 
         // Collect all model shortcuts
-        Stream.Builder<WorkspaceItemInfo> itemStream = Stream.builder();
-        forAllWorkspaceItemInfos(user, itemStream::accept);
+        Stream.Builder<ShortcutKey> itemStream = Stream.builder();
+        BlissDbUtils.queryDeepShortcutsFromDb(context).forEach(itemStream);
         // Map of packageName to shortcutIds that are currently in our model
         Map<String, Set<String>> modelMap = Stream.concat(
                     // Model shortcuts
-                    itemStream.build()
-                        .filter(wi -> wi.itemType == Favorites.ITEM_TYPE_DEEP_SHORTCUT)
-                        .map(ShortcutKey::fromItemInfo),
+                    itemStream.build(),
                     // Pending shortcuts
                     ItemInstallQueue.INSTANCE.get(context).getPendingShortcuts(user))
                 .collect(groupingBy(ShortcutKey::getPackageName,

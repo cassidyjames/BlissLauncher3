@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission
+        android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
+        tools:ignore="ScopedStorage" />
+    <uses-permission android:name="foundation.e.pwaplayer.provider.READ_WRITE" />
+
+    <application android:icon="@mipmap/ic_launcher">
+
+        <activity
+            android:name="foundation.e.bliss.widgets.WidgetsActivity"
+            android:autoRemoveFromRecents="true"
+            android:clearTaskOnLaunch="true"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:label="@string/remove_widgets"
+            android:theme="@style/HomeSettings.Theme" />
+
+        <!-- Dummy receiver for the migration of weather app -->
+        <receiver
+            android:name="foundation.e.blisslauncher.features.weather.WeatherAppWidgetProvider"
+            android:exported="false"
+            android:label="@string/app_name"
+            tools:ignore="Instantiatable">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/weather_appwidget_info" />
+        </receiver>
+
+
+        <service
+            android:name="foundation.e.blisslauncher.features.notification.NotificationService"
+            android:label="@string/notification_dots_service_title"
+            android:exported="true"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
+
+    </application>
+
+</manifest>

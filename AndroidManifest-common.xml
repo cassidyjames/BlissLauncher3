@@ -31,6 +31,10 @@
     with some minor changed based on the derivative app.
     -->
 
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
     <uses-permission android:name="android.permission.CALL_PHONE" />
     <uses-permission android:name="android.permission.SET_WALLPAPER" />
     <uses-permission android:name="android.permission.SET_WALLPAPER_HINTS" />
@@ -41,6 +45,7 @@
     <uses-permission android:name="android.permission.READ_DEVICE_CONFIG" />
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
     <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
     <!-- for rotating surface by arbitrary degree -->
     <uses-permission android:name="android.permission.ROTATE_SURFACE_FLINGER" />
     <uses-permission android:name="android.permission.WAKEUP_SURFACE_FLINGER" />
@@ -74,7 +79,10 @@
         android:fullBackupContent="@xml/backupscheme"
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
+        tools:replace="android:label"
         android:label="@string/derived_app_name"
+        android:usesCleartextTraffic="true"
+        android:allowClearUserData="true"
         android:largeHeap="@bool/config_largeHeap"
         android:restoreAnyVersion="true"
         android:supportsRtl="true" >
@@ -129,8 +137,8 @@
             android:name="com.android.launcher3.LauncherProvider"
             android:authorities="${packageName}.settings"
             android:exported="true"
-            android:writePermission="${packageName}.permission.WRITE_SETTINGS"
-            android:readPermission="${packageName}.permission.READ_SETTINGS" />
+            android:writePermission="${applicationId}.permission.WRITE_SETTINGS"
+            android:readPermission="${applicationId}.permission.READ_SETTINGS" />
 
         <!--
         The content provider for exposing various launcher grid options.
@@ -139,8 +147,8 @@
             android:name="com.android.launcher3.graphics.GridCustomizationsProvider"
             android:authorities="${packageName}.grid_control"
             android:exported="true"
-            android:writePermission="${packageName}.permission.WRITE_SETTINGS"
-            android:readPermission="${packageName}.permission.READ_SETTINGS" />
+            android:writePermission="${applicationId}.permission.WRITE_SETTINGS"
+            android:readPermission="${applicationId}.permission.READ_SETTINGS" />
 
         <!--
         The settings activity. To extend point settings_fragment_name to appropriate fragment class

@@ -28,6 +28,7 @@ import com.android.launcher3.Reorderable
 import com.android.launcher3.Workspace
 import com.android.launcher3.util.MultiTranslateDelegate.INDEX_REORDER_BOUNCE_OFFSET
 import com.android.launcher3.util.Thunk
+import foundation.e.bliss.multimode.MultiModeController
 import kotlin.math.abs
 import kotlin.math.atan
 import kotlin.math.cos
@@ -107,6 +108,7 @@ class ReorderPreviewAnimation<T>(
     }
 
     fun animate() {
+        if (MultiModeController.isSingleLayerMode) return;
         val noMovement = finalDeltaX == 0f && finalDeltaY == 0f
         if (shakeAnimators.containsKey(child)) {
             val oldAnimation: ReorderPreviewAnimation<T>? = shakeAnimators.remove(child)

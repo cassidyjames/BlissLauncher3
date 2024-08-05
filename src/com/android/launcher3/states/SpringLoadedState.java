@@ -23,6 +23,7 @@ import com.android.launcher3.DeviceProfile;
 import com.android.launcher3.Launcher;
 import com.android.launcher3.LauncherState;
 import com.android.launcher3.Workspace;
+import com.android.launcher3.config.FeatureFlags;
 
 /**
  * Definition for spring loaded state used during drag and drop.
@@ -46,7 +47,7 @@ public class SpringLoadedState extends LauncherState {
     public ScaleAndTranslation getWorkspaceScaleAndTranslation(Launcher launcher) {
         DeviceProfile grid = launcher.getDeviceProfile();
         Workspace<?> ws = launcher.getWorkspace();
-        if (ws.getChildCount() == 0) {
+        if (ws.getChildCount() == 0 || FeatureFlags.SHOW_HOME_GARDENING.get()) {
             return super.getWorkspaceScaleAndTranslation(launcher);
         }
 
@@ -62,6 +63,9 @@ public class SpringLoadedState extends LauncherState {
 
     @Override
     protected float getDepthUnchecked(Context context) {
+        if (FeatureFlags.SHOW_HOME_GARDENING.get()) {
+            return 0;
+        }
         return 0.5f;
     }
 
@@ -72,6 +76,9 @@ public class SpringLoadedState extends LauncherState {
 
     @Override
     public float getWorkspaceBackgroundAlpha(Launcher launcher) {
+        if (FeatureFlags.SHOW_HOME_GARDENING.get()) {
+            return 0;
+        }
         return 0.2f;
     }
 }

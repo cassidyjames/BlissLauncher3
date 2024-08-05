@@ -43,6 +43,8 @@ import com.android.launcher3.uioverrides.flags.FlagsFactory;
 import java.util.function.Predicate;
 import java.util.function.ToIntFunction;
 
+import foundation.e.bliss.multimode.MultiModeController;
+
 /**
  * Defines a set of flags used to control various launcher behaviors.
  * <p>
@@ -70,7 +72,11 @@ public final class FeatureFlags {
      * @deprecated Use {@link BuildConfig#QSB_ON_FIRST_SCREEN} directly
      */
     @Deprecated
-    public static final boolean QSB_ON_FIRST_SCREEN = BuildConfig.QSB_ON_FIRST_SCREEN;
+    public static class QSB_ON_FIRST_SCREEN {
+        public static boolean get() {
+            return  MultiModeController.isSingleLayerMode();
+        }
+    }
 
     /**
      * Feature flag to handle define config changes dynamically instead of killing the process.
@@ -220,7 +226,7 @@ public final class FeatureFlags {
 
     // TODO(Block 14): Cleanup flags
     public static final BooleanFlag NOTIFY_CRASHES = getDebugFlag(270393108, "NOTIFY_CRASHES",
-            TEAMFOOD, "Sends a notification whenever launcher encounters an uncaught exception.");
+            ENABLED, "Sends a notification whenever launcher encounters an uncaught exception.");
 
     public static final boolean ENABLE_TASKBAR_NAVBAR_UNIFICATION =
             enableTaskbarNavbarUnification() && !isPhone();
@@ -427,7 +433,7 @@ public final class FeatureFlags {
             DISABLED, "Always use hardware optimization for folder animations.");
 
     public static final BooleanFlag SEPARATE_RECENTS_ACTIVITY = getDebugFlag(270392980,
-            "SEPARATE_RECENTS_ACTIVITY", DISABLED,
+            "SEPARATE_RECENTS_ACTIVITY", ENABLED,
             "Uses a separate recents activity instead of using the integrated recents+Launcher UI");
 
     public static final BooleanFlag ENABLE_ENFORCED_ROUNDED_CORNERS = getReleaseFlag(270393258,
@@ -445,6 +451,18 @@ public final class FeatureFlags {
     public static boolean enableSplitContextually() {
         return ENABLE_SPLIT_FROM_WORKSPACE_TO_WORKSPACE.get() ||
                 com.android.wm.shell.Flags.enableSplitContextual();
+    }
+
+    public static final class SHOW_HOME_GARDENING {
+        public static boolean get() {
+            if (MultiModeController.isSingleLayerMode()) {
+                return  true;
+            } else {
+                return getDebugFlag(270395183,
+                        "SHOW_HOME_GARDENING", DISABLED,
+                        "Show the new home gardening mode").get();
+            }
+        }
     }
 
     public static final BooleanFlag ENABLE_TRACKPAD_GESTURE = getDebugFlag(271010401,
