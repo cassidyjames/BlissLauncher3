@@ -379,7 +379,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         // We need padding zeroed out for minus one page.
         // Also handle vertical bar layout padding manually under
         // updateCellLayoutPadding
-        if (grid.isLandscape) {
+        if (grid.isLandscape || grid.isTablet) {
             setPadding(0, padding.top, 0, padding.bottom);
         } else {
             setPadding(padding.left, padding.top, padding.right, padding.bottom);
