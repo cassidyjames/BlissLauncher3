@@ -19,6 +19,7 @@ package com.android.launcher3;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Rect;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -153,6 +154,15 @@ public class Hotseat extends CellLayout implements Insettable, OffsetParent {
         super.onDraw(canvas);
     }
 
+    public void setBlurAlpha(int alpha) {
+        if (alpha > 255) {
+            alpha = 255;
+        } else if (alpha < 0) {
+            alpha = 0;
+        }
+        mBlurDelegate.setBlurAlpha(alpha);
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         // See comment in #onInterceptTouchEvent
@@ -197,6 +207,14 @@ public class Hotseat extends CellLayout implements Insettable, OffsetParent {
         int bottom = b - t - dp.getQsbOffsetY();
         int top = bottom - dp.hotseatQsbHeight;
         mQsb.layout(left, top, right, bottom);
+
+        // Setting name is hardcoded here to prevent recompilation of
+        // framework jar for studio build
+        Settings.Secure.putInt(getContext().getContentResolver(),
+                "bliss_launcher_dock_width",
+                dp.isVerticalBarLayout()
+                        ? getWidth() - dp.getExtraStatusBarPadding()
+                        : 0);
     }
 
     /**
@@ -228,7 +246,9 @@ public class Hotseat extends CellLayout implements Insettable, OffsetParent {
         return mWorkspace;
     }
 
-    public void setForcedTranslationY(float translationY){
+    // To reduce notifyOffsetChanged() calls
+    public void setForcedTranslationXY(float translationX, float translationY){
+        super.setTranslationX(translationX);
         super.setTranslationY(translationY);
         offsetParentDelegate.notifyOffsetChanged();
     }

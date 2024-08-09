@@ -125,6 +125,8 @@ public class InvariantDeviceProfile implements OnSharedPreferenceChangeListener 
      */
     public int numRows;
     public int numColumns;
+    public int numRowsFixed;
+    public int numColumnsFixed;
     public int numSearchContainerColumns;
 
     /**
@@ -364,7 +366,9 @@ public class InvariantDeviceProfile implements OnSharedPreferenceChangeListener 
         DisplayMetrics metrics = context.getResources().getDisplayMetrics();
         GridOption closestProfile = displayOption.grid;
         numRows = closestProfile.numRows;
+        numRowsFixed = closestProfile.numRows;
         numColumns = closestProfile.numColumns;
+        numColumnsFixed = closestProfile.numColumns;
         numSearchContainerColumns = closestProfile.numSearchContainerColumns;
         dbFile = closestProfile.dbFile;
         defaultLayoutId = closestProfile.defaultLayoutId;
@@ -634,6 +638,8 @@ public class InvariantDeviceProfile implements OnSharedPreferenceChangeListener 
             if (numRows > 0 && numColumns > 0) {
                 this.numRows = numRows;
                 this.numColumns = numColumns;
+                this.numRowsFixed = numRows;
+                this.numColumnsFixed = numColumns;
             }
             if (iconSizePx > 0) {
                 this.iconSize[InvariantDeviceProfile.INDEX_DEFAULT] =

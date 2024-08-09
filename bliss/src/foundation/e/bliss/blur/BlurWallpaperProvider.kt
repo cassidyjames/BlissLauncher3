@@ -32,7 +32,7 @@ class BlurWallpaperProvider(val context: Context) {
 
     private val mWallpaperManager: WallpaperManager = WallpaperManager.getInstance(context)
     private val mListeners = ArrayList<Listener>()
-    private val mDisplaySize = DisplayController.INSTANCE.get(context).info.currentSize
+    private var mDisplaySize = DisplayController.INSTANCE.get(context).info.currentSize
 
     var wallpapers: BlurSizes? = null
         private set(value) {
@@ -85,6 +85,7 @@ class BlurWallpaperProvider(val context: Context) {
             return
         }
 
+        mDisplaySize = DisplayController.INSTANCE.get(context).info.currentSize
         val width = mDisplaySize.x
         val height = mDisplaySize.y
 
@@ -277,7 +278,7 @@ class BlurWallpaperProvider(val context: Context) {
 
         @JvmField val blurConfigBackground = BlurConfig({ it.background }, 2, 8)
 
-        @JvmField val blurConfigDock = BlurConfig({ it.dock }, 2, 0)
+        @JvmField val blurConfigDock = BlurConfig({ it.dock }, 2, 8)
 
         @JvmField val blurConfigAppGroup = BlurConfig({ it.appGroup }, 6, 8)
 
