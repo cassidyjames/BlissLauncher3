@@ -29,4 +29,5 @@
     <string name="widget_remove">Verwijderen</string>
     <string name="remove_widgets">Widgets verwijderen</string>
     <string name="show_notification_count">Teller voor meldingen weergeven</string>
+    <string name="add_to_widget_Screen">Toevoegen aan scherm -1</string>
 </resources>
