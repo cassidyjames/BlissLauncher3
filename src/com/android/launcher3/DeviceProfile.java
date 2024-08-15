@@ -1391,7 +1391,15 @@ public class DeviceProfile {
             }
         } else if (isTaskbarPresent) {
             // Center the QSB vertically with hotseat
-            int hotseatBarBottomPadding = getHotseatBarBottomPadding();
+            boolean noHint = isFullyGesture && LineageSettings.System.getInt(
+                    context.getContentResolver(), LineageSettings.System.NAVIGATION_BAR_HINT, 0) != 1;
+            int hotseatIconMargin = Math.abs(hotseatCellHeightPx - iconSizePx);
+            // Values obtained by manual validation, independent of dpi and display scale
+            double marginScaleFactor = isFullyGesture
+                    ? (noHint ? 2.5 : 3.25)
+                    : 2.75;
+            int hotseatBarBottomPadding = getHotseatBarBottomPadding() -
+                    (int) (marginScaleFactor * hotseatIconMargin);
             int hotseatBarTopPadding =
                     hotseatBarSizePx - hotseatBarBottomPadding - hotseatCellHeightPx;
             int hotseatWidth = getHotseatRequiredWidth();

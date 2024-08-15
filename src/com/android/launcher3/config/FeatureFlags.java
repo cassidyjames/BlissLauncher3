@@ -411,6 +411,10 @@ public final class FeatureFlags {
             "ENABLE_KEYBOARD_QUICK_SWITCH", false,
             "Enables keyboard quick switching");
 
+    public static final BooleanFlag ENABLE_TASKBAR_ALLAPPS = getDebugFlag(-1,
+            "ENABLE_TASKBAR_ALLAPPS", false,
+            "Enables all apps button in taskbar");
+
     public static class BooleanFlag {
 
         private final boolean mCurrentValue;
