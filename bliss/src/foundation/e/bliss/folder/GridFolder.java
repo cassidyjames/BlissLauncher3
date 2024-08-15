@@ -169,19 +169,22 @@ public class GridFolder extends Folder implements OnAlarmListener {
 
     @Override
     public void onFolderOpenStart() {
-        mLastStateBeforeOpen = mLauncher.getStateManager().getState();
-        if (!mLauncher.isInState(NORMAL)) {
-            mLauncher.getStateManager().goToState(LauncherState.NORMAL, false);
-            if (isCanRestoredState(mLastStateBeforeOpen)) {
-                mNeedResetState = true;
+        if (mLauncher != null) {
+            mLastStateBeforeOpen = mLauncher.getStateManager().getState();
+            if (!mLauncher.isInState(NORMAL)) {
+                mLauncher.getStateManager().goToState(NORMAL, false);
+                if (isCanRestoredState(mLastStateBeforeOpen)) {
+                    mNeedResetState = true;
+                }
             }
-        }
-
-        showOrHideDesktop(mLauncher, true);
-        if (mLauncher.getWorkspace().isWobbling()) {
-            wobbleFolder(true);
-        } else if (isFolderWobbling) {
-            wobbleFolder(false);
+            showOrHideDesktop(mLauncher, true);
+            if (mLauncher.getWorkspace().isWobbling()) {
+                wobbleFolder(true);
+            } else if (isFolderWobbling) {
+                wobbleFolder(false);
+            }
+        } else {
+            mNeedResetState = true;
         }
     }
 
@@ -195,6 +198,11 @@ public class GridFolder extends Folder implements OnAlarmListener {
 
     @Override
     protected void handleClose(boolean animate) {
+        if (mLauncher == null) {
+            super.handleClose(animate);
+            return;
+        }
+
         if (!mLauncher.isInState(mLastStateBeforeOpen)) {
             if (mLauncher.getDragController().isDragging()) {
                 mNeedResetState = false;
@@ -253,7 +261,7 @@ public class GridFolder extends Folder implements OnAlarmListener {
 
         AnimatorSet set = new AnimatorSet();
 
-        Workspace<?> workspace = launcher.getWorkspace();
+        Workspace<?> workspace = launcher == null ? null : launcher.getWorkspace();
         if (workspace != null) {
             play(set, getAnimator(workspace, 1f, 0f, hide));
             if (workspace.getPageIndicator() != null) {
@@ -264,7 +272,7 @@ public class GridFolder extends Folder implements OnAlarmListener {
             }
         }
 
-        Hotseat hotseat = launcher.getHotseat();
+        Hotseat hotseat = launcher == null ? null : launcher.getHotseat();
         if (hotseat != null) {
             play(set, getAnimator(hotseat, 1f, 0f, hide));
             View qsb = hotseat.getQsb();
@@ -274,12 +282,12 @@ public class GridFolder extends Folder implements OnAlarmListener {
 
         }
 
-        ScrimView scrimView = launcher.findViewById(R.id.scrim_view);
+        ScrimView scrimView = launcher == null ? null : launcher.findViewById(R.id.scrim_view);
         if (scrimView != null) {
             play(set, getAnimator(scrimView, 1f, 0f, hide));
         }
 
-        BlurBackgroundView blur = launcher.mBlurLayer;
+        BlurBackgroundView blur = launcher == null ? null : launcher.mBlurLayer;
         if (blur != null) {
             play(set, getAnimator(blur, 0f, 1f, hide));
         }
