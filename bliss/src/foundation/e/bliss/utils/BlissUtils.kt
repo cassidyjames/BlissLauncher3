@@ -7,8 +7,6 @@
  */
 package foundation.e.bliss.utils
 
-import android.animation.ArgbEvaluator
-import android.animation.ValueAnimator
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -19,9 +17,6 @@ import android.content.pm.PackageManager
 import android.os.Handler
 import android.os.Looper
 import android.os.UserHandle
-import android.view.Window
-import android.view.animation.LinearInterpolator
-import androidx.core.graphics.ColorUtils
 import com.android.launcher3.Launcher
 import com.android.launcher3.LauncherSettings
 import com.android.launcher3.model.data.ItemInfo
@@ -40,24 +35,6 @@ fun <T> resourcesToMap(array: List<T>): Map<T, T> {
     }
 
     return map
-}
-
-fun createNavbarColorAnimator(window: Window): ValueAnimator {
-    val navColor: Int = window.navigationBarColor or 0x26000000
-    val colorAnimation =
-        ValueAnimator.ofObject(
-            ArgbEvaluator(),
-            navColor,
-            ColorUtils.setAlphaComponent(navColor, 160)
-        )
-
-    colorAnimation.apply {
-        duration = 400
-        interpolator = LinearInterpolator()
-        addUpdateListener { window.navigationBarColor = it.animatedValue as Int }
-    }
-
-    return colorAnimation
 }
 
 fun runOnMainThread(r: () -> Unit) {
