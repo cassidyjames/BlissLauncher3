@@ -350,9 +350,7 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
 
     @Override
     public boolean isHotseatIconOnTopWhenAligned() {
-        return mTaskbarLauncherStateController.isInHotseatOnTopStates()
-                && mTaskbarInAppDisplayProgressMultiProp.get(MINUS_ONE_PAGE_PROGRESS_INDEX)
-                    .getValue() == 0;
+        return false;
     }
 
     @Override
