@@ -204,9 +204,6 @@ public class ShortcutAndWidgetContainer extends ViewGroup implements FolderIcon.
             if (child.getVisibility() != GONE) {
                 layoutChild(child);
                 numOccupied++;
-                if (child instanceof BubbleTextView) {
-
-                }
             }
         }
         int translation;
@@ -217,6 +214,7 @@ public class ShortcutAndWidgetContainer extends ViewGroup implements FolderIcon.
             translation = (getWidth() - (numOccupied * width) + mBorderSpace.x) / 2;
             if (mContainerType == HOTSEAT) {
                 setAnimatedTranslationX(translation);
+                ((CellLayout) getParent()).translationX = translation;
             }
             for (int i = 0; i < count; i++) {
                 final View child = getChildAt(i);
