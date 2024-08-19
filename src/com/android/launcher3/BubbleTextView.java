@@ -225,6 +225,9 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
 
     private Launcher mLauncher;
 
+    public int translationX = 0;
+    public int translationY = 0;
+
     public BubbleTextView(Context context) {
         this(context, null, 0);
     }
@@ -780,14 +783,24 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
     /**
      * Get the icon bounds on the view depending on the layout type.
      */
-    public void getIconBounds(Rect outBounds) {
-        getIconBounds(mIconSize, outBounds);
+
+    public void getIconBounds(Rect outBounds, boolean isClosing) {
+        getIconBounds(mIconSize, outBounds, isClosing);
     }
+
+    public void getIconBounds(Rect outBounds) {
+        getIconBounds(mIconSize, outBounds, false);
+    }
+
+    public void getIconBounds(int iconSize, Rect outBounds) {
+        getIconBounds(iconSize, outBounds, false);
+    }
+
 
     /**
      * Get the icon bounds on the view depending on the layout type.
      */
-    public void getIconBounds(int iconSize, Rect outBounds) {
+    public void getIconBounds(int iconSize, Rect outBounds, boolean isClosing) {
         outBounds.set(0, 0, iconSize, iconSize);
         if (mLayoutHorizontal) {
             int top = (getHeight() - iconSize) / 2;
@@ -798,6 +811,9 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
             }
         } else {
             outBounds.offset((getWidth() - iconSize) / 2, getPaddingTop());
+        }
+        if (isClosing) {
+            outBounds.offset(translationX, translationY);
         }
     }
 

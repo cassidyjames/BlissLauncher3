@@ -2969,7 +2969,7 @@ public class Launcher extends StatefulActivity<LauncherState>
             if (v != null && activeRecyclerView.computeVerticalScrollOffset() > 0) {
                 RectF locationBounds = new RectF();
                 FloatingIconView.getLocationBoundsForView(this, v, false, locationBounds,
-                        new Rect());
+                        new Rect(), true);
                 if (locationBounds.top < mAppsView.getHeaderBottom()) {
                     // Icon is covered by scrim, return null to play fallback animation.
                     return null;

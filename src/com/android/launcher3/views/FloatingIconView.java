@@ -220,7 +220,7 @@ public class FloatingIconView extends FrameLayout implements
 
     private static void getLocationBoundsForView(Launcher launcher, View v, boolean isOpening,
             RectF outRect) {
-        getLocationBoundsForView(launcher, v, isOpening, outRect, new Rect());
+        getLocationBoundsForView(launcher, v, isOpening, outRect, new Rect(), true);
     }
 
     /**
@@ -230,6 +230,11 @@ public class FloatingIconView extends FrameLayout implements
      */
     public static void getLocationBoundsForView(Launcher launcher, View v, boolean isOpening,
             RectF outRect, Rect outViewBounds) {
+        getLocationBoundsForView(launcher, v, isOpening, outRect, outViewBounds, false);
+    }
+
+    public static void getLocationBoundsForView(Launcher launcher, View v, boolean isOpening,
+            RectF outRect, Rect outViewBounds, boolean isClosing) {
         boolean ignoreTransform = !isOpening;
         if (v instanceof BubbleTextHolder) {
             v = ((BubbleTextHolder) v).getBubbleText();
@@ -243,7 +248,7 @@ public class FloatingIconView extends FrameLayout implements
         }
 
         if (v instanceof BubbleTextView) {
-            ((BubbleTextView) v).getIconBounds(outViewBounds);
+            ((BubbleTextView) v).getIconBounds(outViewBounds, isClosing);
         } else if (v instanceof FolderIcon) {
             ((FolderIcon) v).getPreviewBounds(outViewBounds);
         } else {
