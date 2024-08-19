@@ -432,19 +432,21 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         DeviceProfile grid = mLauncher.getDeviceProfile();
         Rect padding = grid.cellLayoutPaddingPx;
         setOrientation(mLauncher);
-        int hotseatLeftCorrection = (grid.isVerticalBarLayout() && mOrientation == Surface.ROTATION_270)
-                ? grid.hotseatBarSizePx : 0;
-        int hotseatRightCorrection = (grid.isVerticalBarLayout() && mOrientation == Surface.ROTATION_90)
-                ? grid.hotseatBarSizePx : 0;
-
+        int tabletMarginMultiplier = grid.isLandscape ? 10 : 2;
+        int leftCorrection = ((grid.isVerticalBarLayout() && mOrientation == Surface.ROTATION_270)
+                ? grid.hotseatBarSizePx : 0)
+                + (grid.isTablet ? (padding.left * tabletMarginMultiplier) : 0);
+        int rightCorrection = ((grid.isVerticalBarLayout() && mOrientation == Surface.ROTATION_90)
+                ? grid.hotseatBarSizePx : 0)
+                + (grid.isTablet ? (padding.left * tabletMarginMultiplier) : 0);
         mWorkspaceScreens.forEach(s -> {
             int widgetPadding = getResources().getDimensionPixelSize(R.dimen.widget_page_all_padding);
             int paddingTop = (s == mWorkspaceScreens.get(FIRST_SCREEN_ID)) ? 0 : padding.top;
             int paddingBottom = (s == mWorkspaceScreens.get(FIRST_SCREEN_ID)) ? 0 : padding.bottom;
             int paddingLeft = (s == mWorkspaceScreens.get(FIRST_SCREEN_ID))
-                    ? widgetPadding : (padding.left + hotseatLeftCorrection);
+                    ? widgetPadding : (padding.left + leftCorrection);
             int paddingRight = (s == mWorkspaceScreens.get(FIRST_SCREEN_ID))
-                    ? widgetPadding : (padding.right + hotseatRightCorrection);
+                    ? widgetPadding : (padding.right + rightCorrection);
             if (grid.isVerticalBarLayout()) {
                 grid.inv.numRows = grid.inv.numColumnsFixed;
                 grid.inv.numColumns = grid.inv.numRowsFixed;
