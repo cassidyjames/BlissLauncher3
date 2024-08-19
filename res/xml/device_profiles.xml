@@ -116,9 +116,9 @@
     </grid-option>
 
     <grid-option
-        launcher:name="6_by_5"
-        launcher:numRows="5"
-        launcher:numColumns="6"
+        launcher:name="4_by_6"
+        launcher:numRows="6"
+        launcher:numColumns="4"
         launcher:numSearchContainerColumns="3"
         launcher:numFolderRows="3"
         launcher:numFolderColumns="3"
