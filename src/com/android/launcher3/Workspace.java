@@ -2711,7 +2711,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         IntSet pageIndexesToVerify = IntSet.wrap(nextPage - 1,
                 nextPage + (isTwoPanelEnabled() ? 2 : 1));
 
-        int iconOffset = mLauncher.getDeviceProfile().iconSizePx / 3;
+        int iconOffset = (int) Math.round(mLauncher.getDeviceProfile().iconSizePx / 1.5);
         for (int pageIndex : pageIndexesToVerify) {
             // When deciding whether to perform a page switch, we need to consider the most
             // extreme X coordinate between the finger location and the center of the object
