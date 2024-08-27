@@ -2693,7 +2693,7 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
             pageIndexesToVerify.add(nextPage + 2);
         }
 
-        int iconOffset = mLauncher.getDeviceProfile().iconSizePx / 3;
+        int iconOffset = (int) Math.round(mLauncher.getDeviceProfile().iconSizePx / 1.5);
         int touchX = (int) Math.min(centerX, d.x);
         int touchY = d.y;
 
