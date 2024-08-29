@@ -112,6 +112,7 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) :
         mWidgetAdapter.addOnDataChangedListener(this)
         handleRemoveButtonVisibility(mWidgetAdapter.getWidgets().size)
         updatePadding()
+        updateRecyclerViewHeight()
     }
 
     override fun onConfigurationChanged(newConfig: Configuration?) {
@@ -126,6 +127,13 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) :
             else 1
         mRecyclerView.layoutManager =
             NoScrollStaggeredLayoutManager(spanCount, StaggeredGridLayoutManager.VERTICAL)
+    }
+
+    private fun updateRecyclerViewHeight() {
+        mRecyclerView.post {
+            val widgetFragment = mLauncher.fragmentManager.findFragmentByTag("qsb_view")
+            (widgetFragment as WidgetFragment).setRecyclerViewHeight()
+        }
     }
 
     private fun updatePadding() {
@@ -224,7 +232,7 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) :
         fun notifyListeners() {
             listeners.forEach { it.onDataChanged() }
         }
-        @SuppressLint("NotifyDataSetChanged")
+
         fun setWidgets(widgets: MutableList<View>) {
             this.widgets.clear()
             this.widgets = widgets
@@ -562,6 +570,34 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) :
         override fun onDestroy() {
             super.onDestroy()
             widgetObserver.dispose()
+        }
+
+        fun setRecyclerViewHeight() {
+            val layoutManager = recyclerView.layoutManager as StaggeredGridLayoutManager
+            val adapter = recyclerView.adapter
+
+            adapter?.let {
+                recyclerView.viewTreeObserver.addOnGlobalLayoutListener {
+                    val columnCount = layoutManager.spanCount
+                    val totalHeight = IntArray(columnCount) { 0 }
+
+                    for (i in 0 until adapter.itemCount) {
+                        val viewHolder = recyclerView.findViewHolderForAdapterPosition(i)
+                        viewHolder?.itemView?.let { itemView ->
+                            val layoutParams =
+                                itemView.layoutParams as StaggeredGridLayoutManager.LayoutParams
+                            val spanIndex = layoutParams.spanIndex
+                            totalHeight[spanIndex] += itemView.measuredHeight
+                        }
+                    }
+
+                    val maxHeight = totalHeight.maxOrNull() ?: 0
+                    val padding = recyclerView.paddingTop + recyclerView.paddingBottom
+                    val layoutParams = recyclerView.layoutParams
+                    layoutParams.height = maxHeight + padding
+                    recyclerView.layoutParams = layoutParams
+                }
+            }
         }
 
         companion object {
