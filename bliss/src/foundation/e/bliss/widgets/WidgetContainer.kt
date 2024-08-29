@@ -574,12 +574,14 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) :
 
         fun setRecyclerViewHeight() {
             val layoutManager = recyclerView.layoutManager as StaggeredGridLayoutManager
-            val adapter = recyclerView.adapter
+            val adapter = recyclerView.adapter as StaggeredAdapter
 
-            adapter?.let {
+            adapter.let {
                 recyclerView.viewTreeObserver.addOnGlobalLayoutListener {
-                    val columnCount = layoutManager.spanCount
-                    val totalHeight = IntArray(columnCount) { 0 }
+                    // Our maximum column span is 2.
+                    // Column span may change on rotation for phones
+                    // Hardcode 2 to workaround
+                    val totalHeight = IntArray(2) { 0 }
 
                     for (i in 0 until adapter.itemCount) {
                         val viewHolder = recyclerView.findViewHolderForAdapterPosition(i)

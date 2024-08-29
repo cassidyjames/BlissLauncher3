@@ -441,7 +441,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
                 + (grid.isTablet ? (padding.left * tabletMarginMultiplier) : 0);
         mWorkspaceScreens.forEach(s -> {
             int widgetPadding = getResources().getDimensionPixelSize(R.dimen.widget_page_all_padding);
-            if (grid.isLandscape) widgetPadding *= 40;
+            if (grid.isLandscape) widgetPadding *= grid.isTablet ? 40 : 20;
             int paddingTop = (s == mWorkspaceScreens.get(FIRST_SCREEN_ID)) ? 0 : padding.top;
             int paddingBottom = (s == mWorkspaceScreens.get(FIRST_SCREEN_ID)) ? 0 : padding.bottom;
             int paddingLeft = (s == mWorkspaceScreens.get(FIRST_SCREEN_ID))

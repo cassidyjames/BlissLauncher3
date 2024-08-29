@@ -208,7 +208,7 @@ public class ShortcutAndWidgetContainer extends ViewGroup implements FolderIcon.
         }
         int translation;
         boolean isGestural = DisplayController.getNavigationMode(getContext()).equals(NavigationMode.NO_BUTTON);
-        if (numOccupied != 0 && isGestural) {
+        if (numOccupied != 0 && isGestural && !mActivity.getDeviceProfile().isVerticalBarLayout()) {
             final CellLayoutLayoutParams lp = (CellLayoutLayoutParams) getChildAt(0).getLayoutParams();
             int width = lp.width + mBorderSpace.x;
             translation = (getWidth() - (numOccupied * width) + mBorderSpace.x) / 2;

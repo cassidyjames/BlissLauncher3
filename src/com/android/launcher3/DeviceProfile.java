@@ -697,6 +697,12 @@ public class DeviceProfile {
                     + hotseatQsbVisualHeight
                     + hotseatBarBottomSpacePx;
         }
+
+
+        if (mInfo.navigationMode != NavigationMode.NO_BUTTON) {
+            int hotseatIconMargin = Math.abs(hotseatCellHeightPx - iconSizePx);
+            hotseatBarSizePx += (int) (hotseatIconMargin * ICON_OVERLAP_FACTOR);
+        }
     }
 
     /**
