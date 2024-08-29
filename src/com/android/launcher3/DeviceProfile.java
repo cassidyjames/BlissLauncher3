@@ -699,7 +699,7 @@ public class DeviceProfile {
         }
 
 
-        if (mInfo.navigationMode != NavigationMode.NO_BUTTON) {
+        if (mInfo.navigationMode != NavigationMode.NO_BUTTON && !isVerticalBarLayout()) {
             int hotseatIconMargin = Math.abs(hotseatCellHeightPx - iconSizePx);
             hotseatBarSizePx += (int) (hotseatIconMargin * ICON_OVERLAP_FACTOR);
         }
