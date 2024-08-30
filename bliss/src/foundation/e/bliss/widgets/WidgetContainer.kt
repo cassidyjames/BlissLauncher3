@@ -25,7 +25,6 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowInsets
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.LinearLayout
@@ -137,7 +136,7 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) :
     }
 
     private fun updatePadding() {
-        val insets = mLauncher.workspace.rootWindowInsets.getInsets(WindowInsets.Type.systemBars())
+        val insets = mLauncher.workspace.mInsets
         if (::mResizeContainer.isInitialized) {
             mResizeContainer.apply {
                 val layoutParams = this.layoutParams as LayoutParams

@@ -148,7 +148,7 @@ public abstract class PagedView<T extends View & PageIndicator> extends ViewGrou
     @Thunk int mPageIndicatorViewId;
     protected T mPageIndicator;
 
-    protected final Rect mInsets = new Rect();
+    public final Rect mInsets = new Rect();
     protected boolean mIsRtl;
 
     // Similar to the platform implementation of isLayoutValid();
