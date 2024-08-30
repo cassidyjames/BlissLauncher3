@@ -120,7 +120,7 @@ class BlurWallpaperProvider(val context: Context) {
         mWallpaperWidth = wallpaper.width
 
         val offsetY: Float
-        if (wallpaper.height > height) {
+        if (wallpaper.height >= height) {
             offsetY = (wallpaper.height - height) * 0.5f
             mListeners.forEach { it.onOffsetChanged(offsetY) }
         }
