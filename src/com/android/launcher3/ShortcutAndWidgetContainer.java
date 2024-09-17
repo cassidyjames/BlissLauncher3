@@ -207,7 +207,7 @@ public class ShortcutAndWidgetContainer extends ViewGroup implements FolderIcon.
             }
         }
         int translation;
-        boolean isGestural = DisplayController.getNavigationMode(getContext()).equals(NavigationMode.NO_BUTTON);
+        boolean isGestural = DeviceProfile.isGestural(getContext());
         if (numOccupied != 0 && isGestural && !mActivity.getDeviceProfile().isVerticalBarLayout()) {
             final CellLayoutLayoutParams lp = (CellLayoutLayoutParams) getChildAt(0).getLayoutParams();
             int width = lp.width + mBorderSpace.x;
@@ -218,10 +218,8 @@ public class ShortcutAndWidgetContainer extends ViewGroup implements FolderIcon.
             }
             for (int i = 0; i < count; i++) {
                 final View child = getChildAt(i);
-                if (child.getVisibility() != GONE) {
-                    if (child instanceof BubbleTextView) {
-                        ((BubbleTextView) child).translationX = mContainerType == HOTSEAT ? translation : 0;
-                    }
+                if (child.getVisibility() != GONE && child instanceof BubbleTextView) {
+                    ((BubbleTextView) child).translationX = mContainerType == HOTSEAT ? translation : 0;
                 }
             }
         }
