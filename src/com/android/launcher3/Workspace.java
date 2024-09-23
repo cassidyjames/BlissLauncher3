@@ -31,8 +31,6 @@ import static com.android.launcher3.logging.StatsLogManager.LAUNCHER_STATE_HOME;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_SWIPELEFT;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_SWIPERIGHT;
 
-import static foundation.e.bliss.utils.BlissUtilsKt.createNavbarColorAnimator;
-
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.LayoutTransition;
@@ -304,7 +302,6 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
 
     private final StatsLogManager mStatsLogManager;
 
-    private final ValueAnimator navbarAnimator;
     private boolean isWobbling = false;
     private ItemInfo mDragObjectInfo;
     private Animation mWobbleAnimation;
@@ -342,8 +339,6 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         mWallpaperManager = WallpaperManager.getInstance(context);
         mAllAppsIconSize = mLauncher.getDeviceProfile().allAppsIconSizePx;
 
-        navbarAnimator = createNavbarColorAnimator(mLauncher.getWindow());
-
         mWallpaperOffset = new WallpaperOffsetInterpolator(this);
 
         setHapticFeedbackEnabled(false);
@@ -379,7 +374,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         // We need padding zeroed out for minus one page.
         // Also handle vertical bar layout padding manually under
         // updateCellLayoutPadding
-        if (grid.isLandscape) {
+        if (grid.isLandscape || grid.isTablet) {
             setPadding(0, padding.top, 0, padding.bottom);
         } else {
             setPadding(padding.left, padding.top, padding.right, padding.bottom);
@@ -437,20 +432,23 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         DeviceProfile grid = mLauncher.getDeviceProfile();
         Rect padding = grid.cellLayoutPaddingPx;
         setOrientation(mLauncher);
-        int hotseatLeftCorrection = (grid.isVerticalBarLayout() && mOrientation == Surface.ROTATION_270)
-                ? grid.hotseatBarSizePx : 0;
-        int hotseatRightCorrection = (grid.isVerticalBarLayout() && mOrientation == Surface.ROTATION_90)
-                ? grid.hotseatBarSizePx : 0;
-
+        int tabletMarginMultiplier = grid.isLandscape ? 10 : 2;
+        int leftCorrection = ((grid.isVerticalBarLayout() && mOrientation == Surface.ROTATION_270)
+                ? grid.hotseatBarSizePx : 0)
+                + (grid.isTablet ? (padding.left * tabletMarginMultiplier) : 0);
+        int rightCorrection = ((grid.isVerticalBarLayout() && mOrientation == Surface.ROTATION_90)
+                ? grid.hotseatBarSizePx : 0)
+                + (grid.isTablet ? (padding.left * tabletMarginMultiplier) : 0);
         mWorkspaceScreens.forEach(s -> {
             int widgetPadding = getResources().getDimensionPixelSize(R.dimen.widget_page_all_padding);
+            if (grid.isLandscape) widgetPadding *= grid.isTablet ? 40 : 20;
             int paddingTop = (s == mWorkspaceScreens.get(FIRST_SCREEN_ID)) ? 0 : padding.top;
             int paddingBottom = (s == mWorkspaceScreens.get(FIRST_SCREEN_ID)) ? 0 : padding.bottom;
             int paddingLeft = (s == mWorkspaceScreens.get(FIRST_SCREEN_ID))
-                    ? widgetPadding : (padding.left + hotseatLeftCorrection);
+                    ? widgetPadding : (padding.left + leftCorrection);
             int paddingRight = (s == mWorkspaceScreens.get(FIRST_SCREEN_ID))
-                    ? widgetPadding : (padding.right + hotseatRightCorrection);
-            if (grid.isVerticalBarLayout()) {
+                    ? widgetPadding : (padding.right + rightCorrection);
+            if (grid.isLandscape) {
                 grid.inv.numRows = grid.inv.numColumnsFixed;
                 grid.inv.numColumns = grid.inv.numRowsFixed;
             } else {
@@ -1476,10 +1474,8 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
                 }
 
                 if (mCurrentPage == 0 && prevPage == 1) {
-                    navbarAnimator.start();
                     getWindowInsetsController().hide(WindowInsetsCompat.Type.statusBars());
                 } else if (prevPage == 0 && mCurrentPage == 1) {
-                    navbarAnimator.reverse();
                     getWindowInsetsController().show(WindowInsetsCompat.Type.statusBars());
                     mFirstPagePinnedItem.clearFocus();
                 }
@@ -1507,7 +1503,6 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
                 }
 
                 mLauncher.mBlurLayer.setAlpha(1);
-                getWindowInsetsController().hide(WindowInsetsCompat.Type.statusBars());
             }
         }
         super.setCurrentPage(currentPage, overridePrevPage);

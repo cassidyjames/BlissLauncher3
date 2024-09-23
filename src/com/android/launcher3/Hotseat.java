@@ -190,11 +190,16 @@ public class Hotseat extends CellLayout implements Insettable, OffsetParent {
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        DeviceProfile dp = mActivity.getDeviceProfile();
+
+        MarginLayoutParams lp = ((MarginLayoutParams) getLayoutParams());
+        lp.leftMargin = -(dp.edgeMarginPx);
+        lp.rightMargin = -(dp.edgeMarginPx);
+        setLayoutParams(lp);
         super.onLayout(changed, l, t, r, b);
 
         int qsbMeasuredWidth = mQsb.getMeasuredWidth();
         int left;
-        DeviceProfile dp = mActivity.getDeviceProfile();
         if (dp.isQsbInline) {
             int qsbSpace = dp.hotseatBorderSpace;
             left = Utilities.isRtl(getResources()) ? r - getPaddingRight() + qsbSpace

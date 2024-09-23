@@ -89,7 +89,6 @@ import com.android.launcher3.icons.PlaceHolderIconDrawable;
 import com.android.launcher3.icons.cache.HandlerRunnable;
 import com.android.launcher3.logging.FileLog;
 import com.android.launcher3.model.data.AppInfo;
-import com.android.launcher3.model.data.FolderInfo;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.model.data.ItemInfoWithIcon;
 import com.android.launcher3.model.data.WorkspaceItemInfo;
@@ -225,6 +224,9 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
 
     private Launcher mLauncher;
 
+    public int translationX = 0;
+    public int translationY = 0;
+
     public BubbleTextView(Context context) {
         this(context, null, 0);
     }
@@ -281,7 +283,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
             mShouldShowLabel = prefs.getBoolean(KEY_SHOW_DESKTOP_LABELS, true);
         }
 
-        mCenterVertically = a.getBoolean(R.styleable.BubbleTextView_centerVertically, MultiModeController.isSingleLayerMode());
+        mCenterVertically = a.getBoolean(R.styleable.BubbleTextView_centerVertically, false);
 
         mIconSize = a.getDimensionPixelSize(R.styleable.BubbleTextView_iconSizeOverride,
                 defaultIconSize);
@@ -780,14 +782,24 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
     /**
      * Get the icon bounds on the view depending on the layout type.
      */
-    public void getIconBounds(Rect outBounds) {
-        getIconBounds(mIconSize, outBounds);
+
+    public void getIconBounds(Rect outBounds, boolean isClosing) {
+        getIconBounds(mIconSize, outBounds, isClosing);
     }
+
+    public void getIconBounds(Rect outBounds) {
+        getIconBounds(mIconSize, outBounds, false);
+    }
+
+    public void getIconBounds(int iconSize, Rect outBounds) {
+        getIconBounds(iconSize, outBounds, false);
+    }
+
 
     /**
      * Get the icon bounds on the view depending on the layout type.
      */
-    public void getIconBounds(int iconSize, Rect outBounds) {
+    public void getIconBounds(int iconSize, Rect outBounds, boolean isClosing) {
         outBounds.set(0, 0, iconSize, iconSize);
         if (mLayoutHorizontal) {
             int top = (getHeight() - iconSize) / 2;
@@ -798,6 +810,9 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
             }
         } else {
             outBounds.offset((getWidth() - iconSize) / 2, getPaddingTop());
+        }
+        if (isClosing) {
+            outBounds.offset(translationX, translationY);
         }
     }
 
@@ -810,7 +825,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        if (mCenterVertically && (getTag() != null && !(getTag() instanceof FolderInfo))) {
+        if (mCenterVertically) {
             Paint.FontMetrics fm = getPaint().getFontMetrics();
             int cellHeightPx = mIconSize + getCompoundDrawablePadding() +
                     (int) Math.ceil(fm.bottom - fm.top);

@@ -71,9 +71,12 @@ public class FolderGridOrganizer {
             calculateGridSize(contentSize);
 
             int maxSize = MAX_NUM_ITEMS_IN_PREVIEW;
-            if (MultiModeController.isSingleLayerMode()) {
-                maxSize = LauncherAppMonitor.getInstanceNoCreate().getGridFolderController()
-                        .getGridFolderIconLayoutRule().getMaxNumItemsInPreview();
+            LauncherAppMonitor monitor = LauncherAppMonitor.getInstanceNoCreate();
+            if (MultiModeController.isSingleLayerMode() && monitor != null) {
+                GridFolderController controller = monitor.getGridFolderController();
+                if (controller != null) {
+                    maxSize = controller.getGridFolderIconLayoutRule().getMaxNumItemsInPreview();
+                }
             }
             mDisplayingUpperLeftQuadrant = contentSize > maxSize;
             mNumItemsInFolder = contentSize;
@@ -176,9 +179,10 @@ public class FolderGridOrganizer {
         int end = Math.min(start + itemsPerPage, contents.size());
 
         int maxSize = MAX_NUM_ITEMS_IN_PREVIEW;
-        if (MultiModeController.isSingleLayerMode()) {
-            maxSize = LauncherAppMonitor.getInstanceNoCreate().getGridFolderController()
-                    .getGridFolderIconLayoutRule().getMaxNumItemsInPreview();
+        LauncherAppMonitor monitor = LauncherAppMonitor.getInstanceNoCreate();
+        GridFolderController controller = monitor != null ? monitor.getGridFolderController() : null;
+        if (MultiModeController.isSingleLayerMode() && controller != null) {
+            maxSize = controller.getGridFolderIconLayoutRule().getMaxNumItemsInPreview();
         }
         for (int i = start, rank = 0; i < end; i++, rank++) {
             if (isItemInPreview(page, rank)) {
@@ -207,10 +211,13 @@ public class FolderGridOrganizer {
     public boolean isItemInPreview(int page, int rank) {
         // First page items are laid out such that the first 4 items are always in the upper
         // left quadrant. For all other pages, we need to check the row and col.
-        if (MultiModeController.isSingleLayerMode()) {
-            int maxSize = LauncherAppMonitor.getInstanceNoCreate().getGridFolderController()
-                    .getGridFolderIconLayoutRule().getMaxNumItemsInPreview();
-            return rank < maxSize;
+        LauncherAppMonitor monitor = LauncherAppMonitor.getInstanceNoCreate();
+        if (MultiModeController.isSingleLayerMode() && monitor != null) {
+            GridFolderController controller = monitor.getGridFolderController();
+            if (controller != null) {
+                int maxSize = controller.getGridFolderIconLayoutRule().getMaxNumItemsInPreview();
+                return rank < maxSize;
+            }
         }
 
         if (page > 0 || mDisplayingUpperLeftQuadrant) {

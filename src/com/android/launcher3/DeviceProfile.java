@@ -673,9 +673,12 @@ public class DeviceProfile {
                 }
             }
             hotseatBarBottomSpacePx = mInsets.bottom + minQsbMargin;
-
         } else {
             hotseatBarBottomSpacePx = hotseatBarBottomSpace;
+        }
+
+        if (isTablet) {
+            hotseatBarBottomSpacePx /= 4;
         }
 
         hotseatBarBottomSpacePx += mInfo.cutout.bottom;
@@ -695,14 +698,11 @@ public class DeviceProfile {
                     + hotseatBarBottomSpacePx;
         }
 
-        // For 2 and 3 button mode, add some padding based on margin between real icon size
-        // and cell layout height. Gestural mode reports a more than sufficient inset,
-        // so make sure it isn't applied for gestural navigation.
-        if (mInfo.navigationMode != NavigationMode.NO_BUTTON) {
+
+        if (mInfo.navigationMode != NavigationMode.NO_BUTTON && !isVerticalBarLayout()) {
             int hotseatIconMargin = Math.abs(hotseatCellHeightPx - iconSizePx);
             hotseatBarSizePx += (int) (hotseatIconMargin * ICON_OVERLAP_FACTOR);
         }
-        hotseatBarSizePx -= getDeductibleGestureHeight();
     }
 
     /**
@@ -1365,7 +1365,7 @@ public class DeviceProfile {
         // Make sure to update all relevant sizes for cutout and orientation
         updateHotseatSizes(pxFromDp(inv.iconSize[INDEX_DEFAULT], mMetrics));
         Rect hotseatBarPadding = new Rect();
-        boolean isFullyGesture = mInfo.navigationMode == NavigationMode.NO_BUTTON;
+        boolean isFullyGesture = isGestural();
         if (isVerticalBarLayout()) {
             // The hotseat icons will be placed in the middle of the hotseat cells.
             // Changing the hotseatCellHeightPx is not affecting hotseat icon positions
@@ -1390,7 +1390,6 @@ public class DeviceProfile {
                         horizontalMargin + navigationPadding, paddingBottom);
             }
         } else if (isTaskbarPresent) {
-            // Center the QSB vertically with hotseat
             int hotseatBarBottomPadding = getHotseatBarBottomPadding();
             int hotseatBarTopPadding =
                     hotseatBarSizePx - hotseatBarBottomPadding - hotseatCellHeightPx;
@@ -1482,10 +1481,24 @@ public class DeviceProfile {
      * Returns the number of pixels the hotseat is translated from the bottom of the screen.
      */
     private int getHotseatBarBottomPadding() {
+        int heightDifference = Math.abs(hotseatCellHeightPx - iconSizePx);
         if (isTaskbarPresent) { // QSB on top or inline
-            return hotseatBarBottomSpacePx - (Math.abs(hotseatCellHeightPx - iconSizePx) / 2);
+            if (isGestural()) {
+                if (isLandscape) {
+                    return 0;
+                } else {
+                    return  heightDifference / 2;
+                }
+            } else {
+                if (isLandscape) {
+                    return hotseatBarBottomSpacePx - (heightDifference / 2);
+                } else {
+                    return heightDifference;
+                }
+            }
+
         } else {
-            return hotseatBarSizePx - hotseatCellHeightPx;
+            return hotseatBarBottomSpacePx + ((isGestural() ? 1 : 2) * heightDifference);
         }
     }
 
@@ -1611,20 +1624,26 @@ public class DeviceProfile {
 
     private int getDeductibleGestureHeight() {
         if (isVerticalBarLayout() || context == null) return 0;
-        boolean isFullyGesture = mInfo.navigationMode == NavigationMode.NO_BUTTON;
-        boolean noHint = isFullyGesture && LineageSettings.System.getInt(
+        boolean noHint = isGestural() && LineageSettings.System.getInt(
                 context.getContentResolver(), LineageSettings.System.NAVIGATION_BAR_HINT, 0) != 1;
         if (!noHint) return 0;
         return ResourceUtils.getDimenByName(NAVBAR_BOTTOM_GESTURE_SIZE, context.getResources(), 0);
     }
 
     public int getExtraStatusBarPadding() {
-        boolean isFullyGesture = mInfo.navigationMode == NavigationMode.NO_BUTTON;
-        if (!isFullyGesture) {
+        if (!isGestural()) {
             return ResourceUtils.getDimenByName(NAVBAR_HEIGHT, context.getResources(), 0);
         }
         // Fully gesture is always at the bottom
         return 0;
+    }
+
+    public boolean isGestural() {
+        return mInfo.navigationMode == NavigationMode.NO_BUTTON;
+    }
+
+    public static boolean isGestural(Context context) {
+        return DisplayController.getNavigationMode(context).equals(NavigationMode.NO_BUTTON);
     }
 
     private String pxToDpStr(String name, float value) {

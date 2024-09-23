@@ -8,11 +8,11 @@
 package foundation.e.bliss.widgets
 
 import android.animation.LayoutTransition
+import android.annotation.SuppressLint
 import android.app.Activity.RESULT_OK
 import android.appwidget.AppWidgetHostView
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetManager.EXTRA_APPWIDGET_ID
-import android.appwidget.AppWidgetProviderInfo
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -25,13 +25,13 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowInsets
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.Toast
-import androidx.core.view.forEach
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.Launcher
 import com.android.launcher3.LauncherPrefs
@@ -49,6 +49,7 @@ import foundation.e.bliss.LauncherAppMonitorCallback
 import foundation.e.bliss.utils.BlissDbUtils
 import foundation.e.bliss.utils.Logger
 import foundation.e.bliss.utils.ObservableList
+import foundation.e.bliss.utils.OnDataChangedListener
 import foundation.e.bliss.utils.disableComponent
 import foundation.e.bliss.widgets.BlissAppWidgetHost.Companion.REQUEST_CONFIGURE_APPWIDGET
 import io.reactivex.rxjava3.disposables.Disposable
@@ -58,14 +59,16 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 
 @Suppress("Deprecation", "NewApi")
-class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(context, attrs) {
+class WidgetContainer(context: Context, attrs: AttributeSet?) :
+    FrameLayout(context, attrs), OnDataChangedListener {
     private val mLauncher by lazy { Launcher.getLauncher(context) }
 
     private lateinit var mManageWidgetLayout: LinearLayout
     private lateinit var mRemoveWidgetLayout: FrameLayout
     private lateinit var mResizeContainer: RelativeLayout
     private lateinit var mWidgetLinearLayout: LinearLayout
-    private lateinit var mWrapper: LinearLayout
+    private lateinit var mRecyclerView: RecyclerView
+    private lateinit var mWidgetAdapter: StaggeredAdapter
 
     private val mResizeContainerRect = Rect()
     private val mInsetPadding =
@@ -103,31 +106,38 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
             context.startActivity(intent)
         }
 
-        mWrapper =
-            findViewWithTag<LinearLayout?>("wrapper_children").apply {
-                setOnHierarchyChangeListener(
-                    object : OnHierarchyChangeListener {
-                        override fun onChildViewAdded(parent: View?, child: View?) {
-                            handleRemoveButtonVisibility((parent as LinearLayout).childCount)
-                        }
-
-                        override fun onChildViewRemoved(parent: View?, child: View?) {
-                            handleRemoveButtonVisibility((parent as LinearLayout).childCount)
-                        }
-                    }
-                )
-            }
-
+        mRecyclerView = findViewWithTag("wrapper_children")
+        mWidgetAdapter = mRecyclerView.adapter as StaggeredAdapter
+        mWidgetAdapter.addOnDataChangedListener(this)
+        handleRemoveButtonVisibility(mWidgetAdapter.getWidgets().size)
         updatePadding()
+        updateRecyclerViewHeight()
     }
 
     override fun onConfigurationChanged(newConfig: Configuration?) {
         super.onConfigurationChanged(newConfig)
         updatePadding()
+        val spanCount =
+            if (mLauncher != null &&
+                (mLauncher.deviceProfile.isTablet || mLauncher.deviceProfile.isLandscape)
+            ) {
+                2
+            } else {
+                1
+            }
+        mRecyclerView.layoutManager =
+            NoScrollStaggeredLayoutManager(spanCount, StaggeredGridLayoutManager.VERTICAL)
+    }
+
+    private fun updateRecyclerViewHeight() {
+        mRecyclerView.post {
+            val widgetFragment = mLauncher.fragmentManager.findFragmentByTag("qsb_view")
+            (widgetFragment as WidgetFragment).setRecyclerViewHeight()
+        }
     }
 
     private fun updatePadding() {
-        val insets = mLauncher.workspace.rootWindowInsets.getInsets(WindowInsets.Type.systemBars())
+        val insets = mLauncher.workspace.mInsets
         if (::mResizeContainer.isInitialized) {
             mResizeContainer.apply {
                 val layoutParams = this.layoutParams as LayoutParams
@@ -170,11 +180,11 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
     }
 
     fun updateWidgets() {
-        if (::mWrapper.isInitialized) {
+        if (::mRecyclerView.isInitialized) {
             val widgetDbHelper = WidgetsDbHelper.getInstance(context)
             val widgetManager = AppWidgetManager.getInstance(context)
 
-            mWrapper.forEach {
+            mWidgetAdapter.getWidgets().forEach {
                 val height = widgetDbHelper.getWidgetHeight(it.id) ?: 0
 
                 val info = (it as AppWidgetHostView).appWidgetInfo
@@ -193,17 +203,84 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
                 val blacklistedComponents =
                     mLauncher.resources.getStringArray(R.array.blacklisted_widget_options)
                 if (!blacklistedComponents.contains(info.provider.className)) {
-                    widgetManager.updateAppWidgetOptions(it.appWidgetId, opts)
+                    widgetManager.updateAppWidgetOptions(it.id, opts)
                 }
+            }
+            mWidgetAdapter.notifyListeners()
+        }
+    }
+
+    class StaggeredAdapter : RecyclerView.Adapter<StaggeredAdapter.WidgetViewHolder>() {
+
+        private var widgets = mutableListOf<View>()
+        private val listeners = mutableListOf<OnDataChangedListener>()
+
+        fun addOnDataChangedListener(listener: OnDataChangedListener) {
+            listeners.add(listener)
+        }
+
+        fun removeOnDataChangedListener(listener: OnDataChangedListener) {
+            listeners.remove(listener)
+        }
+
+        @SuppressLint("NotifyDataSetChanged")
+        fun notifyWidgetsChanged() {
+            notifyDataSetChanged()
+            notifyListeners()
+        }
+
+        fun notifyListeners() {
+            listeners.forEach { it.onDataChanged() }
+        }
+
+        fun setWidgets(widgets: MutableList<View>) {
+            this.widgets.clear()
+            this.widgets = widgets
+            notifyWidgetsChanged()
+        }
+
+        fun addWidget(widget: View) {
+            widgets.add(widget)
+            notifyWidgetsChanged()
+        }
+
+        fun getWidgets(): MutableList<View> {
+            return widgets
+        }
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): WidgetViewHolder {
+            val view =
+                LayoutInflater.from(parent.context)
+                    .inflate(R.layout.widget_item_layout, parent, false)
+            return WidgetViewHolder(view)
+        }
+
+        override fun onBindViewHolder(holder: WidgetViewHolder, position: Int) {
+            val widget = widgets[position]
+            holder.bind(widget)
+        }
+
+        override fun getItemCount(): Int {
+            return widgets.size
+        }
+
+        class WidgetViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+            fun bind(view: View) {
+                (itemView as FrameLayout).removeAllViews()
+                if (view.parent != null) {
+                    (view.parent as ViewGroup).removeAllViews()
+                }
+                (itemView as FrameLayout).addView(view)
             }
         }
     }
 
     /** A fragment to display the default widgets. */
     class WidgetFragment : FragmentWithPreview() {
-        private lateinit var mWrapper: LinearLayout
+        private lateinit var recyclerView: RecyclerView
         private lateinit var widgetObserver: Disposable
         private lateinit var widgetsDbHelper: WidgetsDbHelper
+        private lateinit var widgetsAdapter: StaggeredAdapter
 
         private val mOldWidgets by lazy { BlissDbUtils.getWidgetDetails(context) }
         private val mWidgetManager by lazy { AppWidgetManager.getInstance(context) }
@@ -252,17 +329,31 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
             savedInstanceState: Bundle?
         ): View {
             widgetsDbHelper = WidgetsDbHelper.getInstance(context)
-
-            mWrapper =
-                LinearLayout(context, null).apply {
+            widgetsAdapter = StaggeredAdapter()
+            val spanCount =
+                if (launcher != null &&
+                    (launcher.deviceProfile.isTablet || launcher.deviceProfile.isLandscape)
+                ) {
+                    2
+                } else {
+                    1
+                }
+            recyclerView =
+                RecyclerView(context, null).apply {
                     tag = "wrapper_children"
-                    orientation = LinearLayout.VERTICAL
+                    layoutManager =
+                        NoScrollStaggeredLayoutManager(
+                            spanCount,
+                            StaggeredGridLayoutManager.VERTICAL
+                        )
+                    adapter = widgetsAdapter
+                    isNestedScrollingEnabled = false
                 }
             if (isQsbEnabled) {
                 loadWidgets()
             }
 
-            return mWrapper
+            return recyclerView
         }
 
         override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
@@ -310,10 +401,9 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
             CoroutineScope(Dispatchers.Main).launch { eventFlow.collect { rebindWidgets() } }
         }
 
-        private fun rebindWidgets(backup: Boolean = false) {
-            mWrapper.removeAllViews()
+        fun rebindWidgets(backup: Boolean = false) {
+            widgetsAdapter.setWidgets(mutableListOf())
             if (!backup) {
-
                 val dbWidgets =
                     widgetsDbHelper.getWidgets().apply {
                         sortedBy { it.position }
@@ -374,16 +464,6 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
                     .apply {
                         id = widgetId
                         layoutTransition = LayoutTransition()
-                        setOnLongClickListener {
-                            if (
-                                (widgetInfo.resizeMode and AppWidgetProviderInfo.RESIZE_VERTICAL) ==
-                                    AppWidgetProviderInfo.RESIZE_VERTICAL
-                            ) {
-                                launcher.hideWidgetResizeContainer()
-                                launcher.showWidgetResizeContainer(this as RoundedWidgetView)
-                            }
-                            true
-                        }
                     }
                     .also {
                         var opts = mWidgetManager.getAppWidgetOptions(it.appWidgetId)
@@ -430,11 +510,7 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
                             params.height = widgetsDbHelper.getWidgetHeight(it.id) ?: 0
                         }
 
-                        if (params.height > 0) {
-                            mWrapper.addView(it, params)
-                        } else {
-                            mWrapper.addView(it)
-                        }
+                        widgetsAdapter.addWidget(it)
 
                         opts =
                             WidgetSizes.getWidgetSizeOptions(
@@ -457,7 +533,7 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
 
                         widgetsDbHelper.insert(
                             WidgetInfo(
-                                mWrapper.indexOfChild(it),
+                                widgetsAdapter.getWidgets().indexOf(it),
                                 it.appWidgetInfo.provider,
                                 it.appWidgetId,
                                 params.height
@@ -497,6 +573,40 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
             widgetObserver.dispose()
         }
 
+        fun setRecyclerViewHeight() {
+            val layoutManager = recyclerView.layoutManager as StaggeredGridLayoutManager
+            val adapter = recyclerView.adapter as StaggeredAdapter
+
+            adapter.let {
+                recyclerView.viewTreeObserver.addOnGlobalLayoutListener {
+                    // Our maximum column span is 2.
+                    // Column span may change on rotation for phones
+                    // Hardcode 2 to workaround
+                    val totalHeight = IntArray(2) { 0 }
+
+                    for (i in 0 until adapter.itemCount) {
+                        if (layoutManager.spanCount == 1) {
+                            totalHeight[0] += adapter.getWidgets()[i].measuredHeight
+                            continue
+                        }
+                        val viewHolder = recyclerView.findViewHolderForAdapterPosition(i)
+                        viewHolder?.itemView?.let { itemView ->
+                            val layoutParams =
+                                itemView.layoutParams as StaggeredGridLayoutManager.LayoutParams
+                            val spanIndex = layoutParams.spanIndex
+                            totalHeight[spanIndex] += itemView.measuredHeight
+                        }
+                    }
+
+                    val maxHeight = totalHeight.maxOrNull() ?: 0
+                    val padding = recyclerView.paddingTop + recyclerView.paddingBottom
+                    val layoutParams = recyclerView.layoutParams
+                    layoutParams.height = maxHeight + padding
+                    recyclerView.layoutParams = layoutParams
+                }
+            }
+        }
+
         companion object {
             const val TAG = "WidgetFragment"
             const val defaultWidgetsAdded = "default_widgets_added"
@@ -529,6 +639,12 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
             fun onWidgetAdded(componentName: ComponentName) {
                 defaultWidgets.add(componentName)
             }
+        }
+    }
+
+    override fun onDataChanged() {
+        if (::mWidgetAdapter.isInitialized) {
+            handleRemoveButtonVisibility(mWidgetAdapter.getWidgets().size)
         }
     }
 }

@@ -391,6 +391,14 @@ public class InvariantDeviceProfile implements OnSharedPreferenceChangeListener 
         for (int i = 1; i < iconSize.length; i++) {
             maxIconSize = Math.max(maxIconSize, iconSize[i]);
         }
+        for (WindowBounds bounds : displayInfo.supportedBounds) {
+            boolean isTablet = displayInfo.isTablet(bounds);
+            if (isTablet) {
+                iconSize[INDEX_DEFAULT] *= 1.25f;
+                iconSize[INDEX_LANDSCAPE] *= 1.25f;
+                break;
+            }
+        }
         iconBitmapSize = ResourceUtils.pxFromDp(maxIconSize, metrics);
         fillResIconDpi = getLauncherIconDensity(iconBitmapSize);
 

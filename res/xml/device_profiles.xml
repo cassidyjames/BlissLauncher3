@@ -116,20 +116,21 @@
     </grid-option>
 
     <grid-option
-        launcher:name="6_by_5"
-        launcher:numRows="5"
-        launcher:numColumns="6"
+        launcher:name="4_by_6"
+        launcher:numRows="6"
+        launcher:numColumns="4"
         launcher:numSearchContainerColumns="3"
         launcher:numFolderRows="3"
         launcher:numFolderColumns="3"
         launcher:numHotseatIcons="6"
-        launcher:hotseatColumnSpanLandscape="4"
+        launcher:hotseatColumnSpanLandscape="3"
+        launcher:hotseatColumnSpan="3"
         launcher:numAllAppsColumns="6"
         launcher:isScalable="true"
         launcher:inlineNavButtonsEndSpacing="@dimen/taskbar_button_margin_6_5"
         launcher:devicePaddingId="@xml/paddings_6x5"
         launcher:dbFile="launcher_6_by_5.db"
-        launcher:defaultLayoutId="@xml/default_workspace_6x5"
+        launcher:defaultLayoutId="@xml/default_workspace_4x6_tablet"
         launcher:deviceCategory="tablet" >
 
         <display-option

@@ -21,6 +21,7 @@ import static android.view.MotionEvent.ACTION_DOWN;
 import static com.android.launcher3.CellLayout.FOLDER;
 import static com.android.launcher3.CellLayout.HOTSEAT;
 import static com.android.launcher3.CellLayout.WORKSPACE;
+import static com.android.launcher3.anim.Interpolators.AGGRESSIVE_EASE_IN_OUT;
 import static com.android.launcher3.util.MultiTranslateDelegate.INDEX_WIDGET_CENTERING;
 
 import android.app.WallpaperManager;
@@ -36,6 +37,8 @@ import com.android.launcher3.CellLayout.ContainerType;
 import com.android.launcher3.celllayout.CellLayoutLayoutParams;
 import com.android.launcher3.folder.FolderIcon;
 import com.android.launcher3.model.data.ItemInfo;
+import com.android.launcher3.util.DisplayController;
+import com.android.launcher3.util.NavigationMode;
 import com.android.launcher3.views.ActivityContext;
 import com.android.launcher3.widget.NavigableAppWidgetHostView;
 
@@ -195,12 +198,39 @@ public class ShortcutAndWidgetContainer extends ViewGroup implements FolderIcon.
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         int count = getChildCount();
+        int numOccupied = 0;
         for (int i = 0; i < count; i++) {
             final View child = getChildAt(i);
             if (child.getVisibility() != GONE) {
                 layoutChild(child);
+                numOccupied++;
             }
         }
+        int translation;
+        boolean isGestural = DeviceProfile.isGestural(getContext());
+        if (numOccupied != 0 && isGestural && !mActivity.getDeviceProfile().isVerticalBarLayout()) {
+            final CellLayoutLayoutParams lp = (CellLayoutLayoutParams) getChildAt(0).getLayoutParams();
+            int width = lp.width + mBorderSpace.x;
+            translation = (getWidth() - (numOccupied * width) + mBorderSpace.x) / 2;
+            if (mContainerType == HOTSEAT) {
+                setAnimatedTranslationX(translation);
+                ((CellLayout) getParent()).translationX = translation;
+            }
+            for (int i = 0; i < count; i++) {
+                final View child = getChildAt(i);
+                if (child.getVisibility() != GONE && child instanceof BubbleTextView) {
+                    ((BubbleTextView) child).translationX = mContainerType == HOTSEAT ? translation : 0;
+                }
+            }
+        }
+    }
+
+    public void setAnimatedTranslationX(float targetX) {
+        this.animate()
+                .translationX(targetX)
+                .setDuration(300)
+                .setInterpolator(AGGRESSIVE_EASE_IN_OUT)
+                .start();
     }
 
     /**

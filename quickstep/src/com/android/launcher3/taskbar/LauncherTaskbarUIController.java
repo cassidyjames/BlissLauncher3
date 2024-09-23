@@ -46,6 +46,7 @@ import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.uioverrides.QuickstepLauncher;
 import com.android.launcher3.util.DisplayController;
 import com.android.launcher3.util.MultiPropertyFactory;
+import com.android.launcher3.util.NavigationMode;
 import com.android.launcher3.util.OnboardingPrefs;
 import com.android.quickstep.RecentsAnimationCallbacks;
 import com.android.quickstep.util.GroupTask;
@@ -350,9 +351,7 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
 
     @Override
     public boolean isHotseatIconOnTopWhenAligned() {
-        return mTaskbarLauncherStateController.isInHotseatOnTopStates()
-                && mTaskbarInAppDisplayProgressMultiProp.get(MINUS_ONE_PAGE_PROGRESS_INDEX)
-                    .getValue() == 0;
+        return !DisplayController.getNavigationMode(mLauncher).equals(NavigationMode.NO_BUTTON);
     }
 
     @Override

@@ -79,7 +79,7 @@ public class SplitInstructionsView extends FrameLayout {
                 R.id.split_instructions_text);
         splitInstructionsView.mTextView.setTextColor(
                 Themes.getAttrColor(
-                        launcher, com.android.internal.R.attr.textColorOnAccent)
+                        launcher, android.R.color.black)
         );
 
         // Since textview overlays base view, and we sometimes manipulate the alpha of each

@@ -89,6 +89,7 @@ import java.util.function.Predicate;
 
 import foundation.e.bliss.LauncherAppMonitor;
 import foundation.e.bliss.folder.GridFolder;
+import foundation.e.bliss.folder.GridFolderController;
 import foundation.e.bliss.multimode.MultiModeController;
 
 
@@ -167,9 +168,10 @@ public class FolderIcon extends FrameLayout implements FolderListener, IconLabel
 
     private void init() {
         mLongPressHelper = new CheckLongPressHelper(this);
-        if (MultiModeController.isSingleLayerMode()) {
-            mPreviewLayoutRule = LauncherAppMonitor.getInstanceNoCreate()
-                    .getGridFolderController().getGridFolderIconLayoutRule();
+        LauncherAppMonitor monitor = LauncherAppMonitor.getInstanceNoCreate();
+        GridFolderController controller = monitor != null ? monitor.getGridFolderController() : null;
+        if (MultiModeController.isSingleLayerMode() && controller != null) {
+            mPreviewLayoutRule = controller.getGridFolderIconLayoutRule();
         } else{
             mPreviewLayoutRule = new ClippedFolderIconLayoutRule();
         }
@@ -637,19 +639,6 @@ public class FolderIcon extends FrameLayout implements FolderListener, IconLabel
         }
 
         drawDot(canvas);
-    }
-
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        if (MultiModeController.isSingleLayerMode()) {
-            Paint.FontMetrics fm = mFolderName.getPaint().getFontMetrics();
-            int cellHeightPx = mFolderName.getIconSize() + mFolderName.getCompoundDrawablePadding() +
-                    (int) Math.ceil(fm.bottom - fm.top);
-            int height = MeasureSpec.getSize(heightMeasureSpec);
-            setPadding(getPaddingLeft(), (height - cellHeightPx) / 2, getPaddingRight(),
-                    getPaddingBottom());
-        }
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
 
     public void drawDot(Canvas canvas) {

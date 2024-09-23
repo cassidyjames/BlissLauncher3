@@ -622,7 +622,6 @@ public class Launcher extends StatefulActivity<LauncherState>
             getWindow().setSoftInputMode(LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
         }
         setTitle(R.string.home_screen);
-        getWindow().setNavigationBarColor(getWindow().getNavigationBarColor() | 0x26000000);
     }
 
     /**
@@ -801,7 +800,7 @@ public class Launcher extends StatefulActivity<LauncherState>
         if (FOLDABLE_SINGLE_PAGE.get() && mDeviceProfile.isTwoPanels) {
             mCellPosMapper = new TwoPanelCellPosMapper(mDeviceProfile.inv.numColumns);
         } else {
-            if (mDeviceProfile.isVerticalBarLayout()) {
+            if (mDeviceProfile.isLandscape) {
                 mCellPosMapper = new CellPosMapper.TransposeCellPosMapper(mDeviceProfile.inv);
             } else {
                 mCellPosMapper = CellPosMapper.DEFAULT;
@@ -2970,7 +2969,7 @@ public class Launcher extends StatefulActivity<LauncherState>
             if (v != null && activeRecyclerView.computeVerticalScrollOffset() > 0) {
                 RectF locationBounds = new RectF();
                 FloatingIconView.getLocationBoundsForView(this, v, false, locationBounds,
-                        new Rect());
+                        new Rect(), true);
                 if (locationBounds.top < mAppsView.getHeaderBottom()) {
                     // Icon is covered by scrim, return null to play fallback animation.
                     return null;

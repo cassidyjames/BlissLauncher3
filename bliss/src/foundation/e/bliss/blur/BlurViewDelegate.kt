@@ -30,6 +30,7 @@ class BlurViewDelegate(
 
     private val context = view.context
     private val blurWallpaperProvider by lazy { BlurWallpaperProvider.getInstanceNoCreate() }
+    private var orientation: Int = -1
 
     private var fullBlurDrawable: BlurDrawable? = null
     var blurAlpha = 255
@@ -222,6 +223,11 @@ class BlurViewDelegate(
     }
 
     private fun updateOffsets() {
+        val newOrientation = context.resources.configuration.orientation
+        if (orientation != newOrientation) {
+            BlurWallpaperProvider.getInstanceNoCreate().setWallpaperOffset(null)
+            orientation = newOrientation
+        }
         fullBlurDrawable?.setOffsets(
             previousScrollX.toFloat() + parentOffsetX,
             previousScrollY.toFloat() + parentOffsetY
