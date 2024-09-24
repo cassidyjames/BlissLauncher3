@@ -387,10 +387,6 @@ public class InvariantDeviceProfile implements OnSharedPreferenceChangeListener 
         inlineNavButtonsEndSpacing = closestProfile.inlineNavButtonsEndSpacing;
 
         iconSize = displayOption.iconSizes;
-        float maxIconSize = iconSize[0];
-        for (int i = 1; i < iconSize.length; i++) {
-            maxIconSize = Math.max(maxIconSize, iconSize[i]);
-        }
         for (WindowBounds bounds : displayInfo.supportedBounds) {
             boolean isTablet = displayInfo.isTablet(bounds);
             if (isTablet) {
@@ -398,6 +394,10 @@ public class InvariantDeviceProfile implements OnSharedPreferenceChangeListener 
                 iconSize[INDEX_LANDSCAPE] *= 1.25f;
                 break;
             }
+        }
+        float maxIconSize = iconSize[0];
+        for (int i = 1; i < iconSize.length; i++) {
+            maxIconSize = Math.max(maxIconSize, iconSize[i]);
         }
         iconBitmapSize = ResourceUtils.pxFromDp(maxIconSize, metrics);
         fillResIconDpi = getLauncherIconDensity(iconBitmapSize);
