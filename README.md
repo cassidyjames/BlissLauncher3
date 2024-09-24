@@ -9,7 +9,7 @@ It is the default launcher for [/e/ OS](https://e.foundation/e-os/).
 - Clone the repository
 
   ```git
-  git clone --recurse-submodules https://gitlab.e.foundation/e/os/BlissLauncher -b 1021-launcher3-rewrite
+  git clone --recurse-submodules https://gitlab.e.foundation/e/os/BlissLauncher3 -b v1-s BlissLauncher3s
   ```
 
 - To build this project, we need the following jars inside the `prebuilts` folder from our AOSP build directory:
