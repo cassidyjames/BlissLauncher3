@@ -351,7 +351,7 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
 
     @Override
     public boolean isHotseatIconOnTopWhenAligned() {
-        return !DisplayController.getNavigationMode(mLauncher).equals(NavigationMode.NO_BUTTON);
+        return false;
     }
 
     @Override
