@@ -609,7 +609,8 @@ public class TaskbarLauncherStateController {
     }
 
     boolean isInHome() {
-        return mLauncherState == LauncherState.NORMAL;
+        return isInLauncher() &&
+                (mLauncherState == LauncherState.NORMAL || mLauncherState == LauncherState.SPRING_LOADED);
     }
 
     private void playStateTransitionAnim(AnimatorSet animatorSet, long duration,
