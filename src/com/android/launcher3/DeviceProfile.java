@@ -723,7 +723,7 @@ public class DeviceProfile {
 
         // The side space with inline buttons should be what is defined in InvariantDeviceProfile
         int sideSpacePx = inlineNavButtonsEndSpacingPx;
-        int maxHotseatWidthPx = availableWidthPx - sideSpacePx - hotseatBarEndOffset;
+        int maxHotseatWidthPx = availableWidthPx - sideSpacePx - (hotseatBarEndOffset / 4);
         int maxHotseatIconsWidthPx = maxHotseatWidthPx - (isQsbInline ? hotseatQsbWidth : 0);
         hotseatBorderSpace = calculateHotseatBorderSpace(maxHotseatIconsWidthPx,
                 (isQsbInline ? 1 : 0) + /* border between nav buttons and first icon */ 1);
