@@ -122,7 +122,7 @@
         launcher:numSearchContainerColumns="3"
         launcher:numFolderRows="3"
         launcher:numFolderColumns="3"
-        launcher:numHotseatIcons="6"
+        launcher:numHotseatIcons="9"
         launcher:hotseatColumnSpanLandscape="3"
         launcher:hotseatColumnSpan="3"
         launcher:numAllAppsColumns="6"
