@@ -1,2 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="edit">Düzenle</string>
+    <string name="search">Ara</string>
+    <string name="suggestions">TAVSİYELER</string>
+    <string name="maps">Haritalar</string>
+    <string name="ok">OK</string>
+    <string name="cancel">İptal</string>
+    <string name="uninstall_app">Bu uygulamayı kaldırmak istiyor musunuz?</string>
+    <string name="untitled_folder">Adsız</string>
+    <string name="max">Maks.</string>
+    <string name="min">Min.</string>
+    <string name="widget_no_resize">Bu widget yeniden boyutlandırılamıyor</string>
+    <string name="widget_add">Ekle</string>
+    <string name="widget_remove">Kaldır</string>
+    <string name="remove_widgets">Widget\'ları Kaldır</string>
+    <string name="show_notification_count">Bildirim sayısını göster</string>
+    <string name="add_to_widget_Screen">-1 ekranına ekle</string>
+</resources>
