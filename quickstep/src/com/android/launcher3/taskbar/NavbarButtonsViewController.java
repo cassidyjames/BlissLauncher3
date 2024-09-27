@@ -206,7 +206,8 @@ public class NavbarButtonsViewController implements TaskbarControllers.LoggableT
         };
     private final RecentsHitboxExtender mHitboxExtender = new RecentsHitboxExtender();
     private ImageView mRecentsButton;
-    private Point mWindow;
+    private int mWindowWidth;
+    private int mWindowHeight;
     private boolean mIsInHome = true;
 
     public NavbarButtonsViewController(TaskbarActivityContext context, FrameLayout navButtonsView) {
@@ -219,7 +220,15 @@ public class NavbarButtonsViewController implements TaskbarControllers.LoggableT
         mLightIconColor = context.getColor(R.color.taskbar_nav_icon_light_color);
         mDarkIconColor = context.getColor(R.color.taskbar_nav_icon_dark_color);
         mOnBackgroundIconColor = Utilities.isDarkTheme(context) ? mLightIconColor : mDarkIconColor;
-        mWindow = DisplayController.INSTANCE.get(context).getInfo().currentSize;
+        boolean isLandscape = context.getDeviceProfile().isLandscape;
+        Point window = DisplayController.INSTANCE.get(context).getInfo().currentSize;
+        if (isLandscape) {
+            mWindowWidth = window.y;
+            mWindowHeight = window.x;
+        } else {
+            mWindowWidth = window.x;
+            mWindowHeight = window.y;
+        }
     }
 
     /**
@@ -638,20 +647,27 @@ public class NavbarButtonsViewController implements TaskbarControllers.LoggableT
             // Additional spacing, eat up half of space between last icon and nav button
             navMarginEnd += res.getDimensionPixelSize(R.dimen.taskbar_hotseat_nav_spacing) / 2;
         }
-        return ((float) mWindow.x / 2) - ((float) mNavButtonContainer.getMeasuredWidth() / 2) - navMarginEnd;
+        boolean isLandscape = mContext.getDeviceProfile().isLandscape;
+        return ((float) (isLandscape ? mWindowHeight : mWindowWidth) / 2)
+                - ((float) mNavButtonContainer.getMeasuredWidth() / 2) - navMarginEnd;
     }
 
 
     /**
-     * Sets the translationY of the nav buttons based on the current device state.
+     * Sets the translations of the nav buttons based on the current device state.
      */
+
     public void updateNavButtonTranslations() {
+        updateNavButtonTranslations(false);
+    }
+
+    public void updateNavButtonTranslations(boolean force) {
         if (isPhoneButtonNavMode(mContext) || NAV_TRANSLATION_DISABLED) {
-            if (mWindow.x != 0) {
+            if (mWindowWidth != 0) {
                 TaskbarUIController uiController = mControllers.uiController;
                 final boolean isInHome = (uiController instanceof LauncherTaskbarUIController
                         && ((LauncherTaskbarUIController) uiController).isInHome());
-                if (isInHome != mIsInHome) {
+                if (isInHome != mIsInHome || force) {
                     mIsInHome = isInHome;
                     float translation = getTranslationForNavContainer();
                     setAnimatedTranslationNavContainerX(isInHome ? 0 : translation);
@@ -725,7 +741,6 @@ public class NavbarButtonsViewController implements TaskbarControllers.LoggableT
     }
 
     public void onConfigurationChanged(@Config int configChanges) {
-        mWindow = DisplayController.INSTANCE.get(mContext).getInfo().currentSize;
         if (mFloatingRotationButton != null) {
             mFloatingRotationButton.onConfigurationChanged(configChanges);
         }
@@ -733,6 +748,7 @@ public class NavbarButtonsViewController implements TaskbarControllers.LoggableT
             handleSetupUi();
         }
         updateButtonLayoutSpacing();
+        updateNavButtonTranslations(true);
     }
 
     private void handleSetupUi() {
