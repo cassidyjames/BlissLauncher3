@@ -284,6 +284,7 @@ public class DeviceProfile {
     private Context context;
 
     private final static boolean FORCE_SHOW_LABELS = false;
+    private final static boolean FORCE_LAYOUT_ALL_HOTSEAT_ICONS = true;
 
     /** TODO: Once we fully migrate to staged split, remove "isMultiWindowMode" */
     DeviceProfile(Context context, InvariantDeviceProfile inv, Info info, WindowBounds windowBounds,
@@ -558,7 +559,7 @@ public class DeviceProfile {
 
         mMinHotseatIconSpacePx = res.getDimensionPixelSize(R.dimen.min_hotseat_icon_space);
         mMinHotseatQsbWidthPx = res.getDimensionPixelSize(R.dimen.min_hotseat_qsb_width);
-        mMaxHotseatIconSpacePx = areNavButtonsInline
+        mMaxHotseatIconSpacePx = areNavButtonsInline && !FORCE_LAYOUT_ALL_HOTSEAT_ICONS
                 ? res.getDimensionPixelSize(R.dimen.max_hotseat_icon_space) : Integer.MAX_VALUE;
         // Hotseat and QSB width depends on updated cellSize and workspace padding
         recalculateHotseatWidthAndBorderSpace();
@@ -682,6 +683,9 @@ public class DeviceProfile {
         }
 
         hotseatBarBottomSpacePx += mInfo.cutout.bottom;
+        hotseatBarBottomSpacePx += (areNavButtonsInline && FORCE_LAYOUT_ALL_HOTSEAT_ICONS
+                ? context.getResources().getDimensionPixelSize(R.dimen.taskbar_nav_buttons_size)
+                : 0);
 
         // Ensure there is enough space for folder icons, which have a slightly larger radius.
         hotseatCellHeightPx = (int) Math.ceil(hotseatIconSizePx * ICON_OVERLAP_FACTOR);
@@ -716,17 +720,28 @@ public class DeviceProfile {
         float hotseatWidthPx = getIconToIconWidthForColumns(columns);
         hotseatBorderSpace = calculateHotseatBorderSpace(hotseatWidthPx, /* numExtraBorder= */ 0);
         hotseatQsbWidth = calculateQsbWidth(hotseatBorderSpace);
-        // Spaces should be correct when the nav buttons are not inline
-        if (!areNavButtonsInline) {
-            return;
-        }
+        Resources res = context.getResources();
 
-        // The side space with inline buttons should be what is defined in InvariantDeviceProfile
-        int sideSpacePx = inlineNavButtonsEndSpacingPx;
-        int maxHotseatWidthPx = availableWidthPx - sideSpacePx - (hotseatBarEndOffset / 4);
+        /*
+          dp.inlineNavButtonsEndSpacingPx and dp.hotseatBarEndOffset non-zero values are needed
+          for dock to properly space out 9 icons, but cannot be used here since zeroed values are
+          needed in gestural navigation by taskbar and navbar classes. Thus, we decouple them here.
+         */
+
+        // The side space should be what is defined in InvariantDeviceProfile
+        int dockInlineNavButtonsEndSpacingPx = res.getDimensionPixelSize(inv.inlineNavButtonsEndSpacing);
+        int dockHotseatBarEndOffset = 3 * res.getDimensionPixelSize(R.dimen.taskbar_nav_buttons_size)
+                + 2 * res.getDimensionPixelSize(R.dimen.taskbar_button_space_inbetween)
+                + dockInlineNavButtonsEndSpacingPx;
+        int sideSpacePx = dockInlineNavButtonsEndSpacingPx;
+        int maxHotseatWidthPx = availableWidthPx - sideSpacePx - (dockHotseatBarEndOffset / 4);
         int maxHotseatIconsWidthPx = maxHotseatWidthPx - (isQsbInline ? hotseatQsbWidth : 0);
         hotseatBorderSpace = calculateHotseatBorderSpace(maxHotseatIconsWidthPx,
                 (isQsbInline ? 1 : 0) + /* border between nav buttons and first icon */ 1);
+
+        if (FORCE_LAYOUT_ALL_HOTSEAT_ICONS && isTaskbarPresent) {
+            return;
+        }
 
         if (hotseatBorderSpace >= mMinHotseatIconSpacePx) {
             return;
@@ -1397,7 +1412,7 @@ public class DeviceProfile {
             int startSpacing;
             int endSpacing;
             // Hotseat aligns to the left with nav buttons
-            if (hotseatBarEndOffset > 0) {
+            if (hotseatBarEndOffset > 0 && !FORCE_LAYOUT_ALL_HOTSEAT_ICONS) {
                 startSpacing = inlineNavButtonsEndSpacingPx;
                 endSpacing = availableWidthPx - hotseatWidth - startSpacing + hotseatBorderSpace;
             } else {
@@ -1460,7 +1475,8 @@ public class DeviceProfile {
     private int getHotseatRequiredWidth() {
         int additionalQsbSpace = getAdditionalQsbSpace();
         return iconSizePx * numShownHotseatIcons
-                + hotseatBorderSpace * (numShownHotseatIcons - (areNavButtonsInline ? 0 : 1))
+                + hotseatBorderSpace * (numShownHotseatIcons -
+                        (areNavButtonsInline && !FORCE_LAYOUT_ALL_HOTSEAT_ICONS ? 0 : 1))
                 + additionalQsbSpace;
     }
 
@@ -1490,11 +1506,7 @@ public class DeviceProfile {
                     return  heightDifference / 2;
                 }
             } else {
-                if (isLandscape) {
-                    return hotseatBarBottomSpacePx - (heightDifference / 2);
-                } else {
-                    return heightDifference;
-                }
+                return hotseatBarBottomSpacePx - (heightDifference / 2);
             }
 
         } else {
