@@ -123,8 +123,6 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.OvershootInterpolator;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.Toast;
@@ -135,7 +133,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.annotation.VisibleForTesting;
-import androidx.core.app.ActivityCompat;
 
 import com.android.launcher3.DropTarget.DragObject;
 import com.android.launcher3.accessibility.BaseAccessibilityDelegate.LauncherAction;
@@ -3649,7 +3646,9 @@ public class Launcher extends StatefulActivity<LauncherState>
             public void onStopTrackingTouch(SeekBar seekBar) {
                 int newHeight = minHeight + (normalisedDifference * seekBar.getProgress());
                 if (getWorkspace().getFirstPagePinnedItem() instanceof WidgetContainer) {
-                    ((WidgetContainer) getWorkspace().getFirstPagePinnedItem()).updateWidgets();
+                    WidgetContainer container = ((WidgetContainer) getWorkspace().getFirstPagePinnedItem());
+                    container.reloadStaggeredLayout();
+                    container.updateWidgets();
                 }
                 Logger.d("Launcher.WidgetResize", "newHeight: " + newHeight);
                 WidgetsDbHelper.getInstance(getApplicationContext())

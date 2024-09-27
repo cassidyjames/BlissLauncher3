@@ -13,6 +13,7 @@ import android.app.Activity.RESULT_OK
 import android.appwidget.AppWidgetHostView
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetManager.EXTRA_APPWIDGET_ID
+import android.appwidget.AppWidgetProviderInfo
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -116,6 +117,10 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) :
 
     override fun onConfigurationChanged(newConfig: Configuration?) {
         super.onConfigurationChanged(newConfig)
+        reloadStaggeredLayout()
+    }
+
+    fun reloadStaggeredLayout() {
         updatePadding()
         val spanCount =
             if (mLauncher != null &&
@@ -464,6 +469,16 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) :
                     .apply {
                         id = widgetId
                         layoutTransition = LayoutTransition()
+                        setOnLongClickListener{
+                            if (
+                                (widgetInfo.resizeMode and AppWidgetProviderInfo.RESIZE_VERTICAL) ==
+                                    AppWidgetProviderInfo.RESIZE_VERTICAL
+                            ) {
+                                launcher.hideWidgetResizeContainer()
+                                launcher.showWidgetResizeContainer(this as RoundedWidgetView)
+                            }
+                            true
+                        }
                     }
                     .also {
                         var opts = mWidgetManager.getAppWidgetOptions(it.appWidgetId)
@@ -510,6 +525,9 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) :
                             params.height = widgetsDbHelper.getWidgetHeight(it.id) ?: 0
                         }
 
+                        if (params.height > 0) {
+                            it.layoutParams = params
+                        }
                         widgetsAdapter.addWidget(it)
 
                         opts =

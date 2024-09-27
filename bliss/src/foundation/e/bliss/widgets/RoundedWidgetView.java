@@ -53,7 +53,7 @@ public class RoundedWidgetView extends LauncherAppWidgetHostView implements Offs
     }
 
     public void setHeight(int newHeight) {
-        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) getLayoutParams();
+        FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) getLayoutParams();
         params.height = newHeight;
         setLayoutParams(params);
     }
