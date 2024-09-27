@@ -720,19 +720,26 @@ public class DeviceProfile {
         float hotseatWidthPx = getIconToIconWidthForColumns(columns);
         hotseatBorderSpace = calculateHotseatBorderSpace(hotseatWidthPx, /* numExtraBorder= */ 0);
         hotseatQsbWidth = calculateQsbWidth(hotseatBorderSpace);
-        // Spaces should be correct when the nav buttons are not inline
-        if (!areNavButtonsInline) {
-            return;
-        }
+        Resources res = context.getResources();
 
-        // The side space with inline buttons should be what is defined in InvariantDeviceProfile
-        int sideSpacePx = inlineNavButtonsEndSpacingPx;
-        int maxHotseatWidthPx = availableWidthPx - sideSpacePx - (hotseatBarEndOffset / 4);
+        /*
+          dp.inlineNavButtonsEndSpacingPx and dp.hotseatBarEndOffset non-zero values are needed
+          for dock to properly space out 9 icons, but cannot be used here since zeroed values are
+          needed in gestural navigation by taskbar and navbar classes. Thus, we decouple them here.
+         */
+
+        // The side space should be what is defined in InvariantDeviceProfile
+        int dockInlineNavButtonsEndSpacingPx = res.getDimensionPixelSize(inv.inlineNavButtonsEndSpacing);
+        int dockHotseatBarEndOffset = 3 * res.getDimensionPixelSize(R.dimen.taskbar_nav_buttons_size)
+                + 2 * res.getDimensionPixelSize(R.dimen.taskbar_button_space_inbetween)
+                + dockInlineNavButtonsEndSpacingPx;
+        int sideSpacePx = dockInlineNavButtonsEndSpacingPx;
+        int maxHotseatWidthPx = availableWidthPx - sideSpacePx - (dockHotseatBarEndOffset / 4);
         int maxHotseatIconsWidthPx = maxHotseatWidthPx - (isQsbInline ? hotseatQsbWidth : 0);
         hotseatBorderSpace = calculateHotseatBorderSpace(maxHotseatIconsWidthPx,
                 (isQsbInline ? 1 : 0) + /* border between nav buttons and first icon */ 1);
 
-        if (FORCE_LAYOUT_ALL_HOTSEAT_ICONS && isTaskbarPresent && areNavButtonsInline) {
+        if (FORCE_LAYOUT_ALL_HOTSEAT_ICONS && isTaskbarPresent) {
             return;
         }
 
