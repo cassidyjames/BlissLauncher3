@@ -575,6 +575,10 @@ public class LauncherModel extends LauncherApps.Callback implements InstallSessi
             }
         }
 
+        public boolean isModelLoaded() {
+            return mModelLoaded;
+        }
+
         @Override
         public void close() {
             synchronized (mLock) {

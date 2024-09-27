@@ -35,6 +35,7 @@ import com.android.launcher3.widget.model.WidgetsListBaseEntry;
 import com.android.launcher3.widget.model.WidgetsListContentEntry;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -61,9 +62,9 @@ public class PopupDataProvider implements NotificationListener.NotificationsChan
     private Map<PackageUserKey, DotInfo> mPackageUserToDotInfos = new HashMap<>();
 
     /** All installed widgets. */
-    private List<WidgetsListBaseEntry> mAllWidgets = List.of();
+    private List<WidgetsListBaseEntry> mAllWidgets = new ArrayList<>();
     /** Widgets that can be recommended to the users. */
-    private List<ItemInfo> mRecommendedWidgets = List.of();
+    private List<ItemInfo> mRecommendedWidgets = new ArrayList<>();
 
     private PopupDataChangeListener mChangeListener = PopupDataChangeListener.INSTANCE;
 
