@@ -588,7 +588,7 @@ public abstract class AbsSwipeUpHandler<T extends StatefulActivity<S>,
             }
         }
         AbstractFloatingView.closeAllOpenViewsExcept(activity, mWasLauncherAlreadyVisible,
-                AbstractFloatingView.TYPE_LISTENER);
+                AbstractFloatingView.TYPE_LISTENER | AbstractFloatingView.TYPE_FOLDER);
 
         if (mWasLauncherAlreadyVisible) {
             mStateCallback.setState(STATE_LAUNCHER_DRAWN);
