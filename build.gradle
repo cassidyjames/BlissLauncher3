@@ -166,6 +166,16 @@ android {
         }
     }
 
+    applicationVariants.configureEach { variant ->
+        variant.outputs.configureEach { output ->
+            if (variant.buildType.name == 'release') {
+                outputFileName = "BlissLauncher-apiU-release.apk"
+            } else if (variant.buildType.name == 'debug') {
+                outputFileName = "BlissLauncher-apiU-debug.apk"
+            }
+        }
+    }
+
     buildTypes {
         debug {
             minifyEnabled false
