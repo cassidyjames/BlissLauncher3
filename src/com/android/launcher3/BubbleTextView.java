@@ -672,7 +672,8 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
             final int scrollY = getScrollY();
             canvas.translate(scrollX, scrollY);
             mDotParams.leftAlign = true;
-            mDotRenderer.draw(canvas, mDotParams, mDotInfo == null ? -1 : mDotInfo.getNotificationCount());
+            mDotRenderer.draw(canvas, mDotParams, mDotInfo == null ? -1 : mDotInfo.getNotificationCount(),
+                    mActivity.getDeviceProfile().isTablet, mDisplay == DISPLAY_TASKBAR);
             canvas.translate(-scrollX, -scrollY);
         }
     }
