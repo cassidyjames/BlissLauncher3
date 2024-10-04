@@ -432,7 +432,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         DeviceProfile grid = mLauncher.getDeviceProfile();
         Rect padding = grid.cellLayoutPaddingPx;
         setOrientation(mLauncher);
-        int tabletMarginMultiplier = grid.isLandscape ? 10 : 2;
+        int tabletMarginMultiplier = grid.isLandscape ? 3 : 2;
         int leftCorrection = ((grid.isVerticalBarLayout() && mOrientation == Surface.ROTATION_270)
                 ? grid.hotseatBarSizePx : 0)
                 + (grid.isTablet ? (padding.left * tabletMarginMultiplier) : 0);
