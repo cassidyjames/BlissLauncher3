@@ -433,21 +433,25 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         Rect padding = grid.cellLayoutPaddingPx;
         setOrientation(mLauncher);
         int tabletMarginMultiplier = grid.isLandscape ? 3 : 2;
-        int leftCorrection = ((grid.isVerticalBarLayout() && mOrientation == Surface.ROTATION_270)
+        Rect correction = new Rect();
+        correction.left = ((grid.isVerticalBarLayout() && mOrientation == Surface.ROTATION_270)
                 ? grid.hotseatBarSizePx : 0)
                 + (grid.isTablet ? (padding.left * tabletMarginMultiplier) : 0);
-        int rightCorrection = ((grid.isVerticalBarLayout() && mOrientation == Surface.ROTATION_90)
+        correction.right = ((grid.isVerticalBarLayout() && mOrientation == Surface.ROTATION_90)
                 ? grid.hotseatBarSizePx : 0)
                 + (grid.isTablet ? (padding.left * tabletMarginMultiplier) : 0);
+        int verticalMargin = grid.isTablet ? (grid.edgeMarginPx * tabletMarginMultiplier / 2) : 0;
+        correction.top = verticalMargin;
+        correction.bottom = verticalMargin;
         mWorkspaceScreens.forEach(s -> {
             int widgetPadding = getResources().getDimensionPixelSize(R.dimen.widget_page_all_padding);
             if (grid.isLandscape) widgetPadding *= grid.isTablet ? 40 : 20;
-            int paddingTop = (s == mWorkspaceScreens.get(FIRST_SCREEN_ID)) ? 0 : padding.top;
-            int paddingBottom = (s == mWorkspaceScreens.get(FIRST_SCREEN_ID)) ? 0 : padding.bottom;
+            int paddingTop = (s == mWorkspaceScreens.get(FIRST_SCREEN_ID)) ? 0 : (padding.top + correction.top);
+            int paddingBottom = (s == mWorkspaceScreens.get(FIRST_SCREEN_ID)) ? 0 : (padding.bottom + correction.bottom);
             int paddingLeft = (s == mWorkspaceScreens.get(FIRST_SCREEN_ID))
-                    ? widgetPadding : (padding.left + leftCorrection);
+                    ? widgetPadding : (padding.left + correction.left);
             int paddingRight = (s == mWorkspaceScreens.get(FIRST_SCREEN_ID))
-                    ? widgetPadding : (padding.right + rightCorrection);
+                    ? widgetPadding : (padding.right + correction.right);
             if (grid.isLandscape) {
                 grid.inv.numRows = grid.inv.numColumnsFixed;
                 grid.inv.numColumns = grid.inv.numRowsFixed;
