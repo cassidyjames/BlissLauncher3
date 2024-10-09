@@ -123,8 +123,9 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) :
     fun reloadStaggeredLayout() {
         updatePadding()
         val spanCount =
-            if (mLauncher != null &&
-                (mLauncher.deviceProfile.isTablet || mLauncher.deviceProfile.isLandscape)
+            if (
+                mLauncher != null &&
+                    (mLauncher.deviceProfile.isTablet || mLauncher.deviceProfile.isLandscape)
             ) {
                 2
             } else {
@@ -336,8 +337,9 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) :
             widgetsDbHelper = WidgetsDbHelper.getInstance(context)
             widgetsAdapter = StaggeredAdapter()
             val spanCount =
-                if (launcher != null &&
-                    (launcher.deviceProfile.isTablet || launcher.deviceProfile.isLandscape)
+                if (
+                    launcher != null &&
+                        (launcher.deviceProfile.isTablet || launcher.deviceProfile.isLandscape)
                 ) {
                     2
                 } else {
@@ -469,7 +471,7 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) :
                     .apply {
                         id = widgetId
                         layoutTransition = LayoutTransition()
-                        setOnLongClickListener{
+                        setOnLongClickListener {
                             if (
                                 (widgetInfo.resizeMode and AppWidgetProviderInfo.RESIZE_VERTICAL) ==
                                     AppWidgetProviderInfo.RESIZE_VERTICAL
