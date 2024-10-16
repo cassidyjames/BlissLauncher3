@@ -65,6 +65,34 @@ It is the default launcher for [/e/ OS](https://e.foundation/e-os/).
 
 - Now it is totally ready to use and play around with!
 
+
+## Recurrent task
+### Publish a new release for update through app lounge
+For this, you need to create a protected tag
+which follow this format: `v1.2.3-s`, `v1.2.3-t`
+
+The Android letter is important to let app lounge know which release to use!
+
+also note, that tag with `v*` format will all be protected.
+
+
+### When a new android version is supported
+#### Update .gitlab-ci.yml
+When a new Android version is supported, we need to add the gitlab-ci's job that make release to update it through app lounge
+
+1. Add Ci variables:
+```
+  APK_PATH: "build/outputs/apk/blissWithQuickstep/release"
+  UNSIGNED_APK: "BlissLauncher-apiT-release.apk"
+  COMMUNITY_APK: "BlissLauncher-apiT-community.apk"
+  OFFICIAL_APK: "BlissLauncher-apiT-official.apk.apk"
+``` 
+but you need to adapt the letter after the api work for `UNSIGNED_APK`, `COMMUNITY_APK`, `OFFICIAL_APK`.
+
+2. Add stage `gitlab_release` in `stages` entry
+
+3. Copy paste jobs from one of a branch for a supported Android version : `init_submodules`, `generate-apks`, `create-json-files` and `create-release`
+
 ## License
 
 ```text
