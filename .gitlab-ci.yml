@@ -2,9 +2,14 @@ image: "registry.gitlab.e.foundation/e/os/docker-android-apps-cicd:latest"
 
 variables:
   SENTRY_DSN: ${SENTRY_DSN}
+  APK_PATH: "build/outputs/apk/blissWithQuickstep/release"
+  UNSIGNED_APK: "BlissLauncher-apiT-release.apk"
+  COMMUNITY_APK: "BlissLauncher-apiT-community.apk"
+  OFFICIAL_APK: "BlissLauncher-apiT-official.apk.apk"
 
 stages:
   - build
+  - gitlab_release
 
 before_script:
   - export GRADLE_USER_HOME=$(pwd)/.gradle
@@ -31,3 +36,78 @@ blissWithQuickstepRelease:
   artifacts:
     paths:
       - build/outputs/apk
+
+init_submodules:
+  stage: gitlab_release
+  rules:
+    - if: '$CI_COMMIT_TAG && $CI_COMMIT_REF_PROTECTED == "true"'
+      when: on_success
+  script:
+    - git clone https://gitlab.e.foundation/e/os/system-apps-update-info.git systemAppsUpdateInfo
+  artifacts:
+    paths:
+      - systemAppsUpdateInfo/scripts/
+
+
+generate-apks:
+  stage: gitlab_release
+  rules:
+    - if: '$CI_COMMIT_TAG && $CI_COMMIT_REF_PROTECTED == "true"' 
+      when: on_success
+  needs:
+    - init_submodules
+    - blissWithQuickstepRelease
+  dependencies:
+    - init_submodules
+    - blissWithQuickstepRelease
+  before_script:
+    - apt update && apt install apksigner -y
+  script:
+    - |
+      ./systemAppsUpdateInfo/scripts/generate-apks.sh \
+      "$APK_PATH" "$UNSIGNED_APK" "$COMMUNITY_APK" "$OFFICIAL_APK"
+  artifacts:
+    paths:
+      - $APK_PATH/$UNSIGNED_APK
+      - $APK_PATH/$COMMUNITY_APK
+      - $APK_PATH/$OFFICIAL_APK
+
+create-json-files:
+  stage: gitlab_release
+  dependencies:
+    - init_submodules
+    - generate-apks
+  needs:
+    - init_submodules
+    - generate-apks
+  rules:
+    - if: '$CI_COMMIT_TAG && $CI_COMMIT_REF_PROTECTED == "true"'
+      when: manual
+  before_script:
+    - apt update && apt install jq aapt -y
+  script:
+    - |
+      ./systemAppsUpdateInfo/scripts/create-json-files.sh \
+      "$APK_PATH" "$UNSIGNED_APK" "$COMMUNITY_APK" "$OFFICIAL_APK"
+  artifacts:
+    paths:
+      - community.json
+      - official.json
+
+create-release:
+  stage: gitlab_release
+  dependencies:
+    - init_submodules
+  needs:
+    - init_submodules
+    - create-json-files
+    - generate-apks
+  rules:
+    - if: '$CI_COMMIT_TAG && $CI_COMMIT_REF_PROTECTED == "true"'
+      when: on_success
+  before_script:
+    - apt update && apt install jq -y
+  script:
+    - |
+      ./systemAppsUpdateInfo/scripts/create-release.sh \
+      "$APK_PATH" "$UNSIGNED_APK" "$COMMUNITY_APK" "$OFFICIAL_APK"
