@@ -494,7 +494,7 @@ public class DeviceProfile {
         // Add a bit of space between nav bar and hotseat in vertical bar layout.
         hotseatBarSidePaddingStartPx = isVerticalBarLayout() ? workspacePageIndicatorHeight : 0;
         this.context = context;
-        updateHotseatSizes(pxFromDp(inv.iconSize[INDEX_DEFAULT], mMetrics));
+        updateHotseatSizes(pxFromDp(inv.iconSize[mTypeIndex], mMetrics));
         if (areNavButtonsInline && !isPhone) {
             inlineNavButtonsEndSpacingPx =
                     res.getDimensionPixelSize(inv.inlineNavButtonsEndSpacing);
@@ -660,7 +660,7 @@ public class DeviceProfile {
         hotseatQsbSpace = pxFromDp(inv.hotseatQsbSpace[mTypeIndex], mMetrics);
         mInfo = DisplayController.INSTANCE.get(context).getInfo();
         // Have a little space between the inset and the QSB
-        if (mInsets.bottom + minQsbMargin > hotseatBarBottomSpace) {
+        if (mInsets.bottom + minQsbMargin > hotseatBarBottomSpace && !areNavButtonsInline) {
             int availableSpace = hotseatQsbSpace - (mInsets.bottom - hotseatBarBottomSpace);
 
             // Only change the spaces if there is space
@@ -678,13 +678,9 @@ public class DeviceProfile {
             hotseatBarBottomSpacePx = hotseatBarBottomSpace;
         }
 
-        if (isTablet) {
-            hotseatBarBottomSpacePx /= 4;
-        }
-
         hotseatBarBottomSpacePx += mInfo.cutout.bottom;
         hotseatBarBottomSpacePx += (areNavButtonsInline && FORCE_LAYOUT_ALL_HOTSEAT_ICONS
-                ? context.getResources().getDimensionPixelSize(R.dimen.taskbar_nav_buttons_size)
+                ? context.getResources().getDimensionPixelSize(R.dimen.taskbar_size)
                 : 0);
 
         // Ensure there is enough space for folder icons, which have a slightly larger radius.
@@ -980,7 +976,7 @@ public class DeviceProfile {
         iconDrawablePaddingPx = (int) (iconDrawablePaddingOriginalPx * iconScale);
         cellLayoutBorderSpacePx = getCellLayoutBorderSpace(inv, scale);
 
-        if (isScalableGrid) {
+        if (isScalableGrid && !isTablet) {
             cellWidthPx = pxFromDp(inv.minCellSize[mTypeIndex].x, mMetrics, scale);
             cellHeightPx = pxFromDp(inv.minCellSize[mTypeIndex].y, mMetrics, scale);
 
@@ -1378,7 +1374,7 @@ public class DeviceProfile {
      */
     public Rect getHotseatLayoutPadding(Context context) {
         // Make sure to update all relevant sizes for cutout and orientation
-        updateHotseatSizes(pxFromDp(inv.iconSize[INDEX_DEFAULT], mMetrics));
+        updateHotseatSizes(pxFromDp(inv.iconSize[mTypeIndex], mMetrics));
         Rect hotseatBarPadding = new Rect();
         boolean isFullyGesture = isGestural();
         if (isVerticalBarLayout()) {
