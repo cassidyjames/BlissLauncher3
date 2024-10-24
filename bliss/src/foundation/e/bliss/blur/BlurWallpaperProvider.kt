@@ -170,21 +170,17 @@ class BlurWallpaperProvider(val context: Context) {
     }
 
     private fun applyVibrancy(wallpaper: Bitmap): Bitmap {
-        val width = wallpaper.width
-        val height = wallpaper.height
 
-        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas()
-        canvas.setBitmap(bitmap)
+        mVibrancyPaint.colorFilter =
+            ColorMatrixColorFilter(ColorMatrix().apply { setSaturation(1.25f) })
 
-        val colorMatrix = ColorMatrix()
-        colorMatrix.setSaturation(1.25f)
-        val filter = ColorMatrixColorFilter(colorMatrix)
-        mVibrancyPaint.colorFilter = filter
-        canvas.drawBitmap(wallpaper, 0f, 0f, mVibrancyPaint)
+        val bitmap = Bitmap.createBitmap(wallpaper)
+        Canvas().apply {
+            setBitmap(bitmap)
+            drawBitmap(wallpaper, 0f, 0f, mVibrancyPaint)
+        }
 
         wallpaper.recycle()
-
         return bitmap
     }
 
