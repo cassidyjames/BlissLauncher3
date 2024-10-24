@@ -494,7 +494,7 @@ public class DeviceProfile {
         // Add a bit of space between nav bar and hotseat in vertical bar layout.
         hotseatBarSidePaddingStartPx = isVerticalBarLayout() ? workspacePageIndicatorHeight : 0;
         this.context = context;
-        updateHotseatSizes(pxFromDp(inv.iconSize[INDEX_DEFAULT], mMetrics));
+        updateHotseatSizes(pxFromDp(inv.iconSize[mTypeIndex], mMetrics));
         if (areNavButtonsInline && !isPhone) {
             inlineNavButtonsEndSpacingPx =
                     res.getDimensionPixelSize(inv.inlineNavButtonsEndSpacing);
@@ -1378,7 +1378,7 @@ public class DeviceProfile {
      */
     public Rect getHotseatLayoutPadding(Context context) {
         // Make sure to update all relevant sizes for cutout and orientation
-        updateHotseatSizes(pxFromDp(inv.iconSize[INDEX_DEFAULT], mMetrics));
+        updateHotseatSizes(pxFromDp(inv.iconSize[mTypeIndex], mMetrics));
         Rect hotseatBarPadding = new Rect();
         boolean isFullyGesture = isGestural();
         if (isVerticalBarLayout()) {
