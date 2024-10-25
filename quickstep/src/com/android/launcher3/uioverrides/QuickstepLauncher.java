@@ -488,7 +488,7 @@ public class QuickstepLauncher extends Launcher {
 
             // Close any opened folder
             Folder folder = Folder.getOpen(this);
-            if (folder != null && folder.isOpen()) {
+            if (folder != null && folder.isOpen() && !folder.isFolderWobbling()) {
                 folder.close(false);
             }
         }
