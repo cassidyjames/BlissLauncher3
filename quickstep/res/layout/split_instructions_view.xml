@@ -29,14 +29,14 @@
         android:id="@+id/split_instructions_text"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
-        android:textColor="?androidprv:attr/textColorOnAccent"
+        android:textColor="@color/e_background"
         android:text="@string/toast_split_select_app" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/split_instructions_text_cancel"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
-        android:textColor="?androidprv:attr/textColorOnAccent"
+        android:textColor="@color/e_background"
         android:layout_marginStart="@dimen/split_instructions_start_margin_cancel"
         android:text="@string/toast_split_select_app_cancel"
         android:visibility="gone"/>
